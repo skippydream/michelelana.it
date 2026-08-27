@@ -1,4 +1,4 @@
-# michelelana.it
+# Sito personale — Michele Lana
 
 Sito personale statico. Nessun framework, nessun build step: sono file che il
 browser apre così come sono.
@@ -94,21 +94,42 @@ Poi apri `http://localhost:4325`. Per provare la versione da telefono usa la mod
 dispositivo degli strumenti da sviluppatore: restringere e basta la finestra
 non riproduce l'assenza del mouse.
 
-## Mettere online su michelelana.it
+## Mettere online
 
-**Netlify** — la via più corta, senza git:
+Il dominio `michelelana.it` non è ancora tuo, quindi il sito per ora va su un
+indirizzo gratuito del servizio che scegli. Non c'è nessun file da preparare:
+è una cartella di file statici.
 
-1. Vai su [app.netlify.com/drop](https://app.netlify.com/drop) e trascina questa cartella.
-2. *Domain settings* → *Add custom domain* → `michelelana.it`.
-3. Dal registrar dove hai comprato il dominio, imposta i DNS che Netlify ti mostra
-   (di solito un record `A` verso `75.2.60.5` e un `CNAME` `www` verso il tuo
-   sito `.netlify.app`).
-4. HTTPS si attiva da solo entro un'ora.
+**Netlify** — la via più corta, senza git: vai su
+[app.netlify.com/drop](https://app.netlify.com/drop) e trascina questa cartella.
+Ti dà subito un indirizzo tipo `nome-a-caso.netlify.app`, rinominabile dalle
+impostazioni del sito.
 
-**GitHub Pages** — se preferisci tenerlo su git: crea un repo, carica i file,
-*Settings* → *Pages* → branch `main`. Il file `CNAME` è già pronto; imposta i
-record `A` verso `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
-`185.199.111.153`.
+**Cloudflare Pages** — *Create a project* → *Direct Upload*, stessa cosa, con
+indirizzo `nome.pages.dev`.
+
+**GitHub Pages** — crea un repo, carica i file, *Settings* → *Pages* → branch
+`main`. Esce su `USERNAME.github.io/NOME-REPO`. Attenzione: con un repo di
+progetto il sito sta in una sottocartella, e i percorsi qui sono assoluti
+(`/assets/...`), quindi o usi un repo chiamato `USERNAME.github.io`, oppure
+rendi relativi i percorsi.
+
+## Quando comprerai il dominio
+
+Quattro cose, in quest'ordine:
+
+1. Nel pannello del servizio, aggiungi il dominio personalizzato e imposta i DNS
+   che ti indica.
+2. In `index.html` rimetti gli indirizzi assoluti: c'è già un commento con le
+   righe pronte, sopra `og:image`. Senza `og:url` e `og:image` assoluti,
+   l'anteprima quando condividi il link può uscire senza immagine.
+3. Ricrea `sitemap.xml` con dentro il tuo indirizzo, e aggiungi in `robots.txt`
+   la riga `Sitemap: https://TUO-DOMINIO/sitemap.xml`. Li ho tolti perché
+   entrambi richiedono indirizzi assoluti, e puntare a un dominio non tuo fa
+   più danno che non averli.
+4. Solo con GitHub Pages: ricrea il file `CNAME` con dentro il dominio, una riga
+   sola. L'ho cancellato: se resta in un repo pubblico dichiara un dominio che
+   non controlli.
 
 ## Prima di pubblicare
 
@@ -119,6 +140,7 @@ record `A` verso `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
 - [x] Link al sito solo dove il sito esiste (per ora: torinosulfilo.it)
 - [x] Titolo, Info, formazione e lista strumenti scritti
 - [x] `assets/img/og-image.jpg` (1200×630) per l'anteprima social
-- [ ] Puntare il dominio `michelelana.it`: oggi non ha ancora record DNS
+- [x] Nessun riferimento a un dominio non ancora posseduto
+- [ ] Quando comprerai il dominio: rimettere indirizzi assoluti, sitemap e CNAME
 - [ ] Decidere se tenere l'icona di One Piece Watcher (marchio non tuo)
 - [ ] Provato almeno una volta da telefono vero, non solo restringendo la finestra
