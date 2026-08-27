@@ -109,10 +109,16 @@ impostazioni del sito.
 indirizzo `nome.pages.dev`.
 
 **GitHub Pages** — crea un repo, carica i file, *Settings* → *Pages* → branch
-`main`. Esce su `USERNAME.github.io/NOME-REPO`. Attenzione: con un repo di
-progetto il sito sta in una sottocartella, e i percorsi qui sono assoluti
-(`/assets/...`), quindi o usi un repo chiamato `USERNAME.github.io`, oppure
-rendi relativi i percorsi.
+`main`. Esce su `USERNAME.github.io/NOME-REPO`.
+
+Funziona anche in sottocartella perché **tutti i percorsi sono relativi**
+(`assets/...`, non `/assets/...`). Se aggiungi risorse, tienile relative:
+un percorso che comincia con `/` punta alla radice del dominio, cioè fuori dal
+tuo progetto, e si rompe solo su GitHub Pages — in locale sembrerebbe a posto.
+
+L'unico limite è `404.html`: da un indirizzo profondo tipo `/repo/a/b/c` i
+percorsi relativi risolvono male e la pagina esce senza stile. Il caso normale,
+`/repo/qualcosa`, funziona: il sito non ha sottocartelle.
 
 ## Quando comprerai il dominio
 
