@@ -1,0 +1,287 @@
+/* ============================================================
+   michelelana.it
+   Impianto morbido: angoli ampi, linee che sfumano ai bordi
+   invece di tagliare, archi leggeri sullo sfondo.
+   I lavori sono schede affiancate, tutte visibili: niente da
+   aprire, niente da scoprire al passaggio del mouse.
+   ============================================================ */
+
+/* ---------- token ---------- */
+:root{
+  --bg:#fbfaf8;
+  --bg-warm:#f4f1e9;
+  --card:#fffefb;
+  --ink:#16150f;
+  --tx-2:#4a473f;
+  --mut:#8b8880;
+  --line:#e6e1d8;
+  --line-soft:rgba(22,21,15,.07);
+  --ok:#4d7c3a;
+  --accent:#8a7a5c;
+
+  --serif:"Newsreader","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+
+  --r-xl:34px;
+  --r-lg:26px;
+  --r:18px;
+  --r-pill:999px;
+
+  --sh:0 1px 2px rgba(24,20,12,.04), 0 12px 34px -18px rgba(24,20,12,.22);
+  --sh-up:0 2px 4px rgba(24,20,12,.05), 0 22px 48px -22px rgba(24,20,12,.28);
+
+  --wrap:1080px;
+  --pad:20px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+
+/* ---------- base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+*{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:104px}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+img{display:block;width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+::selection{background:var(--ink);color:var(--bg)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
+
+.wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:var(--pad)}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:16px;top:16px;background:var(--ink);color:var(--bg);
+  padding:11px 20px;border-radius:var(--r-pill);z-index:99}
+
+/* linea che sfuma ai due capi invece di tagliare netta */
+.softline{height:1px;border:0;
+  background:linear-gradient(90deg,transparent,var(--line) 14%,var(--line) 86%,transparent)}
+
+/* ---------- header: una pastiglia sospesa ---------- */
+header.top{position:sticky;top:14px;z-index:60;padding-inline:var(--pad)}
+header.top .bar{
+  max-width:var(--wrap);margin-inline:auto;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  height:58px;padding:0 12px 0 26px;
+  background:rgba(251,250,248,.72);
+  backdrop-filter:saturate(150%) blur(16px);
+  -webkit-backdrop-filter:saturate(150%) blur(16px);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-pill);
+  box-shadow:0 1px 2px rgba(24,20,12,.03);
+  transition:box-shadow .3s var(--ease),background-color .3s;
+}
+header.top.stuck .bar{box-shadow:var(--sh);background:rgba(251,250,248,.9)}
+.name{font-family:var(--serif);font-size:17px;white-space:nowrap}
+nav.top-nav{display:flex;align-items:center;gap:6px}
+nav.top-nav a{
+  font-size:13.5px;color:var(--mut);padding:9px 16px;border-radius:var(--r-pill);
+  transition:color .22s,background-color .22s;
+}
+nav.top-nav a:hover{color:var(--ink);background:var(--bg-warm)}
+nav.top-nav a[aria-current="true"]{color:var(--ink);background:var(--bg-warm)}
+nav.top-nav a.pill{background:var(--ink);color:var(--bg)}
+nav.top-nav a.pill:hover{background:var(--accent);color:var(--bg)}
+
+/* ---------- intro ---------- */
+.intro{position:relative;padding:78px 0 66px;overflow:hidden}
+.intro__curves{
+  position:absolute;top:-120px;left:50%;transform:translateX(-50%);
+  width:1500px;max-width:none;height:620px;pointer-events:none;opacity:.55;
+}
+.intro__tint{
+  position:absolute;top:-260px;left:50%;transform:translateX(-50%);
+  width:1100px;height:620px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(138,122,92,.14),transparent 72%);
+  filter:blur(10px);
+}
+.intro .wrap{position:relative;z-index:1}
+.intro h1{
+  font-family:var(--serif);font-size:clamp(30px,5vw,52px);
+  font-weight:400;letter-spacing:-.014em;line-height:1.16;max-width:20ch;
+}
+.intro .place{margin-top:22px;font-size:15px;color:var(--tx-2)}
+.avail{
+  display:inline-flex;align-items:center;gap:10px;margin-top:26px;
+  font-size:13.5px;color:var(--tx-2);
+  background:var(--card);border:1px solid var(--line-soft);
+  padding:9px 18px;border-radius:var(--r-pill);box-shadow:0 1px 2px rgba(24,20,12,.03);
+}
+.avail i{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+
+/* ---------- intestazione di sezione ---------- */
+.sect{padding-bottom:76px}
+.sect__head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  margin-bottom:14px}
+.lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+
+/* ============================================================
+   LAVORI — schede affiancate
+   ============================================================ */
+.cards{display:grid;grid-template-columns:1fr;gap:22px;margin-top:30px}
+
+.card{
+  display:flex;flex-direction:column;
+  background:var(--card);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-xl);
+  padding:14px 14px 26px;
+  box-shadow:var(--sh);
+  transition:transform .4s var(--ease),box-shadow .4s var(--ease);
+}
+.card:hover{transform:translateY(-3px);box-shadow:var(--sh-up)}
+
+.card__shot{position:relative;border-radius:var(--r-lg);overflow:hidden;background:var(--bg-warm)}
+.card__shot img{aspect-ratio:4/3;object-fit:cover;transition:transform .6s var(--ease)}
+.card:hover .card__shot img{transform:scale(1.02)}
+
+.card__body{padding:22px 12px 0}
+.card__top{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.card__ttl{font-family:var(--serif);font-size:23px;font-weight:400;letter-spacing:-.01em;line-height:1.25}
+.card__yr{font-size:12.5px;color:var(--mut);flex:none}
+.card__cat{margin-top:3px;font-size:12.5px;color:var(--mut)}
+.card__desc{margin-top:14px;font-size:14.5px;color:var(--tx-2);line-height:1.68}
+
+.feat{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
+.feat li{
+  font-size:12.5px;color:var(--tx-2);line-height:1.4;
+  background:var(--bg-warm);border-radius:var(--r-pill);
+  padding:7px 14px;
+}
+/* ---- badge di piattaforma ----
+   Pastiglia chiara con bordo e ombra: si legge sia sulle schede scure
+   sia su quelle avorio, dove il solo fondo chiaro sparirebbe. */
+.plat{
+  position:absolute;top:14px;right:14px;z-index:2;
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11px;letter-spacing:.02em;color:var(--ink);
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:1px solid rgba(22,21,15,.12);
+  padding:6px 12px 6px 10px;border-radius:var(--r-pill);
+  box-shadow:0 1px 3px rgba(24,20,12,.14);
+}
+.plat svg{flex:none;opacity:.75}
+.card--wip .plat{opacity:.75}
+
+/* ---- lavoro non ancora finito ----
+   La scheda resta leggibile: si spegne l'immagine, non il testo. */
+.wip{
+  position:absolute;top:14px;left:14px;z-index:2;
+  font-size:11px;letter-spacing:.06em;color:var(--ink);
+  background:rgba(251,250,248,.92);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  padding:7px 14px;border-radius:var(--r-pill);
+  box-shadow:0 1px 2px rgba(24,20,12,.10);
+}
+.card--wip .card__shot img{filter:saturate(.18) opacity(.5);transition:filter .5s var(--ease)}
+.card--wip:hover .card__shot img{filter:saturate(.7) opacity(.85)}
+.card--wip .card__ttl,
+.card--wip .card__yr{color:var(--mut)}
+.card--wip .card__desc{color:var(--mut)}
+.card--wip .feat li{color:var(--mut);opacity:.8}
+
+.card__site{margin-top:auto;padding-top:20px;display:flex;flex-wrap:wrap;gap:10px}
+.card__site a{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--ink);
+  border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:9px 17px;transition:background-color .22s,border-color .22s,color .22s;
+}
+.card__site a:hover{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.card__site a.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.card__site a.primary:hover{background:var(--accent);border-color:var(--accent)}
+.card__site svg{flex:none}
+
+/* ---------- info ---------- */
+.info-card{
+  background:var(--bg-warm);border-radius:var(--r-xl);
+  padding:clamp(28px,4vw,48px);margin-top:30px;
+  display:grid;grid-template-columns:1fr;gap:30px;
+}
+/* min-width:0 — senza, gli elementi in griglia non scendono sotto la
+   larghezza del proprio contenuto e sfondano la scheda sugli schermi stretti */
+.info-card > div{min-width:0}
+.info-card p{font-family:var(--serif);font-size:17px;color:var(--tx-2);line-height:1.7;max-width:44ch}
+.info-card p + p{margin-top:14px}
+.col-r dl{display:grid;grid-template-columns:auto 1fr;gap:12px 26px;font-size:13.5px}
+.col-r dt{color:var(--mut)}
+.col-r dd{color:var(--tx-2);overflow-wrap:anywhere}
+.col-r a{border-bottom:1px solid var(--line);padding-bottom:1px}
+.col-r a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+
+/* ---------- footer ---------- */
+footer.end{padding:0 0 44px}
+footer.end .softline{margin-bottom:24px}
+.foot{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  font-size:12.5px;color:var(--mut);
+}
+.foot__c{line-height:1}
+/* Il margine negativo compensa l'imbottitura della pastiglia: così ad
+   allinearsi al bordo è il testo del collegamento, non il suo riquadro. */
+.foot__nav{display:flex;gap:4px;margin-right:-13px}
+.foot__nav a{padding:8px 13px;border-radius:var(--r-pill);line-height:1;
+  transition:background-color .22s,color .22s}
+.foot__nav a:hover{background:var(--bg-warm);color:var(--ink)}
+
+/* ---------- pastiglie su schermi stretti ----------
+   In colonna singola le pastiglie andavano quasi tutte a capo da sole.
+   Sotto i 560 px passano a due colonne fisse e si rimpiccioliscono:
+   riga più densa, e le due della stessa riga hanno la stessa altezza
+   anche quando una va a capo. */
+@media (max-width:559px){
+  /* in colonna: il testo dei collegamenti torna a filo con il copyright */
+  .foot{flex-direction:column;align-items:flex-start;gap:12px}
+  .foot__nav{margin-left:-13px;margin-right:0}
+
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .feat li{
+    display:flex;align-items:center;
+    font-size:10.5px;line-height:1.35;padding:6px 10px;
+  }
+}
+
+/* ---------- header su schermi stretti ----------
+   La barra è una pastiglia sola: se i tre collegamenti non ci stanno,
+   traboccano senza che si veda, perché il body nasconde lo scorrimento
+   orizzontale. Quindi si riducono per scaglioni, e sotto i 480 px
+   restano nome e pulsante di contatto. Il sito è una pagina sola:
+   scorrere costa meno di una barra che scoppia. */
+@media (max-width:699px){
+  header.top .bar{height:54px;padding:0 8px 0 20px}
+  .name{font-size:16px}
+  nav.top-nav a{font-size:12.5px;padding:8px 13px}
+  nav.top-nav a.pill{padding:8px 15px}
+}
+
+@media (max-width:479px){
+  nav.top-nav a:not(.pill){display:none}
+  .name{font-size:15.5px}
+
+  /* la lista contatti passa a una colonna: l'etichetta sopra, il dato sotto */
+  .col-r dl{grid-template-columns:1fr;gap:2px}
+  .col-r dt{margin-top:12px}
+  .col-r dt:first-child{margin-top:0}
+}
+
+/* ---------- responsive ---------- */
+@media (min-width:700px){
+  :root{--pad:28px}
+  .intro{padding:104px 0 84px}
+  .cards{grid-template-columns:1fr 1fr;gap:26px}
+  .info-card{grid-template-columns:1fr 1fr;gap:44px}
+}
+
+@media (min-width:1000px){
+  .intro{padding:120px 0 96px}
+  .card__body{padding:24px 14px 0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important;animation:none!important}
+}
