@@ -5,22 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Michele Lana</title>
-<meta name="description" content="Michele Lana — sviluppo web, contenuti e design. Lavori selezionati e contatti.">
+<meta name="description" content="Michele Lana — sviluppo siti, piattaforme gestionali e applicazioni per macOS e Android, e consulenza sulla privacy digitale. Da Torino, solo da remoto.">
 <meta name="theme-color" content="#fbfaf8">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="Michele Lana">
-<meta property="og:description" content="Sviluppo web, contenuti e design. Lavori selezionati e contatti.">
-<!-- Quando il sito avrà un indirizzo stabile, rimetti qui gli assoluti:
-     <link rel="canonical" href="https://IL-TUO-DOMINIO/">
-     <meta property="og:url" content="https://IL-TUO-DOMINIO/">
-     e cambia og:image in https://IL-TUO-DOMINIO/assets/img/og-image.jpg
-     Molti servizi risolvono anche il percorso relativo qui sotto, ma non tutti. -->
-<meta property="og:image" content="assets/img/og-image.jpg">
+<meta property="og:description" content="Siti, piattaforme gestionali e applicazioni per macOS e Android. Consulenza sulla privacy digitale. Da Torino, solo da remoto.">
+<link rel="canonical" href="https://michelelana.it/">
+<meta property="og:url" content="https://michelelana.it/">
+<meta property="og:image" content="https://michelelana.it/assets/img/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Michele Lana — sviluppo siti, piattaforme gestionali e applicazioni">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://michelelana.it/assets/img/og-image.jpg">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +28,9 @@
 
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Person","name":"Michele Lana",
-"email":"mailto:michelelana12@gmail.com"}
+"url":"https://michelelana.it/","image":"https://michelelana.it/assets/img/michele.jpg","email":"mailto:michelelana12@gmail.com",
+"jobTitle":"Sviluppatore web e consulente di privacy digitale",
+"address":{"@type":"PostalAddress","addressLocality":"Torino","addressCountry":"IT"}}
 </script>
 </head>
 
@@ -43,8 +43,10 @@
     <a href="./" class="name">Michele Lana</a>
     <nav class="top-nav" aria-label="Navigazione">
       <a href="#lavori">Lavori</a>
+      <a href="#percorso">Percorso</a>
       <a href="#info">Info</a>
-      <a class="pill" href="mailto:michelelana12@gmail.com">Scrivimi</a>
+      <a class="pill wa" href="https://wa.me/michele.lana" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>WhatsApp</a>
+      <a class="pill" href="mailto:michelelana12@gmail.com"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>Mail</a>
     </nav>
   </div>
 </header>
@@ -62,10 +64,19 @@
       <path d="M-40 400 C 280 180 600 180 870 330 S 1320 500 1560 250"
             stroke="#e6e1d8" stroke-width="1.2" opacity=".45"/>
     </svg>
-    <div class="wrap">
+    <div class="wrap intro__row">
+      <div class="intro__txt">
+      <p class="hello"><span id="greet">Ciao</span>.</p>
       <h1>Sviluppo siti, piattaforme gestionali e applicazioni per macOS e Android.</h1>
-      <p class="place">Lavoro solo da remoto.</p>
+      <p class="place">Da Torino costruisco strumenti per associazioni e collettivi, dal sito pubblico all'area riservata. Mi occupo anche di privacy digitale. Lavoro solo da remoto.</p>
+      <p class="cta">
+        <a class="primary" href="#lavori">Vedi i lavori</a>
+        <a href="mailto:michelelana12@gmail.com"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>Mail</a>
+        <a href="https://wa.me/michele.lana" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>WhatsApp</a>
+      </p>
       <p class="avail"><i aria-hidden="true"></i> Disponibile per nuove collaborazioni</p>
+      </div>
+      <img class="intro__me" src="assets/img/michele.jpg" alt="Michele Lana" width="480" height="480">
     </div>
   </section>
 
@@ -100,7 +111,7 @@
             <li>Schede dei corsi</li>
             <li>Pannello di gestione</li>
           </ul>
-        <p class="card__site"><a href="https://torinosulfilo.it" target="_blank" rel="noopener">torinosulfilo.it <span aria-hidden="true">&#8599;</span></a></p>
+        <p class="card__site"><a class="card__go" href="https://torinosulfilo.it" target="_blank" rel="noopener">torinosulfilo.it <span aria-hidden="true">&#8599;</span></a></p>
         </div>
       </article>
 
@@ -122,7 +133,7 @@
             <li>Tre lingue</li>
             <li>Statico, senza build</li>
           </ul>
-          <p class="card__site"><a href="https://pachamaryoga.pages.dev" target="_blank" rel="noopener">Cloudflare Preview<span aria-hidden="true">&#8599;</span></a></p>
+          <p class="card__site"><a class="card__go" href="https://pachamaryoga.pages.dev" target="_blank" rel="noopener">Cloudflare Preview<span aria-hidden="true">&#8599;</span></a></p>
         </div>
       </article>
 
@@ -144,14 +155,15 @@
             <li>Italiano e inglese</li>
           </ul>
           <p class="card__site">
-            <a class="primary" href="https://github.com/skippydream/Strati/releases/latest/download/Strati-release.apk" download>
+            <a class="primary" data-apk="skippydream/Strati"
+               href="https://github.com/skippydream/Strati/releases/latest" download>
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor"
                    stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M8 1.5v8.5"/><path d="M4.5 7 8 10.5 11.5 7"/><path d="M2 13.5h12"/>
               </svg>
               Scarica l'APK
             </a>
-            <a href="https://github.com/skippydream/Strati" target="_blank" rel="noopener">GitHub Repo<span aria-hidden="true">&#8599;</span></a>
+            <a class="card__go" href="https://github.com/skippydream/Strati" target="_blank" rel="noopener">GitHub Repo<span aria-hidden="true">&#8599;</span></a>
           </p>
         </div>
       </article>
@@ -175,7 +187,7 @@
             <li>Dettaglio ora per ora</li>
             <li>Fasi lunari</li>
           </ul>
-          <p class="card__site"><a href="https://skippydream.github.io/SunSeeker/" target="_blank" rel="noopener">GitHub Deploy <span aria-hidden="true">&#8599;</span></a></p>
+          <p class="card__site"><a class="card__go" href="https://skippydream.github.io/SunSeeker/" target="_blank" rel="noopener">GitHub Deploy <span aria-hidden="true">&#8599;</span></a></p>
         </div>
       </article>
 
@@ -219,7 +231,7 @@
             <li>Tema chiaro e scuro</li>
             <li>Funziona offline</li>
           </ul>
-          <p class="card__site"><a href="https://appunti-bin.pages.dev" target="_blank" rel="noopener">Cloudflare Preview<span aria-hidden="true">&#8599;</span></a></p>
+          <p class="card__site"><a class="card__go" href="https://appunti-bin.pages.dev" target="_blank" rel="noopener">Cloudflare Preview<span aria-hidden="true">&#8599;</span></a></p>
         </div>
       </article>
 
@@ -249,6 +261,54 @@
     </div>
   </section>
 
+  <!-- ── PERCORSO ────────────────────────────────────────────── -->
+  <section class="sect" id="percorso">
+    <div class="wrap">
+      <div class="sect__head"><span class="lbl">Percorso</span></div>
+      <hr class="softline">
+
+      <div class="cv">
+        <div>
+          <h2 class="lbl">Esperienza</h2>
+          <ol class="cv__list">
+            <li><span class="cv__yr">2025 — oggi</span>
+              <div><p class="cv__ttl">Sviluppo siti e applicazioni</p>
+                <p class="cv__desc">I lavori qui sopra: siti, piattaforme di gestione, app Android e macOS.</p></div></li>
+            <li><span class="cv__yr">2024 — oggi</span>
+              <div><p class="cv__ttl">Consulente privato per la privacy digitale</p>
+                <p class="cv__desc">Consulenza a privati sulla protezione di account, dispositivi e dati personali.</p></div></li>
+            <li><span class="cv__yr">2018 — 2019</span>
+              <div><p class="cv__ttl">LineageOS per LG G5</p>
+                <p class="cv__desc">Build di LineageOS dai sorgenti per LG G5, adattamento al dispositivo e rilasci pubblici, scaricati da circa 4000 utenti.
+                  <a href="https://androidfilehost.com/?w=profile&amp;uid=673956719939834158" target="_blank" rel="noopener">AndroidFileHost <span aria-hidden="true">&#8599;</span></a></p></div></li>
+          </ol>
+        </div>
+
+        <div>
+          <h2 class="lbl">Formazione</h2>
+          <ol class="cv__list">
+            <li><span class="cv__yr">2022 — 2026</span>
+              <div><p class="cv__ttl">Scienze e Tecnologie Agrarie</p>
+                <p class="cv__desc">Curriculum Agrobiotecnologie — Università di Torino</p></div></li>
+            <li><span class="cv__yr">2013 — 2017</span>
+              <div><p class="cv__ttl">Diploma di liceo scientifico</p>
+                <p class="cv__desc">Liceo Scientifico “A. Volta”, Torino</p></div></li>
+          </ol>
+
+          <h2 class="lbl cv__h">Competenze</h2>
+          <ol class="cv__list">
+            <li><span class="cv__yr">Sistemi</span>
+              <div><p class="cv__desc">Linux (Debian), macOS (hackintosh), Android (LineageOS, GrapheneOS). So usare i bootloader e conosco il processo di avvio UEFI.</p></div></li>
+            <li><span class="cv__yr">Lingue</span>
+              <div><p class="cv__desc">Italiano madrelingua, inglese B2, spagnolo B2, francese A2</p></div></li>
+            <li><span class="cv__yr">Sport</span>
+              <div><p class="cv__desc">Slackline (highline), arrampicata (sportiva, boulder, trad, multipitch), sci alpinismo, ciclismo su strada.</p></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ── INFO ────────────────────────────────────────────────── -->
   <section class="sect" id="info">
     <div class="wrap">
@@ -261,6 +321,8 @@
              sito pubblico, area riservata, gestione di iscrizioni, biglietti e pagamenti.</p>
           <p>Seguo il progetto per intero — interfaccia, sviluppo, base dati, messa online
              e manutenzione successiva — così il committente ha un solo interlocutore.</p>
+          <p>Dal 2024 faccio anche consulenza privata sulla privacy digitale: account,
+             dispositivi e dati personali messi in sicurezza, senza giri di parole.</p>
           <p>Parte dei lavori qui sopra sono strumenti nati per uso personale.</p>
         </div>
 
@@ -271,9 +333,6 @@
 
             <dt>Dove</dt>
             <dd>Solo da remoto</dd>
-
-            <dt>Formazione</dt>
-            <dd>Agrobiotecnologie — Università di Torino, Grugliasco</dd>
 
             <dt>Strumenti</dt>
             <dd>JavaScript e TypeScript, React, Node, Python,
@@ -292,8 +351,9 @@
     <div class="foot">
       <p class="foot__c">© <span id="year">2026</span> Michele Lana</p>
       <nav class="foot__nav" aria-label="Collegamenti">
-        <a href="#top">Torna su</a>
-        <a href="mailto:michelelana12@gmail.com">Scrivimi</a>
+        <a href="#top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>Torna su</a>
+        <a href="mailto:michelelana12@gmail.com"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>Mail</a>
+        <a href="https://wa.me/michele.lana" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>WhatsApp</a>
       </nav>
     </div>
   </div>

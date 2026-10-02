@@ -7,10 +7,10 @@ browser apre così come sono.
 index.html            la pagina
 404.html              pagina di errore
 assets/css/style.css  stile e token del design
-assets/js/main.js     anno nel footer, ombra dell'header, voce di menu attiva
-assets/img/           schede dei lavori e anteprima social
+assets/js/main.js     saluto in base all'ora, anno nel footer, ombra dell'header,
+                      voce di menu attiva, download dell'APK
+assets/img/           schede dei lavori, foto (michele.jpg) e anteprima social
 favicon.svg           icona della scheda
-CNAME                 dominio (serve solo con GitHub Pages)
 robots.txt sitemap.xml
 tools/                strumenti per rigenerare immagini (fuori dal sito)
 ```
@@ -24,7 +24,20 @@ Le misure stanno tutte nei token in cima a `assets/css/style.css` — cambiare
 
 I lavori sono **schede affiancate, tutte visibili**: niente da aprire, niente
 da scoprire al passaggio del mouse. Due colonne da 700 px in su, una sotto.
-Lo script fa pochissimo: anno nel footer, ombra dell'header, voce di menu attiva.
+Ogni scheda con un sito o un repo è **cliccabile per intero**: il collegamento
+principale ha la classe `card__go` e stende un `::after` su tutta la scheda; gli
+altri pulsanti (es. «Scarica l'APK») restano sopra e cliccabili. Le schede senza
+link (One Piece Watcher, Frushío) non lo sono.
+
+## Hero e Percorso
+
+In cima c'è un saluto che cambia con l'ora (`#greet`: buongiorno 5–13, buon
+pomeriggio 13–18, buonasera il resto; senza JavaScript resta «Ciao»), la foto in
+cornice circolare (`assets/img/michele.jpg`, 480×480, ritaglio quadrato sul viso)
+e due pulsanti: «Vedi i lavori» e «Mail».
+
+La sezione **Percorso** (esperienza, formazione, competenze) è scritta a mano in
+`index.html`. Le attività in corso hanno «oggi» come data di fine.
 
 ## I badge sulle schede
 
@@ -40,16 +53,30 @@ dentro `.card__shot`.
 
 ## Il download dell'APK
 
-La scheda di Strati punta a:
+Il pulsante sulla scheda di Strati **non dipende né dal tag né dal nome del
+file**. Nell'HTML c'è solo il repository:
 
-```
-https://github.com/skippydream/Strati/releases/latest/download/Strati-release.apk
+```html
+<a class="primary" data-apk="skippydream/Strati"
+   href="https://github.com/skippydream/Strati/releases/latest" download>
 ```
 
-`latest/download/` è un indirizzo stabile: GitHub redirige sempre all'ultima
-release. **Non va aggiornato a ogni rilascio**, a una condizione — che il file
-allegato continui a chiamarsi `Strati-release.apk`. Se cambi il nome dell'asset
-il collegamento restituisce 404, quindi tienilo costante nella build.
+Quando qualcuno passa sopra al pulsante o gli arriva sopra con la tastiera,
+`assets/js/main.js` chiede a `api.github.com` qual è l'ultima release, prende il
+primo allegato che finisce in `.apk` e riscrive `href`. Se ce n'è più d'uno ha
+la precedenza quello con «release» nel nome. Il numero di versione finisce nel
+`title` del pulsante.
+
+La richiesta parte **solo al passaggio del mouse o al fuoco da tastiera**, non a
+ogni visita: l'API di GitHub senza autenticazione concede 60 chiamate all'ora
+per indirizzo IP, e caricarla a ogni apertura di pagina la sprecherebbe.
+
+**Se JavaScript è spento o l'API non risponde**, resta l'indirizzo scritto
+nell'HTML: la pagina dell'ultima release, da cui si scarica a mano. Il pulsante
+non si rompe mai, al massimo fa un passaggio in più.
+
+Per aggiungere lo stesso pulsante a un altro progetto basta l'attributo
+`data-apk="utente/repo"`: lo script lo trova da solo.
 
 ## Le immagini dei lavori
 
@@ -82,7 +109,9 @@ caratteri ed emblemi sono quelli veri di ogni progetto.
 ## L'anteprima social
 
 `assets/img/og-image.jpg` (1200×630) si rigenera da `tools/og.html` con lo
-stesso Chromium, finestra `1200,760`, poi ritagliata a 630 di altezza.
+stesso Chromium, finestra `1200,760`, poi ritagliata a 630 di altezza
+(`--screenshot=og.png file://$PWD/tools/og.html`, poi ritaglio dei primi 630 px).
+La cartella `tools/_demo/` non è nel repo: la ricrea `tools/demo-assets.py`.
 
 ## Vedere il sito in locale
 
@@ -96,57 +125,34 @@ non riproduce l'assenza del mouse.
 
 ## Mettere online
 
-Il dominio `michelelana.it` non è ancora tuo, quindi il sito per ora va su un
-indirizzo gratuito del servizio che scegli. Non c'è nessun file da preparare:
-è una cartella di file statici.
+Il dominio è `michelelana.it`, servito da **Cloudflare Pages**. Il dominio ha i
+nameserver di Cloudflare (registrar: OVH), quindi i record DNS li crea Cloudflare
+da solo quando si aggiunge il dominio al progetto.
 
-**Netlify** — la via più corta, senza git: vai su
-[app.netlify.com/drop](https://app.netlify.com/drop) e trascina questa cartella.
-Ti dà subito un indirizzo tipo `nome-a-caso.netlify.app`, rinominabile dalle
-impostazioni del sito.
+1. *Workers & Pages* → *Create* → *Pages* → *Connect to Git* → repo
+   `skippydream/michelelana.it`, branch `main`.
+2. Build command: vuoto. Output directory: `/` (la radice). Nessun build step.
+3. Nel progetto: *Custom domains* → *Set up a custom domain* → `michelelana.it`
+   (poi anche `www.michelelana.it`, che reindirizza). HTTPS è automatico.
 
-**Cloudflare Pages** — *Create a project* → *Direct Upload*, stessa cosa, con
-indirizzo `nome.pages.dev`.
+Ogni push su `main` ripubblica il sito. `404.html` viene usata da Pages da sola.
+Non serve il file `CNAME` (era solo per GitHub Pages).
 
-**GitHub Pages** — crea un repo, carica i file, *Settings* → *Pages* → branch
-`main`. Esce su `USERNAME.github.io/NOME-REPO`.
+Gli indirizzi nella pagina sono assoluti dove serve (`canonical`, `og:url`,
+`og:image`, `twitter:image`, dati strutturati) e relativi per il resto. `404.html`
+usa percorsi che iniziano con `/`: va bene perché il sito sta sulla radice del dominio.
 
-Funziona anche in sottocartella perché **tutti i percorsi sono relativi**
-(`assets/...`, non `/assets/...`). Se aggiungi risorse, tienile relative:
-un percorso che comincia con `/` punta alla radice del dominio, cioè fuori dal
-tuo progetto, e si rompe solo su GitHub Pages — in locale sembrerebbe a posto.
-
-L'unico limite è `404.html`: da un indirizzo profondo tipo `/repo/a/b/c` i
-percorsi relativi risolvono male e la pagina esce senza stile. Il caso normale,
-`/repo/qualcosa`, funziona: il sito non ha sottocartelle.
-
-## Quando comprerai il dominio
-
-Quattro cose, in quest'ordine:
-
-1. Nel pannello del servizio, aggiungi il dominio personalizzato e imposta i DNS
-   che ti indica.
-2. In `index.html` rimetti gli indirizzi assoluti: c'è già un commento con le
-   righe pronte, sopra `og:image`. Senza `og:url` e `og:image` assoluti,
-   l'anteprima quando condividi il link può uscire senza immagine.
-3. Ricrea `sitemap.xml` con dentro il tuo indirizzo, e aggiungi in `robots.txt`
-   la riga `Sitemap: https://TUO-DOMINIO/sitemap.xml`. Li ho tolti perché
-   entrambi richiedono indirizzi assoluti, e puntare a un dominio non tuo fa
-   più danno che non averli.
-4. Solo con GitHub Pages: ricrea il file `CNAME` con dentro il dominio, una riga
-   sola. L'ho cancellato: se resta in un repo pubblico dichiara un dominio che
-   non controlli.
+`sitemap.xml` e `robots.txt` contengono già l'indirizzo `https://michelelana.it/`.
 
 ## Prima di pubblicare
 
 - [x] Sette lavori con titoli, anni, schede di design e funzionalità
 - [x] `alt` scritto su ogni immagine
-- [x] Email: `michelelana12@gmail.com`
-- [x] Nessun rimando a GitHub né ai social
-- [x] Link al sito solo dove il sito esiste (per ora: torinosulfilo.it)
-- [x] Titolo, Info, formazione e lista strumenti scritti
-- [x] `assets/img/og-image.jpg` (1200×630) per l'anteprima social
-- [x] Nessun riferimento a un dominio non ancora posseduto
-- [ ] Quando comprerai il dominio: rimettere indirizzi assoluti, sitemap e CNAME
-- [ ] Decidere se tenere l'icona di One Piece Watcher (marchio non tuo)
+- [x] Email: `michelelana12@gmail.com` (nessun numero di telefono sul sito)
+- [x] Link al sito solo dove il sito esiste
+- [x] `canonical`, `og:url`, `og:image` assoluti su `michelelana.it`
+- [x] `assets/img/og-image.jpg` (1200×630) aggiornata con foto e consulenza
+- [x] `404.html` allineata al resto del sito
+- [ ] Progetto Cloudflare Pages creato, dominio `michelelana.it` collegato, HTTPS attivo
 - [ ] Provato almeno una volta da telefono vero, non solo restringendo la finestra
+- [ ] Decidere se tenere l'icona di One Piece Watcher (marchio non tuo)
