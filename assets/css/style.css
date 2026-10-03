@@ -1,3 +1,26 @@
+/* font ospitati sul sito: nessuna richiesta a terzi */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url(../fonts/geist-normal.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 300 500;
+  font-display: swap;
+  src: url(../fonts/fraunces-italic-300-500.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 300 500;
+  font-display: swap;
+  src: url(../fonts/fraunces-normal-300-500.woff2) format('woff2');
+}
+
 /* ============================================================
    michelelana.it
    Impianto morbido: angoli ampi, linee che sfumano ai bordi
@@ -23,7 +46,7 @@
   --badge:rgba(255,255,255,.94);
 
   --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --sans:"Geist","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
 
   --r-xl:34px;
   --r-lg:26px;
@@ -71,12 +94,21 @@ body{
   overflow-x:hidden;
 }
 img{display:block;width:100%;height:auto}
-a{color:inherit;text-decoration:none}
+a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+a,button{touch-action:manipulation}
+h1,h2,h3,.contact__lead,.contact__mail{text-wrap:balance}
+p,.cv__desc,.card__desc{text-wrap:pretty}
+body::after{ /* grana leggera: rompe la piattezza digitale */
+  content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+@media (prefers-color-scheme:dark){body::after{opacity:.06}}
 ul{list-style:none}
 ::selection{background:var(--ink);color:var(--bg)}
 :focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
 
 .wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:var(--pad)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .skip{position:absolute;left:-9999px}
 .skip:focus{left:16px;top:16px;background:var(--ink);color:var(--bg);
   padding:11px 20px;border-radius:var(--r-pill);z-index:99}
@@ -132,6 +164,23 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
 }
 .intro__row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
 .intro__txt{min-width:0}
+.stack{display:flex;flex-wrap:wrap;align-items:center;gap:18px 22px;margin-bottom:30px}
+.stack img{width:28px;height:28px;object-fit:contain}
+
+/* volo di rondine: ogni logo arriva in planata da sinistra, scende,
+   risale e si posa con un piccolo ondeggiamento. Solo transform e opacity. */
+@keyframes swallow{
+  0%  {opacity:0;transform:translate(-72px,38px) rotate(-22deg) scale(.6)}
+  38% {opacity:1;transform:translate(-26px,-16px) rotate(10deg) scale(1.08)}
+  64% {transform:translate(9px,7px) rotate(-5deg) scale(.97)}
+  84% {transform:translate(-2px,-3px) rotate(2deg) scale(1.01)}
+  100%{opacity:1;transform:none}
+}
+.stack li{animation:swallow 1.05s cubic-bezier(.33,.1,.3,1) both;animation-delay:calc(var(--i,0) * 85ms + 150ms);will-change:transform,opacity}
+.stack li:nth-child(1){--i:0}.stack li:nth-child(2){--i:1}.stack li:nth-child(3){--i:2}
+.stack li:nth-child(4){--i:3}.stack li:nth-child(5){--i:4}.stack li:nth-child(6){--i:5}
+.stack li:nth-child(7){--i:6}.stack li:nth-child(8){--i:7}.stack li:nth-child(9){--i:8}
+.stack li:nth-child(10){--i:9}.stack li:nth-child(11){--i:10}
 .intro .hello{font-family:var(--serif);font-style:italic;font-size:clamp(19px,2.4vw,24px);
   color:var(--accent);margin-bottom:14px}
 .intro__me{
@@ -167,7 +216,8 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
 /* ============================================================
    LAVORI: schede affiancate
    ============================================================ */
-.cards{display:grid;grid-template-columns:1fr;gap:22px;margin-top:30px;counter-reset:lavoro}
+#lavori{counter-reset:lavoro}
+.cards{display:grid;grid-template-columns:1fr;gap:22px;margin-top:30px}
 .card{counter-increment:lavoro}
 .card__body::before{
   content:counter(lavoro,decimal-leading-zero);display:block;margin-bottom:12px;
@@ -247,6 +297,16 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
 .card__site a.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .card__site a.primary:hover{background:var(--accent);border-color:var(--accent)}
 .card__site svg{flex:none}
+
+/* ---- pressione: feedback fisico al click ---- */
+.cta a,.card__site a,nav.top-nav a,.foot__nav a{transition-property:background-color,border-color,color,transform}
+.cta a:active,.card__site a:active,nav.top-nav a:active,.foot__nav a:active{transform:scale(.97)}
+
+/* ---- entrata progressiva delle schede (solo dove il browser la supporta) ---- */
+@supports (animation-timeline:view()){
+  @keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+  .card{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
+}
 
 /* ---- scheda cliccabile ----
    Il collegamento principale (.card__go) stende il proprio ::after su
@@ -398,4 +458,86 @@ footer.end .softline{margin-bottom:24px}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *{transition:none!important;animation:none!important}
+}
+
+/* ---------- altri lavori in uno spoiler ---------- */
+.more{margin-top:28px}
+.more summary{
+  list-style:none;cursor:pointer;width:max-content;max-width:100%;margin-inline:auto;
+  display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);
+  border:1px solid var(--line);border-radius:var(--r-pill);padding:12px 22px;
+  transition-property:background-color,border-color,color,transform;transition-duration:.22s;
+}
+.more summary::-webkit-details-marker{display:none}
+.more summary:hover{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.more summary:active{transform:scale(.97)}
+.more summary svg{transition:transform .3s var(--ease)}
+.more[open] summary svg{transform:rotate(180deg)}
+.more__close,.more[open] .more__open{display:none}
+.more[open] .more__close{display:inline}
+.cards--more{margin-top:28px}
+
+
+/* ---------- menu mobile ----------
+   Sotto i 480 px i tre collegamenti non stanno nella pastiglia:
+   si aprono da un pulsante, la pastiglia resta con nome, Contatti e menu. */
+.menu{display:none}
+@media (max-width:479px){
+  .menu{display:block}
+  .menu summary{
+    list-style:none;cursor:pointer;display:grid;place-items:center;
+    width:38px;height:38px;border-radius:50%;color:var(--ink);
+    transition-property:background-color,transform;transition-duration:.22s;
+  }
+  .menu summary::-webkit-details-marker{display:none}
+  .menu summary:hover,.menu[open] summary{background:var(--bg-warm)}
+  .menu summary:active{transform:scale(.94)}
+  .menu summary path{transition:transform .3s var(--ease);transform-box:fill-box;transform-origin:center}
+  .menu[open] .m1{transform:translateY(4px) rotate(45deg)}
+  .menu[open] .m2{transform:translateY(-4px) rotate(-45deg)}
+  .menu__panel{
+    position:absolute;left:0;right:0;top:calc(100% + 8px);
+    display:grid;padding:8px;border-radius:var(--r-lg);
+    background:var(--glass-up);
+    backdrop-filter:saturate(150%) blur(16px);-webkit-backdrop-filter:saturate(150%) blur(16px);
+    border:1px solid var(--line-soft);box-shadow:var(--sh-up);
+    animation:menu-in .25s var(--ease) both;
+  }
+  nav.top-nav .menu__panel a{display:block;padding:14px 18px;border-radius:var(--r);font-size:16px;
+    color:var(--ink);font-family:var(--serif);transition:background-color .22s}
+  nav.top-nav .menu__panel a:hover,nav.top-nav .menu__panel a[aria-current="true"]{background:var(--bg-warm)}
+  @keyframes menu-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+}
+
+/* ---------- icone della hero su mobile: orbita intorno alla foto ----------
+   La foto va al centro; i loghi stanno su un cerchio e ruotano con lo scroll
+   (--spin lo scrive main.js). Ogni logo si controruota per restare dritto.
+   Solo transform: niente layout a ogni fotogramma. */
+@media (max-width:559px){
+  .intro__row{position:relative}
+  .intro__me{align-self:center;width:132px;height:132px;margin:50px 0 76px}
+  .stack{
+    position:absolute;left:50%;top:116px;width:0;height:0;margin:0;
+    --r:98px;--spin:0deg;
+  }
+  .stack li{
+    position:absolute;left:-10px;top:-10px;width:20px;height:20px;animation:none;
+    --a:calc(var(--i) * 32.727deg);
+    transform:rotate(calc(var(--a) + var(--spin))) translateX(var(--r)) rotate(calc(-1 * (var(--a) + var(--spin))));
+    will-change:transform;
+  }
+  .stack img{width:20px;height:20px;animation:orbit-in .7s var(--ease) both;
+    animation-delay:calc(var(--i) * 70ms + 200ms)}
+  @keyframes orbit-in{from{opacity:0;scale:.3}to{opacity:1;scale:1}}
+}
+
+/* ---------- righe di testo su mobile ----------
+   Larghezza massima in caratteri per il testo introduttivo, e righe
+   bilanciate (text-wrap:balance) sui paragrafi brevi: niente riga lunga
+   seguita da una corta. */
+@media (max-width:559px){
+  .intro .place{max-width:26ch}
+  .info-card p,.card__desc,.cv__desc,.contact__lead{max-width:27ch}
+  .intro .place,.info-card p,.card__desc,.cv__desc,.contact__lead,
+  .intro h1,.sect__head > .lbl:first-child,.card__ttl,.cv__ttl{text-wrap:balance}
 }

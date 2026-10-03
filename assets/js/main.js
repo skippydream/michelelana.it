@@ -16,6 +16,19 @@
     g.textContent = h >= 5 && h < 13 ? 'Buongiorno' : h >= 13 && h < 18 ? 'Buon pomeriggio' : 'Buonasera';
   }
 
+  // anello di loghi su mobile: l'angolo segue lo scroll (0,3° per pixel)
+  var ring = document.querySelector('.stack');
+  if (ring && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var frame = 0;
+    var spin = function () {
+      frame = 0;
+      ring.style.setProperty('--spin', (window.scrollY * 0.3) + 'deg');
+    };
+    window.addEventListener('scroll', function () {
+      if (!frame) frame = requestAnimationFrame(spin);
+    }, { passive: true });
+  }
+
   var head = document.querySelector('header.top');
   if (head) {
     var mark = function () { head.classList.toggle('stuck', window.scrollY > 6); };
@@ -74,9 +87,18 @@
     });
   });
 
+  // menu mobile: si chiude con un collegamento, con Esc o toccando fuori
+  var menu = document.querySelector('details.menu');
+  if (menu) {
+    menu.addEventListener('click', function (e) { if (e.target.closest('a')) menu.open = false; });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu.open = false; });
+    document.addEventListener('click', function (e) { if (!menu.contains(e.target)) menu.open = false; });
+  }
+
   var anchors = {};
-  document.querySelectorAll('nav.top-nav a[href^="#"]').forEach(function (a) {
-    anchors[a.getAttribute('href').slice(1)] = a;
+  document.querySelectorAll('nav.top-nav a[href^="#"], .menu__panel a').forEach(function (a) {
+    var k = a.getAttribute('href').slice(1);
+    (anchors[k] = anchors[k] || []).push(a);
   });
 
   var sections = document.querySelectorAll('main section[id]');
@@ -84,12 +106,12 @@
 
   var spy = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
-      var a = anchors[e.target.id];
-      if (!a || !e.isIntersecting) return;
+      var list = anchors[e.target.id];
+      if (!list || !e.isIntersecting) return;
       Object.keys(anchors).forEach(function (k) {
-        anchors[k].removeAttribute('aria-current');
+        anchors[k].forEach(function (a) { a.removeAttribute('aria-current'); });
       });
-      a.setAttribute('aria-current', 'true');
+      list.forEach(function (a) { a.setAttribute('aria-current', 'true'); });
     });
   }, { rootMargin: '-40% 0px -55% 0px' });
 
