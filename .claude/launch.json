@@ -3,9 +3,10 @@
   "configurations": [
     {
       "name": "michelelana",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4325"],
-      "port": 4325
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "python3 -m http.server $PORT"],
+      "port": 4325,
+      "autoPort": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-# Sito personale — Michele Lana
+# Sito personale, Michele Lana
 
 Sito personale statico. Nessun framework, nessun build step: sono file che il
 browser apre così come sono.
@@ -19,7 +19,7 @@ tools/                strumenti per rigenerare immagini (fuori dal sito)
 
 Impianto morbido: angoli ampi, linee che sfumano ai bordi invece di tagliare
 netto, archi leggeri sullo sfondo dell'intro, header come pastiglia sospesa.
-Le misure stanno tutte nei token in cima a `assets/css/style.css` — cambiare
+Le misure stanno tutte nei token in cima a `assets/css/style.css`, cambiare
 `--r-xl`, `--r-lg`, `--r` e `--sh` cambia la morbidezza di tutto il sito.
 
 I lavori sono **schede affiancate, tutte visibili**: niente da aprire, niente
@@ -42,7 +42,7 @@ La sezione **Percorso** (esperienza, formazione, competenze) è scritta a mano i
 ## I badge sulle schede
 
 In alto a destra di ogni immagine c'è la piattaforma: **Web**, **macOS** o
-**Android**, icona più etichetta. L'etichetta non è ridondante — un'icona a
+**Android**, icona più etichetta. L'etichetta non è ridondante, un'icona a
 laptop da sola non distingue macOS da una web app aperta sul portatile.
 
 In alto a sinistra, sui lavori non finiti, la classe `card--wip` sulla scheda
