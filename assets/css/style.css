@@ -300,7 +300,7 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
 
 /* ---- pressione: feedback fisico al click ---- */
 .cta a,.card__site a,nav.top-nav a,.foot__nav a{transition-property:background-color,border-color,color,transform}
-.cta a:active,.card__site a:active,nav.top-nav a:active,.foot__nav a:active{transform:scale(.97)}
+.cta a:active,.card__site a:not(.card__go):active,nav.top-nav a:active,.foot__nav a:active{transform:scale(.97)}
 
 /* ---- entrata progressiva delle schede (solo dove il browser la supporta) ---- */
 @supports (animation-timeline:view()){
