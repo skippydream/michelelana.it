@@ -1,40 +1,34 @@
 /* ============================================================
    michelelana.it
-   Poco lavoro per lo script: le schede sono statiche e tutto è
-   già visibile. Restano il saluto in base all'ora, l'anno nel footer,
-   l'ombra dell'header quando la pagina scorre e la voce di menu attiva.
+   Poco lavoro per lo script: il saluto in base all'ora, l'anno nel
+   footer, l'ombra dell'header e l'anello di loghi che seguono lo
+   scroll, il download dell'APK, il menu mobile e la voce attiva.
+   Lo carica solo index.html: gli elementi che cerca ci sono sempre.
    ============================================================ */
 (function () {
   'use strict';
 
-  var y = document.getElementById('year');
-  if (y) y.textContent = new Date().getFullYear();
+  document.getElementById('year').textContent = new Date().getFullYear();
 
-  var g = document.getElementById('greet');
-  if (g) {
-    var h = new Date().getHours();
-    g.textContent = h >= 5 && h < 13 ? 'Buongiorno' : h >= 13 && h < 18 ? 'Buon pomeriggio' : 'Buonasera';
-  }
+  var h = new Date().getHours();
+  document.getElementById('greet').textContent =
+    h >= 5 && h < 13 ? 'Buongiorno' : h >= 13 && h < 18 ? 'Buon pomeriggio' : 'Buonasera';
 
-  // anello di loghi su mobile: l'angolo segue lo scroll (0,3° per pixel)
-  var ring = document.querySelector('.stack');
-  if (ring && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var frame = 0;
-    var spin = function () {
-      frame = 0;
-      ring.style.setProperty('--spin', (window.scrollY * 0.3) + 'deg');
-    };
-    window.addEventListener('scroll', function () {
-      if (!frame) frame = requestAnimationFrame(spin);
-    }, { passive: true });
-  }
-
+  // allo scroll, al massimo una volta per fotogramma: ombra dell'header e,
+  // su mobile, angolo dell'anello di loghi (0,3° per pixel)
   var head = document.querySelector('header.top');
-  if (head) {
-    var mark = function () { head.classList.toggle('stuck', window.scrollY > 6); };
-    mark();
-    window.addEventListener('scroll', mark, { passive: true });
+  var ring = document.querySelector('.stack');
+  var spin = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var frame = 0;
+  function onScroll() {
+    frame = 0;
+    head.classList.toggle('stuck', window.scrollY > 6);
+    if (spin) ring.style.setProperty('--spin', (window.scrollY * 0.3) + 'deg');
   }
+  onScroll();
+  window.addEventListener('scroll', function () {
+    if (!frame) frame = requestAnimationFrame(onScroll);
+  }, { passive: true });
 
 
   /* ============================================================
@@ -89,21 +83,18 @@
 
   // menu mobile: si chiude con un collegamento, con Esc o toccando fuori
   var menu = document.querySelector('details.menu');
-  if (menu) {
-    menu.addEventListener('click', function (e) { if (e.target.closest('a')) menu.open = false; });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu.open = false; });
-    document.addEventListener('click', function (e) { if (!menu.contains(e.target)) menu.open = false; });
-  }
+  menu.addEventListener('click', function (e) { if (e.target.closest('a')) menu.open = false; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu.open = false; });
+  document.addEventListener('click', function (e) { if (!menu.contains(e.target)) menu.open = false; });
 
+  // voce attiva: comprende anche i collegamenti del menu mobile, che stanno dentro nav.top-nav
   var anchors = {};
-  document.querySelectorAll('nav.top-nav a[href^="#"], .menu__panel a').forEach(function (a) {
+  document.querySelectorAll('nav.top-nav a[href^="#"]').forEach(function (a) {
     var k = a.getAttribute('href').slice(1);
     (anchors[k] = anchors[k] || []).push(a);
   });
 
   var sections = document.querySelectorAll('main section[id]');
-  if (!sections.length || !('IntersectionObserver' in window)) return;
-
   var spy = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
       var list = anchors[e.target.id];

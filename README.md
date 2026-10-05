@@ -22,8 +22,10 @@ netto, archi leggeri sullo sfondo dell'intro, header come pastiglia sospesa.
 Le misure stanno tutte nei token in cima a `assets/css/style.css`, cambiare
 `--r-xl`, `--r-lg`, `--r` e `--sh` cambia la morbidezza di tutto il sito.
 
-I lavori sono **schede affiancate, tutte visibili**: niente da aprire, niente
-da scoprire al passaggio del mouse. Due colonne da 700 px in su, una sotto.
+I lavori sono **schede affiancate**: le prime quattro sempre visibili, le altre
+dentro lo spoiler «Mostra altri 3 lavori» (`details.more`). Niente da scoprire
+al passaggio del mouse. Due colonne da 960 px in su; tra 700 e 959 px una scheda
+per riga con immagine a sinistra; sotto i 700 px una colonna.
 Ogni scheda con un sito o un repo è **cliccabile per intero**: il collegamento
 principale ha la classe `card__go` e stende un `::after` su tutta la scheda; gli
 altri pulsanti (es. «Scarica l'APK») restano sopra e cliccabili. Le schede senza
@@ -33,7 +35,7 @@ link (One Piece Watcher, Frushío) non lo sono.
 
 In cima c'è un saluto che cambia con l'ora (`#greet`: buongiorno 5–13, buon
 pomeriggio 13–18, buonasera il resto; senza JavaScript resta «Ciao»), la foto in
-cornice circolare (`assets/img/michele.jpg`, 480×480, ritaglio quadrato sul viso)
+cornice circolare (`assets/img/michele.jpg`, 640×640, ritaglio quadrato sul viso)
 e due pulsanti: «Vedi i lavori» e «Mail».
 
 La sezione **Percorso** (esperienza, formazione, competenze) è scritta a mano in
@@ -58,7 +60,7 @@ file**. Nell'HTML c'è solo il repository:
 
 ```html
 <a class="primary" data-apk="skippydream/Strati"
-   href="https://github.com/skippydream/Strati/releases/latest" download>
+   href="https://github.com/skippydream/Strati/releases/latest">
 ```
 
 Quando qualcuno passa sopra al pulsante o gli arriva sopra con la tastiera,
@@ -148,7 +150,7 @@ usa percorsi che iniziano con `/`: va bene perché il sito sta sulla radice del 
 
 - [x] Sette lavori con titoli, anni, schede di design e funzionalità
 - [x] `alt` scritto su ogni immagine
-- [x] Email: `michelelana12@gmail.com` (nessun numero di telefono sul sito)
+- [x] Email: `info@michelelana.it` (nessun numero di telefono sul sito)
 - [x] Link al sito solo dove il sito esiste
 - [x] `canonical`, `og:url`, `og:image` assoluti su `michelelana.it`
 - [x] `assets/img/og-image.jpg` (1200×630) aggiornata con foto e consulenza

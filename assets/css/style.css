@@ -25,8 +25,8 @@
    michelelana.it
    Impianto morbido: angoli ampi, linee che sfumano ai bordi
    invece di tagliare, archi leggeri sullo sfondo.
-   I lavori sono schede affiancate, tutte visibili: niente da
-   aprire, niente da scoprire al passaggio del mouse.
+   I lavori sono schede affiancate (le ultime in uno spoiler):
+   niente da scoprire al passaggio del mouse.
    ============================================================ */
 
 /* ---------- token ---------- */
@@ -138,11 +138,9 @@ nav.top-nav a{
   font-size:13.5px;color:var(--mut);padding:9px 16px;border-radius:var(--r-pill);
   transition:color .22s,background-color .22s;
 }
-nav.top-nav a:hover{color:var(--ink);background:var(--bg-warm)}
-nav.top-nav a[aria-current="true"]{color:var(--ink);background:var(--bg-warm)}
-nav.top-nav a.pill{background:var(--ink);color:var(--bg)}
+nav.top-nav a:hover,nav.top-nav a[aria-current="true"]{color:var(--ink);background:var(--bg-warm)}
+nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--bg)}
 nav.top-nav a.pill:hover{background:var(--accent);color:var(--bg)}
-nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
 
 /* ---------- intro ---------- */
 .intro{position:relative;padding:78px 0 66px;overflow:hidden}
@@ -187,17 +185,20 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
   flex:none;width:112px;height:112px;border-radius:50%;object-fit:cover;
   border:3px solid var(--card);box-shadow:var(--sh-up);
 }
-.intro .place{margin-top:24px;font-size:17px;color:var(--tx-2)}
-.intro .place{max-width:46ch;line-height:1.65}
+.intro .place{margin-top:24px;font-size:17px;color:var(--tx-2);max-width:46ch;line-height:1.65}
 .cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
-.cta a{display:inline-flex;align-items:center;gap:8px;
-  font-size:13.5px;color:var(--ink);border:1px solid var(--line);
-  border-radius:var(--r-pill);padding:10px 20px;
-  transition:background-color .22s,border-color .22s,color .22s;
+
+/* ---------- pulsanti a pastiglia: hero, schede, spoiler ----------
+   Contorno sottile; al passaggio si invertono. .primary parte già pieno. */
+.cta a,.card__site a,.more summary{
+  display:inline-flex;align-items:center;gap:8px;
+  color:var(--ink);border:1px solid var(--line);border-radius:var(--r-pill);
+  transition-property:background-color,border-color,color,transform;transition-duration:.22s;
 }
-.cta a:hover{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.cta a.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.cta a.primary:hover{background:var(--accent);border-color:var(--accent)}
+.cta a:hover,.card__site a:hover,.more summary:hover,
+.cta a.primary,.card__site a.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.cta a.primary:hover,.card__site a.primary:hover{background:var(--accent);border-color:var(--accent)}
+.cta a{font-size:13.5px;padding:10px 20px}
 .avail{
   display:flex;align-items:center;gap:10px;margin-top:20px;
   font-size:14px;color:var(--mut);
@@ -218,7 +219,6 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
    ============================================================ */
 #lavori{counter-reset:lavoro}
 .cards{display:grid;grid-template-columns:1fr;gap:22px;margin-top:30px}
-.card{counter-increment:lavoro}
 .card__body::before{
   content:counter(lavoro,decimal-leading-zero);display:block;margin-bottom:12px;
   font-family:var(--serif);font-style:italic;font-weight:300;font-size:40px;line-height:1;
@@ -226,6 +226,7 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
 .card--wip .card__body::before{color:var(--mut)}
 
 .card{
+  position:relative;counter-increment:lavoro;
   display:flex;flex-direction:column;
   background:var(--card);
   border:1px solid var(--line-soft);
@@ -253,54 +254,37 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
   background:var(--bg-warm);border-radius:var(--r-pill);
   padding:7px 14px;
 }
-/* ---- badge di piattaforma ----
-   Pastiglia chiara con bordo e ombra: si legge sia sulle schede scure
-   sia su quelle avorio, dove il solo fondo chiaro sparirebbe. */
-.plat{
-  position:absolute;top:14px;right:14px;z-index:2;
-  display:inline-flex;align-items:center;gap:7px;
-  font-size:12px;letter-spacing:.02em;color:var(--ink);
-  background:var(--badge);
+/* ---- badge sull'immagine ----
+   .plat (a destra) è la piattaforma: pastiglia chiara con bordo e ombra,
+   si legge sia sulle schede scure sia su quelle avorio. .wip (a sinistra)
+   segna un lavoro non finito: si spegne l'immagine, non il testo. */
+.plat,.wip{
+  position:absolute;top:14px;z-index:2;
+  font-size:12px;color:var(--ink);background:var(--badge);
   backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  border:1px solid var(--line);
-  padding:6px 12px 6px 10px;border-radius:var(--r-pill);
+  border-radius:var(--r-pill);
+}
+.plat{
+  right:14px;display:inline-flex;align-items:center;gap:7px;letter-spacing:.02em;
+  border:1px solid var(--line);padding:6px 12px 6px 10px;
   box-shadow:0 1px 3px rgba(24,20,12,.14);
 }
+.wip{left:14px;letter-spacing:.06em;padding:7px 14px;box-shadow:0 1px 2px rgba(24,20,12,.10)}
 .plat svg{flex:none;opacity:.75}
 .card--wip .plat{opacity:.75}
-
-/* ---- lavoro non ancora finito ----
-   La scheda resta leggibile: si spegne l'immagine, non il testo. */
-.wip{
-  position:absolute;top:14px;left:14px;z-index:2;
-  font-size:12px;letter-spacing:.06em;color:var(--ink);
-  background:var(--badge);
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  padding:7px 14px;border-radius:var(--r-pill);
-  box-shadow:0 1px 2px rgba(24,20,12,.10);
-}
 .card--wip .card__shot img{filter:saturate(.18) opacity(.5);transition:filter .5s var(--ease)}
 .card--wip:hover .card__shot img{filter:saturate(.7) opacity(.85)}
-.card--wip .card__ttl,
-.card--wip .card__yr{color:var(--mut)}
-.card--wip .card__desc{color:var(--mut)}
+.card--wip .card__ttl,.card--wip .card__yr,.card--wip .card__desc{color:var(--mut)}
 .card--wip .feat li{color:var(--mut);opacity:.8}
 
 .card__site{margin-top:auto;padding-top:20px;display:flex;flex-wrap:wrap;gap:10px}
-.card__site a{
-  display:inline-flex;align-items:center;gap:8px;
-  font-size:13px;color:var(--ink);
-  border:1px solid var(--line);border-radius:var(--r-pill);
-  padding:9px 17px;transition:background-color .22s,border-color .22s,color .22s;
-}
-.card__site a:hover{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.card__site a.primary{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.card__site a.primary:hover{background:var(--accent);border-color:var(--accent)}
+.card__site a{font-size:13px;padding:9px 17px}
 .card__site svg{flex:none}
 
 /* ---- pressione: feedback fisico al click ---- */
-.cta a,.card__site a,nav.top-nav a,.foot__nav a{transition-property:background-color,border-color,color,transform}
-.cta a:active,.card__site a:not(.card__go):active,nav.top-nav a:active,.foot__nav a:active{transform:scale(.97)}
+nav.top-nav a,.foot__nav a{transition-property:background-color,border-color,color,transform}
+.cta a:active,.card__site a:not(.card__go):active,.more summary:active,
+nav.top-nav a:active,.foot__nav a:active{transform:scale(.97)}
 
 /* ---- entrata progressiva delle schede (solo dove il browser la supporta) ---- */
 @supports (animation-timeline:view()){
@@ -311,7 +295,6 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
 /* ---- scheda cliccabile ----
    Il collegamento principale (.card__go) stende il proprio ::after su
    tutta la scheda; gli altri collegamenti restano sopra e cliccabili. */
-.card{position:relative}
 .card__go::after{content:"";position:absolute;inset:0;border-radius:var(--r-xl)}
 .card__site a:not(.card__go){position:relative;z-index:3}
 .card:has(.card__go:hover) .card__go{background:var(--ink);border-color:var(--ink);color:var(--bg)}
@@ -340,7 +323,7 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
 .info-card > div{min-width:0}
 .info-card p{font-family:var(--serif);font-size:19px;color:var(--tx-2);line-height:1.7;max-width:44ch}
 .info-card p + p{margin-top:14px}
-/* etichetta sopra e dato sotto: l'email ha tutta la larghezza e non si spezza */
+/* etichetta sopra e dato sotto: il dato ha tutta la larghezza */
 .col-r dl{display:grid;grid-template-columns:1fr;gap:4px;font-size:15px}
 .col-r dt:not(:first-child){margin-top:18px}
 .col-r dt{color:var(--mut);font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding-top:3px}
@@ -356,7 +339,6 @@ nav.top-nav a.pill{display:inline-flex;align-items:center;gap:7px}
   border-bottom:1px solid var(--accent);transition:color .22s;
 }
 .contact__mail:hover{color:var(--accent)}
-.contact .cta{margin-top:22px}
 
 /* ---------- footer ---------- */
 footer.end{padding:0 0 44px}
@@ -373,54 +355,17 @@ footer.end .softline{margin-bottom:24px}
   transition:background-color .22s,color .22s}
 .foot__nav a:hover{background:var(--bg-warm);color:var(--ink)}
 
-/* ---------- pastiglie su schermi stretti ----------
-   In colonna singola le pastiglie andavano quasi tutte a capo da sole.
-   Sotto i 560 px passano a due colonne fisse e si rimpiccioliscono:
-   riga più densa, e le due della stessa riga hanno la stessa altezza
-   anche quando una va a capo. */
-@media (max-width:559px){
-  /* in colonna: il testo dei collegamenti torna a filo con il copyright */
-  .foot{flex-direction:column;align-items:flex-start;gap:12px}
-  .foot__nav{margin-left:-13px;margin-right:0}
-
-  /* foto grande in cima, poi saluto e testo: niente vuoto accanto al saluto */
-  .intro{padding:44px 0 56px}
-  .intro__row{display:flex;flex-direction:column;align-items:flex-start;gap:0}
-  .intro__me{order:-1;width:150px;height:150px;border-width:4px;margin-bottom:24px}
-  .intro .hello{margin-bottom:10px}
-  .intro h1{margin-top:0}
-  .cta{gap:8px}
-  .cta a{font-size:13px;padding:9px 15px}
-
-  .feat{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .feat li{
-    display:flex;align-items:center;
-    font-size:12px;line-height:1.35;padding:7px 11px;
-  }
-}
-
 /* ---------- header su schermi stretti ----------
    La barra è una pastiglia sola: se i tre collegamenti non ci stanno,
    traboccano senza che si veda, perché il body nasconde lo scorrimento
    orizzontale. Quindi si riducono per scaglioni, e sotto i 480 px
-   restano nome e pulsante di contatto. Il sito è una pagina sola:
+   restano nome, Contatti e il menu (vedi «menu mobile»). Il sito è una pagina sola:
    scorrere costa meno di una barra che scoppia. */
 @media (max-width:699px){
   header.top .bar{height:54px;padding:0 8px 0 20px}
   .name{font-size:16px}
   nav.top-nav a{font-size:12.5px;padding:8px 13px}
   nav.top-nav a.pill{padding:8px 15px}
-}
-
-@media (max-width:479px){
-  nav.top-nav a:not(.pill){display:none}
-  .name{font-size:15px}
-  header.top .bar{padding:0 6px 0 16px;gap:10px}
-  nav.top-nav{gap:4px}
-  nav.top-nav a.pill{padding:8px 12px;gap:6px;font-size:12.5px}
-
-  .cv__list li{grid-template-columns:1fr;gap:2px}
-  .info-card p{font-size:17px}
 }
 
 /* ---------- responsive ---------- */
@@ -464,13 +409,9 @@ footer.end .softline{margin-bottom:24px}
 .more{margin-top:28px}
 .more summary{
   list-style:none;cursor:pointer;width:max-content;max-width:100%;margin-inline:auto;
-  display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);
-  border:1px solid var(--line);border-radius:var(--r-pill);padding:12px 22px;
-  transition-property:background-color,border-color,color,transform;transition-duration:.22s;
+  display:flex;gap:10px;font-size:14px;padding:12px 22px;
 }
 .more summary::-webkit-details-marker{display:none}
-.more summary:hover{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.more summary:active{transform:scale(.97)}
 .more summary svg{transition:transform .3s var(--ease)}
 .more[open] summary svg{transform:rotate(180deg)}
 .more__close,.more[open] .more__open{display:none}
@@ -483,6 +424,15 @@ footer.end .softline{margin-bottom:24px}
    si aprono da un pulsante, la pastiglia resta con nome, Contatti e menu. */
 .menu{display:none}
 @media (max-width:479px){
+  nav.top-nav a:not(.pill){display:none}
+  .name{font-size:15px}
+  header.top .bar{padding:0 6px 0 16px;gap:10px}
+  nav.top-nav{gap:4px}
+  nav.top-nav a.pill{padding:8px 12px;gap:6px;font-size:12.5px}
+
+  .cv__list li{grid-template-columns:1fr;gap:2px}
+  .info-card p{font-size:17px}
+
   .menu{display:block}
   .menu summary{
     list-style:none;cursor:pointer;display:grid;place-items:center;
@@ -509,13 +459,32 @@ footer.end .softline{margin-bottom:24px}
   @keyframes menu-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 }
 
-/* ---------- icone della hero su mobile: orbita intorno alla foto ----------
-   La foto va al centro; i loghi stanno su un cerchio e ruotano con lo scroll
-   (--spin lo scrive main.js). Ogni logo si controruota per restare dritto.
-   Solo transform: niente layout a ogni fotogramma. */
+/* ---------- schermi stretti (sotto i 560 px) ---------- */
 @media (max-width:559px){
-  .intro__row{position:relative}
-  .intro__me{align-self:center;width:132px;height:132px;margin:50px 0 76px}
+  /* in colonna: il testo dei collegamenti torna a filo con il copyright */
+  .foot{flex-direction:column;align-items:flex-start;gap:12px}
+  .foot__nav{margin-left:-13px;margin-right:0}
+
+  /* foto al centro in cima, i loghi le girano intorno, poi saluto e testo */
+  .intro{padding:44px 0 56px}
+  .intro__row{position:relative;flex-direction:column;align-items:flex-start;gap:0}
+  .intro__me{order:-1;align-self:center;width:132px;height:132px;border-width:4px;margin:50px 0 76px}
+  .intro .hello{margin-bottom:10px}
+  .cta{gap:8px}
+  .cta a{font-size:13px;padding:9px 15px}
+
+  /* pastiglie: in colonna singola andavano quasi tutte a capo da sole.
+     Qui passano a due colonne fisse e si rimpiccioliscono: riga più densa,
+     e le due della stessa riga hanno la stessa altezza anche quando una va a capo. */
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .feat li{
+    display:flex;align-items:center;
+    font-size:12px;line-height:1.35;padding:7px 11px;
+  }
+
+  /* icone della hero: orbita intorno alla foto. I loghi stanno su un cerchio
+     e ruotano con lo scroll (--spin lo scrive main.js); ognuno si controruota
+     per restare dritto. Solo transform: niente layout a ogni fotogramma. */
   .stack{
     position:absolute;left:50%;top:116px;width:0;height:0;margin:0;
     --r:98px;--spin:0deg;
@@ -529,13 +498,9 @@ footer.end .softline{margin-bottom:24px}
   .stack img{width:20px;height:20px;animation:orbit-in .7s var(--ease) both;
     animation-delay:calc(var(--i) * 70ms + 200ms)}
   @keyframes orbit-in{from{opacity:0;scale:.3}to{opacity:1;scale:1}}
-}
 
-/* ---------- righe di testo su mobile ----------
-   Larghezza massima in caratteri per il testo introduttivo, e righe
-   bilanciate (text-wrap:balance) sui paragrafi brevi: niente riga lunga
-   seguita da una corta. */
-@media (max-width:559px){
+  /* righe di testo: larghezza massima in caratteri e righe bilanciate
+     sui paragrafi brevi, niente riga lunga seguita da una corta */
   .intro .place{max-width:26ch}
   .info-card p,.card__desc,.cv__desc,.contact__lead{max-width:27ch}
   .intro .place,.info-card p,.card__desc,.cv__desc,.contact__lead,

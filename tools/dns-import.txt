@@ -1,4 +1,0 @@
-$ORIGIN michelelana.it.
-$TTL 3600
-@    IN CNAME michelelana-it.pages.dev.
-www  IN CNAME michelelana-it.pages.dev.
