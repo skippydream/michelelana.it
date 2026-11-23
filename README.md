@@ -102,7 +102,11 @@ solo quando un progetto è aperto, in fondo e senza coprire il testo. Si apre
 toccando il dispositivo o con lo swipe verticale. A progetto aperto l'inner è
 spostato verso il basso di un offset proporzionale all'altezza utile (0 px a
 360×640, 60 px alle altezze maggiori), così i frame non restano attaccati al bordo
-superiore. Sopra i 600 px il comportamento è identico.
+superiore. La filmstrip è a tutta larghezza su telefono, con miniature da
+~53 px a 390 px (58 px a 430) e appena 4 px di gap: è più grande di prima e
+poggiato più in basso (y≈804 a 390×844). Su desktop le miniature passano da 96
+a 120 px e il padding inferiore da 28 a 18 px. Sopra i 600 px il comportamento
+è identico.
 
 L'inner aperto resta largo `viewport - 40` (1641 px su desktop); la card della
 striscia è il 74% dell'inner (minimo 220 px), quindi `k < 1` e l'apertura è un

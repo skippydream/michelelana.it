@@ -277,10 +277,10 @@ picture{display:block}
   position:absolute;left:0;right:0;bottom:0;z-index:20;
   display:flex;align-items:flex-end;gap:12px;
   width:min(1240px,calc(100% - 200px));margin-inline:auto;
-  padding-bottom:28px;
+  padding-bottom:18px;
 }
 .timeline button{
-  flex:0 0 auto;width:96px;overflow:hidden;opacity:.32;
+  flex:0 0 auto;width:120px;overflow:hidden;opacity:.32;
   transform-origin:bottom center;
   transition:opacity .55s var(--ease-soft),transform .75s var(--ease);
 }
@@ -400,9 +400,9 @@ picture{display:block}
     width:var(--timeline-w);
     justify-content:center;
     gap:clamp(4px,1vw,12px);
-    padding-bottom:clamp(10px,3vh,28px);
+    padding-bottom:clamp(6px,2vh,20px);
   }
-  .timeline button{flex:0 1 clamp(36px,9vw,96px);width:clamp(36px,9vw,96px)}
+  .timeline button{flex:0 1 clamp(44px,10vw,120px);width:clamp(44px,10vw,120px)}
 
   .panel__inner{
     width:var(--content-w);
@@ -524,13 +524,13 @@ picture{display:block}
   /* filmstrip: come su desktop, visibile solo a progetto aperto; nella
      schermata iniziale restano le anteprime dei progetti */
   .timeline{
-    width:calc(100% - var(--gutter));
-    margin-left:var(--gutter);margin-right:0;
+    width:100%;
+    margin-left:0;margin-right:0;
     justify-content:flex-start;
-    gap:clamp(6px,1.6vw,12px);
-    padding-bottom:clamp(12px,2.5vh,24px);
+    gap:clamp(4px,1vw,8px);
+    padding:0 0 clamp(6px,1vh,12px) 4px;
   }
-  .timeline button{flex:0 0 clamp(40px,11vw,56px);width:clamp(40px,11vw,56px)}
+  .timeline button{flex:0 0 clamp(44px,13vw,64px);width:clamp(44px,13vw,64px)}
 
   /* freccia: riquadro 6em in alto a sinistra, chevron piccolo e discreto */
   .back,
