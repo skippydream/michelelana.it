@@ -9,7 +9,8 @@ index.html            la pagina
 assets/css/style.css  stile e token del design
 assets/js/main.js     anno, paging, pannelli, cursore, download dell'APK
 assets/img/           screenshot nei frame, foto (michele.jpg) e anteprima social;
-                      screens/ ha gli screenshot, thumbs/ le miniature della timeline
+                      screens/ ha gli screenshot, thumbs/ le miniature,
+                      devices/ i frame PNG trasparenti dei dispositivi
 favicon.svg           icona della scheda
 robots.txt sitemap.xml
 tools/                strumenti locali (fuori dal sito)
@@ -48,7 +49,8 @@ Come nella reference ci sono **due stati**, su desktop e su mobile:
 - **Zoom in (gallery).** Cliccando l'immagine di una card (o con rotellina
   verticale, swipe verso l'alto, barra spaziale/Invio) la card si apre a schermo intero: a
   sinistra compaiono titolo, sottotitolo, dettagli e link, a destra il progetto
-  dentro un frame **ThinkPad** o **Google Pixel 10a**, entrambi in CSS puro.
+  dentro un **MacBook Pro 14" con PROLED** (l'ultimo modello, M6) o un
+  **iPhone 18 Pro**, con frame PNG trasparente.
   I dettagli esistono solo in questo stato. `Escape`, un altro clic, la rotellina
   verticale contraria o lo swipe verso il basso riportano alla timeline.
 
@@ -87,9 +89,25 @@ c'è lo zoom extra dell'anteprima (`--pv: 1`): è il FLIP a ingrandire ogni
 dispositivo in modo uniforme. Il testo resta in alto, il dispositivo sotto e la
 filmstrip in basso; l'hint dice «tocca per aprire» quando non c'è hover.
 
-I frame sono CSS puro: laptop con lid, cinturino e base arrotondata, Pixel con
-corpo in alluminio e tasti laterali; nessuna scritta «ThinkPad» e nessun notch.
-Le immagini dei due layer non vengono mai ricreate durante l'animazione.
+I frame non sono più disegnati in CSS: lo screenshot sta sotto il layer trasparente
+del dispositivo vero, con l'antiriflesso mantenuto da `.device__glare`
+(la stessa diagonale chiara di prima, `rgba(255,255,255,.07)`). Le immagini dei
+due layer non vengono mai ricreate durante l'animazione.
+
+I PNG dei dispositivi stanno in `assets/img/devices/`:
+
+- `macbook-pro-14-silver.png`: frame del MacBook Pro 14" con PROLED (M6, 2026),
+  colore Silver, derivato dagli Apple Developer Resources tramite il repo
+  `jamesjingyi/mockup-device-frames` (aggiornato al 28 settembre 2026);
+- `iphone-18-pro-silver.png`: frame dell'iPhone 18 Pro (2026), colore Silver,
+  dalle [frame gratuite di Screeny](https://getscreeny.app/frames) (1350×2760,
+  apertura 1206×2622, nessuna attribuzione richiesta).
+
+Sono scattati entrambi in Silver perché è l'unica finitura con contrasto buono
+sia su `#ffffff` sia su `#14161a`. Le aperture sono calibrate sui pixel dei
+frame: MacBook `400,300 → 3424,2286` su `3824×2586`, iPhone `72,69 → 1278,2691`
+su `1350×2760`; i valori sono in percentuale nelle variabili `--rx/--ry/--rw/--rh`
+di `style.css`.
 
 Per aggiungere un lavoro: copia un `<article class="slide">`, aggiorna testi e
 immagine, poi aggiungi un `<button data-go="N">` con la miniatura dentro
@@ -101,7 +119,8 @@ Il tipo di slide è rilevato da `main.js` dalla presenza di `.device--laptop` e
 
 Chi sono, Percorso e Contatti non sono più sotto lo slideshow: sono **pannelli**
 sovrapposti che si aprono dalla navigazione in alto (come l'About di Mike) e si
-chiudono con la freccia in basso a sinistra, con `Escape` o cliccando «Lavori».
+chiudono con la freccia appena sopra la colonna di testo, con `Escape` o
+cliccando «Lavori».
 Mentre un pannello è aperto la galleria diventa `inert`.
 
 Senza JavaScript un foglio dentro `<noscript>` riporta tutto a scorrimento
@@ -149,7 +168,7 @@ Dentro gli schermi ci sono **screenshot reali**, in `assets/img/screens/`:
 - `pachamar.jpg`: sito live ricatturato con la scrollbar nascosta prima dello
   scatto; ha una sola variante, usata in entrambi i temi;
 - `pachamar-mobile.jpg`: versione mobile, 390×844;
-- `strati-app.jpg`: screenshot dal README di `skippydream/Strati`, nel Pixel;
+- `strati-app.jpg`: screenshot dal README di `skippydream/Strati`, nell'iPhone;
 - `appunti-light.jpg` e `appunti-dark.jpg`: due catture reali dello stesso sito,
   che supporta `prefers-color-scheme` — chiaro (`#f5f7f9`/bianco) e scuro
   (`#0a0d12`). Quella scura è la vecchia `appunti.jpg`; entrambe hanno la
