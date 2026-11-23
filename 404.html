@@ -2,26 +2,39 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pagina non trovata | Michele Lana</title>
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/css/style.css?v=20261004">
+<style>
+  @font-face{font-family:'Geist';font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/fonts/geist-normal.woff2) format('woff2')}
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:#fff;color:#000;font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  :focus-visible{outline:2px solid #000;outline-offset:6px}
+  body{display:grid;place-items:center}
+  .error{width:min(1000px,calc(100% - 300px));font-weight:200}
+  .error h1{font-size:40px;font-weight:400;letter-spacing:-.03em}
+  .error p{margin-top:14px;font-size:20px;color:rgba(0,0,0,.4)}
+  .error a{display:inline-block;margin-top:40px;padding-bottom:2px;font-size:20px;border-bottom:1px solid rgba(0,0,0,.4)}
+  .error a:hover{color:#000;border-color:#000}
+  @media (prefers-color-scheme:dark){
+    html,body{background:#0b0b0c;color:#f2f2f3}
+    :focus-visible{outline-color:#f2f2f3}
+    .error p{color:rgba(255,255,255,.45)}
+    .error a{border-bottom-color:rgba(255,255,255,.35)}
+    .error a:hover{color:#fff;border-color:#fff}
+  }
+  @media(max-width:600px){.error{width:calc(100% - 40px)}.error h1{font-size:32px}}
+</style>
 </head>
 <body>
-<header class="top">
-  <div class="bar">
-    <a href="/" class="name">Michele Lana</a>
-  </div>
-</header>
-<main>
-  <section class="intro">
-    <div class="wrap">
-      <p class="hello">404.</p>
-      <h1>Questa pagina non esiste.</h1>
-      <p class="cta"><a class="primary" href="/">Torna alla home</a></p>
-    </div>
-  </section>
+<main class="error">
+  <h1>404.</h1>
+  <p>Questa pagina non esiste.</p>
+  <a href="/">Torna alla home <span aria-hidden="true">&#8594;</span></a>
 </main>
 </body>
 </html>

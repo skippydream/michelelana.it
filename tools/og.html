@@ -2,35 +2,31 @@
 <html lang="it"><head><meta charset="utf-8">
 <style>
 @font-face{font-family:"Geist";font-weight:400 600;src:url(../assets/fonts/geist-normal.woff2) format("woff2")}
-@font-face{font-family:"Fraunces";font-weight:300 500;src:url(../assets/fonts/fraunces-normal-300-500.woff2) format("woff2")}
 *{margin:0;padding:0;box-sizing:border-box}
-html{background:#fbfaf8}
-body{width:1200px;height:630px;overflow:hidden}
+html{background:#fff}
 body{
-  background:#fbfaf8;color:#16150f;
+  width:1200px;height:630px;overflow:hidden;background:#fff;color:#000;
   font-family:"Geist",-apple-system,Helvetica,Arial,sans-serif;
-  padding:70px 80px;display:flex;flex-direction:column;justify-content:space-between;
+  padding:64px 80px;display:flex;flex-direction:column;justify-content:space-between;
   -webkit-font-smoothing:antialiased;
 }
-.serif{font-family:"Fraunces","Iowan Old Style",Georgia,serif;font-weight:360}
-.nm{font-size:30px;letter-spacing:-.005em}
-h1{font-size:54px;line-height:1.18;letter-spacing:-.016em;max-width:19ch;font-weight:400}
-.me{position:absolute;top:70px;right:80px;width:230px;height:230px;border-radius:50%;object-fit:cover;border:6px solid #fffefb;box-shadow:0 18px 40px -18px rgba(24,20,12,.35)}
-.sub{font-size:22px;color:#4a473f;margin-top:22px}
-.rule{height:1px;background:#e3dfd7;margin-bottom:24px}
-.foot{display:flex;justify-content:space-between;align-items:center;font-size:20px;color:#6d6a63}
-.avail{display:flex;align-items:center;gap:10px}
-.avail i{width:8px;height:8px;border-radius:50%;background:#4d7c3a;display:block}
-.dom{color:#16150f}
+.nm{font-size:30px;font-weight:500;letter-spacing:-.02em;line-height:1.1}
+.nm span{display:block;font-size:18px;font-weight:400;letter-spacing:0;color:rgba(0,0,0,.42);margin-top:4px}
+h1{font-size:56px;line-height:1.1;letter-spacing:-.03em;max-width:19ch;font-weight:500}
+.sub{font-size:22px;color:rgba(0,0,0,.42);margin-top:22px}
+.me{position:absolute;top:64px;right:80px;width:190px;height:190px;object-fit:cover;filter:grayscale(1)}
+.rule{height:1px;background:rgba(0,0,0,.16);margin-bottom:22px}
+.foot{display:flex;justify-content:space-between;align-items:center;font-size:18px;color:rgba(0,0,0,.42)}
+.dom{color:#000}
 </style></head>
 <body>
-  <p class="nm serif">Michele Lana</p>
-  <div><h1 class="serif">Sviluppo siti, piattaforme gestionali e applicazioni per macOS e Android.</h1>
-  <p class="sub">E consulenza sulla privacy digitale.</p></div>
+  <p class="nm">Michele Lana<span>2026</span></p>
+  <div><h1>Sviluppo siti, piattaforme gestionali e applicazioni per macOS e Android.</h1>
+  <p class="sub">Consulenza sulla privacy digitale. Solo da remoto.</p></div>
   <img class="me" src="../assets/img/michele.jpg" alt="">
   <div><div class="rule"></div>
   <div class="foot">
-    <span class="avail"><i></i> Disponibile per nuove collaborazioni · Solo da remoto</span>
+    <span>Disponibile per nuove collaborazioni</span>
     <span class="dom">michelelana.it</span>
   </div></div>
 </body></html>

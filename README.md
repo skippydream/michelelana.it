@@ -7,51 +7,105 @@ browser apre così come sono.
 index.html            la pagina
 404.html              pagina di errore
 assets/css/style.css  stile e token del design
-assets/js/main.js     saluto in base all'ora, anno nel footer, ombra dell'header,
-                      voce di menu attiva, download dell'APK
-assets/img/           schede dei lavori, foto (michele.jpg) e anteprima social
+assets/js/main.js     anno, paging, pannelli, cursore, download dell'APK
+assets/img/           screenshot nei frame, foto (michele.jpg) e anteprima social;
+                      screens/ ha gli screenshot, thumbs/ le miniature della timeline
 favicon.svg           icona della scheda
 robots.txt sitemap.xml
-tools/                strumenti per rigenerare immagini (fuori dal sito)
+tools/                strumenti locali (fuori dal sito)
 ```
 
 ## Il design
 
-Impianto morbido: angoli ampi, linee che sfumano ai bordi invece di tagliare
-netto, archi leggeri sullo sfondo dell'intro, header come pastiglia sospesa.
-Le misure stanno tutte nei token in cima a `assets/css/style.css`, cambiare
-`--r-xl`, `--r-lg`, `--r` e `--sh` cambia la morbidezza di tutto il sito.
+È un **clone integrale** di [mikematas.com](https://mikematas.com/), con i miei
+contenuti: pagina fissa a schermo intero, niente scroll verticale e niente
+scrollbar, bianco e nero con tema scuro automatico, Geist a tutte le misure (la variabile 100–900), testi
+leggeri, griglia centrata di 1000 px, header con nome e anno in colonna a sinistra
+(come nella reference: nome a 116 px dal bordo superiore, anno subito sotto) e
+navigazione in colonna a destra, cursore cerchio che inverte lo sfondo. Il font di Mike
+(Lab Grotesque) non è stato copiato: uso Geist, che è open source.
 
-I lavori sono **schede affiancate**: le prime quattro sempre visibili, le altre
-dentro lo spoiler «Mostra altri 3 lavori» (`details.more`). Niente da scoprire
-al passaggio del mouse. Due colonne da 960 px in su; tra 700 e 959 px una scheda
-per riga con immagine a sinistra; sotto i 700 px una colonna.
-Ogni scheda con un sito o un repo è **cliccabile per intero**: il collegamento
-principale ha la classe `card__go` e stende un `::after` su tutta la scheda; gli
-altri pulsanti (es. «Scarica l'APK») restano sopra e cliccabili. Le schede senza
-link (One Piece Watcher, Frushío) non lo sono.
+Il cursore compare solo con mouse preciso (`hover:hover` e `pointer:fine`); con
+`prefers-reduced-motion` o `?nocursor=1` resta quello del browser e le animazioni
+si accorciano.
 
-## Hero e Percorso
+Il tema segue `prefers-color-scheme`: su sistema chiaro sfondo `#ffffff` e testo
+nero, su sistema scuro sfondo `#0b0b0c` e testo `#f2f2f3`. Non c'è un interruttore:
+basta il tema del sistema. Anche `404.html` e il colore della barra del browser
+seguono la stessa preferenza.
 
-In cima c'è un saluto che cambia con l'ora (`#greet`: buongiorno 5–13, buon
-pomeriggio 13–18, buonasera il resto; senza JavaScript resta «Ciao»), la foto in
-cornice circolare (`assets/img/michele.jpg`, 640×640, ritaglio quadrato sul viso)
-e due pulsanti: «Vedi i lavori» e «Mail».
+## La galleria
 
-La sezione **Percorso** (esperienza, formazione, competenze) è scritta a mano in
-`index.html`. Le attività in corso hanno «oggi» come data di fine.
+Come nella reference ci sono **due stati**, su desktop e su mobile:
 
-## I badge sulle schede
+- **Zoom out (timeline).** I progetti sono card allineate in basso, centrate
+  sull'attiva; si vede solo l'immagine, senza titolo, e le card lontane si
+  schiariscono. Le card si sovrappongono di ~650 px: tra un'immagine e l'altra
+  resta uno spazio di circa 60 px. La miniatura di Strati (solo telefono) è
+  ridimensionata e centrata per non sovrapporsi a Pachamar. Si scorre **lateralmente** con rotellina/trackpad orizzontale,
+  swipe, frecce `←`/`→` o `Home`/`End`.
+- **Zoom in (gallery).** Cliccando l'immagine di una card (o con rotellina
+  verticale, swipe verso l'alto, barra spaziale/Invio) la card si apre a schermo intero: a
+  sinistra compaiono titolo, sottotitolo, dettagli e link, a destra il progetto
+  dentro un frame **ThinkPad** o **Google Pixel 10a**, entrambi in CSS puro.
+  I dettagli esistono solo in questo stato. `Escape`, un altro clic, la rotellina
+  verticale contraria o lo swipe verso il basso riportano alla timeline.
 
-In alto a destra di ogni immagine c'è la piattaforma: **Web**, **macOS** o
-**Android**, icona più etichetta. L'etichetta non è ridondante, un'icona a
-laptop da sola non distingue macOS da una web app aperta sul portatile.
+Lo zoom non scatta e non gonfia l'immagine: `.slide__inner` ha **sempre** la
+dimensione finale (`--inner-w`, 1641 px su desktop) e in timeline viene solo
+scalato tramite `--k` con `transform`, esattamente come nella reference. I due
+valori sono stati invertiti rispetto alla prova precedente: la card della
+striscia è più piccola (`--card-w`, ~1238 px a 1440 px, 350 px su telefono,
+520 px in landscape) e l'elemento aperto è più grande. L'apertura è un **FLIP**
+sull'inner: la geometria viene scambiata a transizioni spente e l'immagine viene
+riportata al suo rettangolo di partenza, poi rilasciata sulla curva esponenziale
+(`--ease`, 950 ms). Così la card cresce dov'è, senza lo scorrimento del track;
+anche padding e scala del telefono di Strati sono animati insieme. Il FLIP è
+interrompibile e i dettagli entrano in ritardo senza spostare l'immagine.
+Filmstrip, pannelli, frecce e cursore usano la stessa curva, con tempi più
+lunghi sulle aperture e più corti sugli hover.
+L'anno nell'header non è fisso: `apply()` legge
+il `.slide__date` della slide attiva, quindi passa da 2026 a 2025 su One Piece
+Watcher. La rotellina verticale comanda lo zoom, quella orizzontale il paging;
+sul touch vale la stessa distinzione tra swipe verticale e orizzontale, più il
+pizzico. `main.js` blocca solo il paging per 300 ms (120 ms con reduced motion)
+e assorbe la rotellina per 450 ms dopo uno scatto, mentre lo zoom resta sempre
+cliccabile. In basso la
+**timeline** di miniature resta disponibile nello zoom-in: un clic apre direttamente
+il progetto scelto e torna allo zoom-out. Nello zoom-in le slide inattive hanno
+`inert` e `aria-hidden="true"`.
 
-In alto a sinistra, sui lavori non finiti, la classe `card--wip` sulla scheda
-aggiunge l'etichetta e spegne l'immagine (desaturata al 18%, opacità 50%) senza
-toccare la leggibilità del testo. Al passaggio del mouse l'immagine si riprende.
-Per marcarne un altro: aggiungi `card--wip` all'`<article>` e il `<p class="wip">`
-dentro `.card__shot`.
+### Mobile e tablet
+
+Fino a 900 px di larghezza (e in landscape con altezza ≤ 520 px) l'inner aperto
+è largo `viewport - 40`, così tutto resta dentro lo schermo: niente immagini
+fuori riquadro su iPad in verticale. La card della striscia è il 74% dell'inner
+(minimo 220 px), quindi `k < 1` e l'apertura è un vero enlargement anche su
+telefono: per esempio a 390×844 l'immagine passa da 237 a 320 px. Su mobile non
+c'è lo zoom extra dell'anteprima (`--pv: 1`): è il FLIP a ingrandire ogni
+dispositivo in modo uniforme. Il testo resta in alto, il dispositivo sotto e la
+filmstrip in basso; l'hint dice «tocca per aprire» quando non c'è hover.
+
+I frame sono CSS puro: laptop con lid, cinturino e base arrotondata, Pixel con
+corpo in alluminio e tasti laterali; nessuna scritta «ThinkPad» e nessun notch.
+Le immagini dei due layer non vengono mai ricreate durante l'animazione.
+
+Per aggiungere un lavoro: copia un `<article class="slide">`, aggiorna testi e
+immagine, poi aggiungi un `<button data-go="N">` con la miniatura dentro
+`<nav class="timeline">`. L'ordine dei bottoni deve seguire quello delle slide.
+Il tipo di slide è rilevato da `main.js` dalla presenza di `.device--laptop` e
+`.device--phone`: non va scritto a mano.
+
+## I pannelli
+
+Chi sono, Percorso e Contatti non sono più sotto lo slideshow: sono **pannelli**
+sovrapposti che si aprono dalla navigazione in alto (come l'About di Mike) e si
+chiudono con la freccia in basso a sinistra, con `Escape` o cliccando «Lavori».
+Mentre un pannello è aperto la galleria diventa `inert`.
+
+Senza JavaScript un foglio dentro `<noscript>` riporta tutto a scorrimento
+normale, impila le slide una sotto l'altra e mostra i pannelli in fondo: la
+pagina resta leggibile.
 
 ## Il download dell'APK
 
@@ -59,7 +113,7 @@ Il pulsante sulla scheda di Strati **non dipende né dal tag né dal nome del
 file**. Nell'HTML c'è solo il repository:
 
 ```html
-<a class="primary" data-apk="skippydream/Strati"
+<a data-apk="skippydream/Strati"
    href="https://github.com/skippydream/Strati/releases/latest">
 ```
 
@@ -73,47 +127,46 @@ La richiesta parte **solo al passaggio del mouse o al fuoco da tastiera**, non a
 ogni visita: l'API di GitHub senza autenticazione concede 60 chiamate all'ora
 per indirizzo IP, e caricarla a ogni apertura di pagina la sprecherebbe.
 
-**Se JavaScript è spento o l'API non risponde**, resta l'indirizzo scritto
-nell'HTML: la pagina dell'ultima release, da cui si scarica a mano. Il pulsante
-non si rompe mai, al massimo fa un passaggio in più.
+**Se JavaScript è spento, l'API non risponde o si è su touch**, resta l'indirizzo
+scritto nell'HTML: la pagina dell'ultima release, da cui si scarica a mano. Il
+pulsante non si rompe mai, al massimo fa un passaggio in più.
 
 Per aggiungere lo stesso pulsante a un altro progetto basta l'attributo
 `data-apk="utente/repo"`: lo script lo trova da solo.
 
 ## Le immagini dei lavori
 
-Non sono screenshot dell'interfaccia. Sono **schede di design**: marchio reale
-del progetto, il suo carattere tipografico e la sua palette, presi dai
-rispettivi repository. Così restano leggibili anche a 290 px, che è la misura
-massima a cui il sito le mostra.
+Dentro gli schermi ci sono **screenshot reali**, in `assets/img/screens/`:
 
-Per rigenerarle:
+- siti live catturati con Firefox headless via WebDriver BiDi a 1280×800,
+  con **5 secondi di attesa reale** dopo `load` e scroll per le immagini lazy:
+  `torinosulfilo.jpg`, `sunseeker.jpg` (da
+  `skippydream.github.io/SunSeeker`, con geolocalizzazione concessa per far
+  caricare le previsioni) e `frushio-app.jpg` (da `localhost:8788`, con la
+  scrollbar nascosta per eliminare la barra nera di 15 px a destra);
+- `pachamar.jpg` e `appunti.jpg`: altri siti live, entrambi ricatturati con la
+  scrollbar nascosta prima dello scatto (su Appunti la barra scura di 15 px a
+  destra era la scrollbar del browser, non parte del sito); Appunti è stato
+  ricatturato con il tema scuro, coerente con il tema dark del sito;
+- `pachamar-mobile.jpg`: versione mobile, 390×844;
+- `strati-app.jpg`: screenshot dal README di `skippydream/Strati`, nel Pixel;
+- `one-piece-watcher.jpg`: immagine in testa al README di
+  `skippydream/opwatcher`, composta su nero.
 
-```bash
-python3 tools/demo-assets.py
-```
-
-```bash
-python3 -m http.server 4325
-```
-
-```bash
-/Applications/Chromium.app/Contents/MacOS/Chromium --headless=new --hide-scrollbars --virtual-time-budget=15000 --window-size=1200,6400 --screenshot=strip.png http://127.0.0.1:4325/tools/demo-cards.html
-```
-
-```bash
-python3 tools/slice-cards.py strip.png assets/img
-```
-
-La composizione delle sette schede è in `tools/demo-cards.html`: colori,
-caratteri ed emblemi sono quelli veri di ogni progetto.
+Le immagini sono salvate come JPEG baseline, non progressivi, così non compaiono
+a strisce durante il caricamento. Le miniature in basso sono ritagli 128×80 degli
+stessi screenshot, in `assets/img/thumbs/`.
 
 ## L'anteprima social
 
-`assets/img/og-image.jpg` (1200×630) si rigenera da `tools/og.html` con lo
-stesso Chromium, finestra `1200,760`, poi ritagliata a 630 di altezza
-(`--screenshot=og.png file://$PWD/tools/og.html`, poi ritaglio dei primi 630 px).
-La cartella `tools/_demo/` non è nel repo: la ricrea `tools/demo-assets.py`.
+`assets/img/og-image.jpg` (1200×630) si rigenera da `tools/og.html` con Firefox
+in headless, finestra `1200,630`:
+
+```bash
+/Applications/Firefox.app/Contents/MacOS/firefox --headless --profile /tmp/ff-og --screenshot og.png --window-size=1200,630 file://$PWD/tools/og.html
+```
+
+Poi salva `og.png` come `assets/img/og-image.jpg` (convertendolo in JPEG).
 
 ## Vedere il sito in locale
 
@@ -148,13 +201,14 @@ usa percorsi che iniziano con `/`: va bene perché il sito sta sulla radice del 
 
 ## Prima di pubblicare
 
-- [x] Sette lavori con titoli, anni, schede di design e funzionalità
+- [x] Sette lavori con titoli, anni, screenshot e funzionalità
 - [x] `alt` scritto su ogni immagine
 - [x] Email: `info@michelelana.it` (nessun numero di telefono sul sito)
 - [x] Link al sito solo dove il sito esiste
 - [x] `canonical`, `og:url`, `og:image` assoluti su `michelelana.it`
 - [x] `assets/img/og-image.jpg` (1200×630) aggiornata con foto e consulenza
 - [x] `404.html` allineata al resto del sito
+- [x] Tema chiaro e scuro automatico (`prefers-color-scheme`)
 - [ ] Progetto Cloudflare Pages creato, dominio `michelelana.it` collegato, HTTPS attivo
 - [ ] Provato almeno una volta da telefono vero, non solo restringendo la finestra
 - [ ] Decidere se tenere l'icona di One Piece Watcher (marchio non tuo)
