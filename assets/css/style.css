@@ -352,8 +352,8 @@ picture{display:block}
    Nessun layout alternativo: cambiano le misure, non la struttura.
    ============================================================ */
 :root{
-  --pad-top:min(116px,max(24px,calc(13vh + env(safe-area-inset-top,0px))));
-  --pad-bottom:max(56px,calc(12vh + env(safe-area-inset-bottom,0px)));
+  --pad-top:clamp(56px,9vh,96px);
+  --pad-bottom:clamp(64px,11vh,104px);
   --gutter:clamp(24px,calc(14vw + env(safe-area-inset-left,0px) + env(safe-area-inset-right,0px)),300px);
   --content-w:min(1000px,calc(100% - var(--gutter)));
   --timeline-w:min(1240px,calc(100% - clamp(24px,14vw,200px)));
@@ -369,12 +369,12 @@ picture{display:block}
 
   .gallery.is-zoomed .slide__inner{
     left:50%;
-    padding-left:clamp(16px,4vw,40px);
-    padding-right:clamp(16px,4vw,40px);
+    padding-left:clamp(12px,3vw,40px);
+    padding-right:clamp(12px,3vw,40px);
   }
   .slide__inner{
-    grid-template-columns:minmax(0,clamp(130px,34vw,300px)) minmax(0,1fr);
-    gap:clamp(10px,2.5vw,30px);
+    grid-template-columns:minmax(0,clamp(112px,32vw,300px)) minmax(0,1fr);
+    gap:clamp(8px,2.2vw,26px);
     padding-top:var(--pad-top);
     padding-bottom:var(--pad-bottom);
   }
@@ -395,14 +395,15 @@ picture{display:block}
 
   .gallery:not(.is-zoomed) .slide__inner,
   .gallery:not(.is-zoomed) .slide--phone .slide__inner{--px:0px;top:50%}
-  .gallery__hint{top:calc(var(--pad-top) + 44px);font-size:clamp(10px,2.2vw,12px)}
+  .gallery__hint{top:calc(var(--pad-top) + 56px);font-size:clamp(10px,2.2vw,12px)}
 
   .timeline{
     width:var(--timeline-w);
+    justify-content:center;
     gap:clamp(4px,1vw,12px);
     padding-bottom:clamp(10px,3vh,28px);
   }
-  .timeline button{flex:0 1 clamp(32px,7vw,96px);width:clamp(32px,7vw,96px)}
+  .timeline button{flex:0 1 clamp(36px,9vw,96px);width:clamp(36px,9vw,96px)}
 
   .panel__inner{
     width:var(--content-w);
@@ -424,6 +425,15 @@ picture{display:block}
     width:clamp(32px,5vw,44px);height:clamp(32px,5vw,44px);
   }
   body:has(.panel.is-open) .back{top:max(64px,calc(var(--pad-top) - 28px))}
+}
+
+/* riequilibra i vuoti in verticale: il contenuto scende tra header e filmstrip */
+@media (max-width:900px) and (orientation:portrait){
+  .slide__inner{
+    padding-top:calc(var(--pad-top) + 52px);
+    padding-bottom:max(24px,calc(var(--pad-bottom) - 52px));
+  }
+  .back{top:calc(50% - 100px)}
 }
 
 /* landscape compatto: poco spazio in altezza, testo e freccia si compatta */

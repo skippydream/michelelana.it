@@ -94,9 +94,13 @@ landscape compatto (altezza ≤ 520 px) si riducono soltanto i font di testo e
 header e si sposta la freccia; i dispositivi sono limitati dall'altezza utile
 della slide, così non finiscono sotto la filmstrip.
 
-La freccia di ritorno sta nella colonna del testo, appena a sinistra e sopra il
-titolo, ed è visibile anche a 390 px e in landscape. L'hint dice «tocca per
-aprire» quando non c'è hover.
+Sul telefono l'header sale a circa il 9% dell'altezza, il contenuto viene
+centrato nello spazio che resta tra header e filmstrip e la timeline è centrata
+con miniature più grandi (36 px contro 32 px): a 390×844 i vuoti sopra e sotto
+il testo aperto sono quasi uguali, circa 190 px ciascuno. La freccia di ritorno
+sta nella colonna del testo, appena a sinistra e sopra il titolo, ed è visibile
+anche a 390 px e in landscape. L'hint dice «tocca per aprire» quando non c'è
+hover.
 
 I frame sono CSS puro: laptop con lid, cinturino e base arrotondata, Pixel con
 corpo in alluminio e tasti laterali; nessuna scritta «ThinkPad» e nessun notch.
