@@ -56,8 +56,8 @@ Lo zoom non scatta e non gonfia l'immagine: `.slide__inner` ha **sempre** la
 dimensione finale (`--inner-w`, 1641 px su desktop) e in timeline viene solo
 scalato tramite `--k` con `transform`, esattamente come nella reference. I due
 valori sono stati invertiti rispetto alla prova precedente: la card della
-striscia è più piccola (`--card-w`, ~1238 px a 1440 px, 350 px su telefono,
-520 px in landscape) e l'elemento aperto è più grande. L'apertura è un **FLIP**
+striscia è più piccola (`--card-w`, ~1238 px a 1440 px, ~259 px a 390 px di
+larghezza) e l'elemento aperto è più grande. L'apertura è un **FLIP**
 sull'inner: la geometria viene scambiata a transizioni spente e l'immagine viene
 riportata al suo rettangolo di partenza, poi rilasciata sulla curva esponenziale
 (`--ease`, 950 ms). Così la card cresce dov'è, senza lo scorrimento del track;
@@ -76,16 +76,27 @@ cliccabile. In basso la
 il progetto scelto e torna allo zoom-out. Nello zoom-in le slide inattive hanno
 `inert` e `aria-hidden="true"`.
 
-### Mobile e tablet
+### Responsive: una sola griglia
 
-Fino a 900 px di larghezza (e in landscape con altezza ≤ 520 px) l'inner aperto
-è largo `viewport - 40`, così tutto resta dentro lo schermo: niente immagini
-fuori riquadro su iPad in verticale. La card della striscia è il 74% dell'inner
-(minimo 220 px), quindi `k < 1` e l'apertura è un vero enlargement anche su
-telefono: per esempio a 390×844 l'immagine passa da 237 a 320 px. Su mobile non
-c'è lo zoom extra dell'anteprima (`--pv: 1`): è il FLIP a ingrandire ogni
-dispositivo in modo uniforme. Il testo resta in alto, il dispositivo sotto e la
-filmstrip in basso; l'hint dice «tocca per aprire» quando non c'è hover.
+Non c'è più una versione mobile separata. Sotto i 900 px cambiano solo le
+misure, non la struttura: testo a sinistra, dispositivo a destra, header e
+timeline dove sono su desktop. La griglia usa `clamp()` e quattro variabili
+fluide (`--pad-top`, `--pad-bottom`, `--gutter`, `--content-w`,
+`--timeline-w`), quindi non esistono più layout impilati, rami per telefono
+corto o regole landscape dedicate al posizionamento dei contenuti.
+
+L'inner aperto è largo `viewport - 40` fino a 900 px (1641 px su desktop); la
+card della striscia è il 74% dell'inner (minimo 220 px), quindi `k < 1` e
+l'apertura è un vero enlargement anche su telefono: a 390×844 l'immagine passa
+da ~259 a 350 px. `--pv` resta 1.6 a ogni dimensione: a ingrandire il
+dispositivo è il FLIP, non un ramo JavaScript specifico per il telefono. In
+landscape compatto (altezza ≤ 520 px) si riducono soltanto i font di testo e
+header e si sposta la freccia; i dispositivi sono limitati dall'altezza utile
+della slide, così non finiscono sotto la filmstrip.
+
+La freccia di ritorno sta nella colonna del testo, appena a sinistra e sopra il
+titolo, ed è visibile anche a 390 px e in landscape. L'hint dice «tocca per
+aprire» quando non c'è hover.
 
 I frame sono CSS puro: laptop con lid, cinturino e base arrotondata, Pixel con
 corpo in alluminio e tasti laterali; nessuna scritta «ThinkPad» e nessun notch.

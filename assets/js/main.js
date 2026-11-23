@@ -46,25 +46,21 @@
   /* ---------- galleria ---------- */
   function innerWidth() {
     var w = window.innerWidth;
-    // fino a 900 px l'elemento aperto deve stare dentro il viewport
-    if (w <= 900 || (window.innerHeight <= 520 && w > window.innerHeight)) return w - 40;
-    return 1641;
+    // compatto: inner quasi uguale al viewport; desktop: 1641px come reference
+    return w <= 900 ? w - 40 : 1641;
   }
 
   function cardWidth() {
-    var w = window.innerWidth, h = window.innerHeight;
-    if (h <= 520 && w > h) return 520;
-    // la card è una frazione dell'inner: k<1 rende visibile l'enlargement
+    var w = window.innerWidth;
     if (w <= 900) return Math.max(220, Math.round((w - 40) * 0.74));
+    // la card è una frazione dell'inner: k<1 rende visibile l'enlargement
     return clamp(Math.round(w * 0.86), 900, 1400);
   }
 
-  // larghezza dell'immagine a inner a dimensione naturale, per breakpoint
+  // il dispositivo è limitato dall'altezza utile; sui compact lo scala in JS
   function visualMax() {
     var w = window.innerWidth, h = window.innerHeight;
-    if (h <= 520 && w > h) return 357;   // laptop max 420 con scale(.85)
-    if (w <= 600) return 320;
-    if (w <= 900) return 420;
+    if (w <= 900) return Math.min(700, Math.round(h * 1.1));
     return 700;
   }
 
@@ -76,10 +72,7 @@
 
   // Strati ha solo il telefono: si compatta di più per non lasciare un vuoto
   function extraPhone() {
-    var w = window.innerWidth, h = window.innerHeight;
-    if (w <= 600) return 50;
-    if (h <= 520 && w > h) return 60;
-    return 134;
+    return window.innerWidth <= 900 ? 50 : 134;
   }
 
   function apply() {
@@ -87,9 +80,8 @@
     var k = cw / iw;
     var vw = window.innerWidth, vh = window.innerHeight;
     var ov = overlap(cw, iw);
-    var w = window.innerWidth, h = window.innerHeight;
-    // su mobile/tablet niente zoom extra in timeline: il FLIP ingrandisce tutto
-    var pv = (w <= 900 || (h <= 520 && w > h)) ? 1 : 1.6;
+    // il telefono in timeline resta ingrandito a ogni dimensione
+    var pv = 1.6;
     var extra = extraPhone();
     gallery.style.setProperty('--card-w', cw + 'px');
     gallery.style.setProperty('--inner-w', iw + 'px');
