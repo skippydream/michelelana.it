@@ -80,8 +80,9 @@
     var k = cw / iw;
     var vw = window.innerWidth, vh = window.innerHeight;
     var ov = overlap(cw, iw);
-    // il telefono in timeline resta ingrandito a ogni dimensione
-    var pv = 1.6;
+    // il telefono in timeline resta ingrandito; su telefono in portrait lo si
+    // riduce perché la filmstrip sta al centro e il telefono alto la coprirebbe
+    var pv = window.matchMedia('(max-width:600px) and (orientation:portrait)').matches ? 1.1 : 1.6;
     var extra = extraPhone();
     gallery.style.setProperty('--card-w', cw + 'px');
     gallery.style.setProperty('--inner-w', iw + 'px');

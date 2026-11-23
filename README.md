@@ -61,7 +61,7 @@ larghezza) e l'elemento aperto è più grande. L'apertura è un **FLIP**
 sull'inner: la geometria viene scambiata a transizioni spente e l'immagine viene
 riportata al suo rettangolo di partenza, poi rilasciata sulla curva esponenziale
 (`--ease`, 950 ms). Così la card cresce dov'è, senza lo scorrimento del track;
-anche padding e scala del telefono di Strati sono animati insieme. Il FLIP è
+anche padding e scala dei telefoni (Strati e Pachamar) sono animati insieme. Il FLIP è
 interrompibile e i dettagli entrano in ritardo senza spostare l'immagine.
 Filmstrip, pannelli, frecce e cursore usano la stessa curva, con tempi più
 lunghi sulle aperture e più corti sugli hover.
@@ -91,16 +91,23 @@ una colonna singola con `flex-direction:column-reverse`, quindi **dispositivo
 sopra e testo sotto**, entrambi centrati e larghi quanto la colonna utile
 (`viewport - 2×gutter`, ~281 px a 390 px). L'header è impilato come «Michele
 Lana / 2026» con la nav sotto a ~16 px e scompare con una dissolvenza quando il
-progetto è aperto. I font del testo salgono a ~15 px, la filmstrip parte dallo
-stesso margine dell'header con miniature da ~43 px, l'hint sparisce (il gesto è
-ovvio sul touch) e la freccia torna in alto a sinistra in un riquadro da 72 px.
+progetto è aperto. I font del testo salgono a ~15 px e l'hint sparisce (il gesto
+è ovvio sul touch); la freccia torna in alto a sinistra in un riquadro da 72 px.
 La geometria FLIP non cambia: `main.js` misura sempre il rettangolo di
 `.slide__inner`, dentro il quale il layout è semplicemente diverso.
 
+La filmstrip è **visibile fin dalla schermata iniziale**, a metà schermo
+(y≈455 a 390×844, come la reference), parte dallo stesso margine dell'header e
+usa miniature da ~43 px. Quando si apre un progetto scende in fondo con un
+`transform` sulla curva `--ease`, così non copre il testo e resta ancorata al
+bottom a qualunque altezza. Sopra i 600 px resta come su desktop.
+
 L'inner aperto resta largo `viewport - 40` (1641 px su desktop); la card della
 striscia è il 74% dell'inner (minimo 220 px), quindi `k < 1` e l'apertura è un
-vero enlargement anche su telefono. `--pv` resta 1.6 a ogni dimensione: a
-ingrandire il dispositivo è il FLIP, non un ramo JavaScript specifico.
+vero enlargement anche su telefono. `--pv` è 1.6 dappertutto tranne che in
+portrait sotto i 600 px, dove scende a 1.1: il telefono in timeline è già
+abbastanza grande e con 1.6 andrebbe a coprire la filmstrip centrata.
+Pachamar Yoga mostra solo il frame mobile, come Strati (nessun laptop affiancato).
 
 I frame sono CSS puro: laptop con lid, cinturino e base arrotondata, Pixel con
 corpo in alluminio e tasti laterali; nessuna scritta «ThinkPad» e nessun notch.

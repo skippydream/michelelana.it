@@ -165,8 +165,7 @@ picture{display:block}
 .gallery.no-transitions .slide,
 .gallery.no-transitions .slide__inner,
 .gallery.no-transitions .slide__visual,
-.gallery.no-transitions .slide__text,
-.gallery.no-transitions .timeline{transition:none!important}
+.gallery.no-transitions .slide__text{transition:none!important}
 .gallery:not(.is-zoomed) .slide.is-active{opacity:1}
 /* l'immagine resta al centro della card: si sposta solo l'inner, non il layout */
 .gallery:not(.is-zoomed) .slide__inner{left:calc(50% + var(--px,0px))}
@@ -497,7 +496,7 @@ picture{display:block}
   }
   .device--phone,
   .slide__visual--pair .device--phone{
-    width:min(100%,150px,calc((100vh - var(--pad-top) - var(--pad-bottom) - 240px) * .5));
+    width:min(100%,150px,calc((100vh - var(--pad-top) - var(--pad-bottom) - 270px) * .5));
   }
   .slide__visual--pair{gap:clamp(8px,2vw,16px);align-items:center}
 
@@ -510,14 +509,21 @@ picture{display:block}
   .slide__desc{margin-top:6px}
   .slide__links{margin-top:14px;gap:0 clamp(12px,3vw,20px)}
 
-  /* filmstrip: parte dallo stesso margine dell'header, come la reference */
+  /* filmstrip: al centro nella schermata iniziale come la reference,
+     in fondo a progetto aperto, dove non copre il testo.
+     Si muove con un transform così resta ancorata al bottom a ogni altezza. */
   .timeline{
     width:calc(100% - var(--gutter));
     margin-left:var(--gutter);margin-right:0;
+    bottom:0;
     justify-content:flex-start;
     gap:clamp(6px,1.6vw,12px);
     padding-bottom:clamp(12px,2.5vh,24px);
+    transform:translateY(calc(48px - 46vh));
+    transition:transform var(--dur) var(--ease);
   }
+  .gallery.is-zoomed .timeline{transform:none}
+  .gallery:not(.is-zoomed) .timeline{opacity:1;pointer-events:auto}
   .timeline button{flex:0 0 clamp(40px,11vw,56px);width:clamp(40px,11vw,56px)}
 
   /* freccia: riquadro 6em in alto a sinistra, chevron piccolo e discreto */
