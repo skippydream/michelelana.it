@@ -146,19 +146,31 @@ Dentro gli schermi ci sono **screenshot reali**, in `assets/img/screens/`:
   caricamento per far apparire le previsioni; il sito è dark di default) e
   `frushio-app.jpg` (da `localhost:8788`, con la scrollbar nascosta per eliminare
   la barra nera di 15 px a destra);
-- `pachamar.jpg` e `appunti.jpg`: altri siti live, entrambi ricatturati con la
-  scrollbar nascosta prima dello scatto (su Appunti la barra scura di 15 px a
-  destra era la scrollbar del browser, non parte del sito); Appunti è stato
-  ricatturato con il tema scuro, coerente con il tema dark del sito;
+- `pachamar.jpg`: sito live ricatturato con la scrollbar nascosta prima dello
+  scatto; ha una sola variante, usata in entrambi i temi;
 - `pachamar-mobile.jpg`: versione mobile, 390×844;
 - `strati-app.jpg`: screenshot dal README di `skippydream/Strati`, nel Pixel;
-- `one-piece-watcher.jpg`: screenshot originale
-  `Developer/opwatcher/Images/5.png` composto su `#14161a`, senza inversione dei
-  colori, così lo sfondo non è più bianco e la scena resta leggibile.
+- `appunti-light.jpg` e `appunti-dark.jpg`: due catture reali dello stesso sito,
+  che supporta `prefers-color-scheme` — chiaro (`#f5f7f9`/bianco) e scuro
+  (`#0a0d12`). Quella scura è la vecchia `appunti.jpg`; entrambe hanno la
+  scrollbar nascosta;
+- `one-piece-watcher-light.jpg` e `one-piece-watcher-dark.jpg`: stesso screenshot
+  originale `Developer/opwatcher/Images/5.png` composto rispettivamente su
+  bianco e su `#14161a`, senza inversione dei colori, così lo sfondo non è più
+  bianco in dark e la scena resta leggibile in entrambi i temi.
+
+Gli screenshot seguono il tema del sistema solo **dove esiste una variante reale**:
+`appunti-*` e `one-piece-watcher-*` stanno dentro un `<picture>` con un `<source
+media="(prefers-color-scheme: dark)">` e l'immagine chiara come fallback. Gli altri
+progetti (Torino Sul Filo, Frushío, Strati, SunSeeker, Pachamar) hanno una sola
+immagine, identica nei due temi: non ha senso fabbricare varianti sintetiche di
+siti che non le offrono. Torino Sul Filo ha pure `data-theme`, ma l'hero resta
+scuro in entrambi i casi, quindi le due catture sarebbero quasi identiche.
 
 Le immagini sono salvate come JPEG baseline, non progressivi, così non compaiono
-a strisce durante il caricamento. Le miniature in basso sono ritagli 128×80 degli
-stessi screenshot, in `assets/img/thumbs/`.
+a strisce durante il caricamento. Le miniature in basso seguono la stessa regola:
+ritagli 128×80 in `assets/img/thumbs/`, con coppie `*-light.jpg`/`*-dark.jpg` per
+Appunti e One Piece Watcher.
 
 ## L'anteprima social
 
