@@ -76,31 +76,31 @@ cliccabile. In basso la
 il progetto scelto e torna allo zoom-out. Nello zoom-in le slide inattive hanno
 `inert` e `aria-hidden="true"`.
 
-### Responsive: una sola griglia
+### Responsive: desktop/tablet a griglia, telefono come mikematas.com
 
-Non c'è più una versione mobile separata. Sotto i 900 px cambiano solo le
-misure, non la struttura: testo a sinistra, dispositivo a destra, header e
-timeline dove sono su desktop. La griglia usa `clamp()` e quattro variabili
-fluide (`--pad-top`, `--pad-bottom`, `--gutter`, `--content-w`,
-`--timeline-w`), quindi non esistono più layout impilati, rami per telefono
-corto o regole landscape dedicate al posizionamento dei contenuti.
+Sopra i 600 px (e in landscape) c'è una sola griglia: sotto i 900 px cambiano
+le misure, non la struttura — testo a sinistra, dispositivo a destra, header e
+timeline dove sono su desktop. Tutto usa `clamp()` e quattro variabili fluide
+(`--pad-top`, `--pad-bottom`, `--gutter`, `--content-w`, `--timeline-w`). In
+landscape compatto (altezza ≤ 520 px) si riducono soltanto i font e si sposta la
+freccia; i dispositivi sono limitati dall'altezza utile della slide, così non
+finiscono sotto la filmstrip.
 
-L'inner aperto è largo `viewport - 40` fino a 900 px (1641 px su desktop); la
-card della striscia è il 74% dell'inner (minimo 220 px), quindi `k < 1` e
-l'apertura è un vero enlargement anche su telefono: a 390×844 l'immagine passa
-da ~259 a 350 px. `--pv` resta 1.6 a ogni dimensione: a ingrandire il
-dispositivo è il FLIP, non un ramo JavaScript specifico per il telefono. In
-landscape compatto (altezza ≤ 520 px) si riducono soltanto i font di testo e
-header e si sposta la freccia; i dispositivi sono limitati dall'altezza utile
-della slide, così non finiscono sotto la filmstrip.
+Sotto i 600 px in portrait il layout segue invece il reference: la card diventa
+una colonna singola con `flex-direction:column-reverse`, quindi **dispositivo
+sopra e testo sotto**, entrambi centrati e larghi quanto la colonna utile
+(`viewport - 2×gutter`, ~281 px a 390 px). L'header è impilato come «Michele
+Lana / 2026» con la nav sotto a ~16 px e scompare con una dissolvenza quando il
+progetto è aperto. I font del testo salgono a ~15 px, la filmstrip parte dallo
+stesso margine dell'header con miniature da ~43 px, l'hint sparisce (il gesto è
+ovvio sul touch) e la freccia torna in alto a sinistra in un riquadro da 72 px.
+La geometria FLIP non cambia: `main.js` misura sempre il rettangolo di
+`.slide__inner`, dentro il quale il layout è semplicemente diverso.
 
-Sul telefono l'header sale a circa il 9% dell'altezza, il contenuto viene
-centrato nello spazio che resta tra header e filmstrip e la timeline è centrata
-con miniature più grandi (36 px contro 32 px): a 390×844 i vuoti sopra e sotto
-il testo aperto sono quasi uguali, circa 190 px ciascuno. La freccia di ritorno
-sta nella colonna del testo, appena a sinistra e sopra il titolo, ed è visibile
-anche a 390 px e in landscape. L'hint dice «tocca per aprire» quando non c'è
-hover.
+L'inner aperto resta largo `viewport - 40` (1641 px su desktop); la card della
+striscia è il 74% dell'inner (minimo 220 px), quindi `k < 1` e l'apertura è un
+vero enlargement anche su telefono. `--pv` resta 1.6 a ogni dimensione: a
+ingrandire il dispositivo è il FLIP, non un ramo JavaScript specifico.
 
 I frame sono CSS puro: laptop con lid, cinturino e base arrotondata, Pixel con
 corpo in alluminio e tasti laterali; nessuna scritta «ThinkPad» e nessun notch.
@@ -116,8 +116,8 @@ Il tipo di slide è rilevato da `main.js` dalla presenza di `.device--laptop` e
 
 Chi sono, Percorso e Contatti non sono più sotto lo slideshow: sono **pannelli**
 sovrapposti che si aprono dalla navigazione in alto (come l'About di Mike) e si
-chiudono con la freccia appena sopra la colonna di testo, con `Escape` o
-cliccando «Lavori».
+chiudono con la freccia (nella colonna del testo, in alto a sinistra sul telefono),
+con `Escape` o cliccando «Lavori».
 Mentre un pannello è aperto la galleria diventa `inert`.
 
 Senza JavaScript un foglio dentro `<noscript>` riporta tutto a scorrimento

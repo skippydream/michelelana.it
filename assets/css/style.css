@@ -452,6 +452,82 @@ picture{display:block}
   body:has(.panel.is-open) .back{top:max(58px,calc(var(--pad-top) + 6px))}
 }
 
+/* ============================================================
+   telefono in portrait: layout di mikematas.com.
+   Dispositivo sopra, testo sotto, header impilato che sparisce a
+   progetto aperto, freccia in alto a sinistra. Tablet e desktop
+   restano sulla griglia unica qui sopra.
+   ============================================================ */
+@media only screen and (max-width:600px) and (orientation:portrait){
+  :root{
+    --pad-top:clamp(72px,10vh,110px);
+    --pad-bottom:clamp(56px,9vh,96px);
+  }
+
+  /* header: "Michele Lana / 2026" impilato, nav sotto, tutto a sinistra */
+  .top{transition:opacity .45s var(--ease-soft)}
+  .top__frame{
+    width:calc(100% - 2*var(--gutter));
+    display:block;
+    padding:var(--pad-top) 0 0;
+  }
+  .brand,.brand__yr{font-size:clamp(28px,8.6vw,36px);line-height:1.2;letter-spacing:-.03em}
+  .nav{margin-top:clamp(10px,2.2vh,22px)}
+  .nav button{font-size:clamp(14px,4.3vw,17px);line-height:1.45}
+  body:has(.gallery.is-zoomed) .top{opacity:0;pointer-events:none}
+
+  .gallery__hint{display:none}
+
+  /* card a colonna singola: il reverse mette il dispositivo sopra il testo */
+  .slide__inner{
+    width:calc(100% - 2*var(--gutter));
+    display:flex;flex-direction:column-reverse;
+    align-items:center;justify-content:center;
+    gap:clamp(16px,3vh,28px);
+    padding:var(--pad-top) 0 var(--pad-bottom);
+  }
+  .gallery.is-zoomed .slide__inner{padding-left:0;padding-right:0}
+  .gallery:not(.is-zoomed) .slide__inner,
+  .gallery:not(.is-zoomed) .slide--phone .slide__inner{left:50%;top:50%}
+
+  .slide__visual{width:100%;justify-content:center}
+  .device--laptop,
+  .slide__visual--pair .device--laptop{
+    width:min(100%,calc((100vh - var(--pad-top) - var(--pad-bottom) - 240px) * 1.6));
+  }
+  .device--phone,
+  .slide__visual--pair .device--phone{
+    width:min(100%,150px,calc((100vh - var(--pad-top) - var(--pad-bottom) - 240px) * .5));
+  }
+  .slide__visual--pair{gap:clamp(8px,2vw,16px);align-items:center}
+
+  .slide__text{width:100%;max-width:none}
+  .slide__text h2{font-size:clamp(16px,4.3vw,19px)}
+  .slide__sub{font-size:clamp(14px,3.9vw,16px)}
+  .slide__sub .slide__date{margin-top:6px}
+  .slide__meta{margin-top:14px}
+  .slide__meta,.slide__meta h4,.slide__desc,.slide__links{font-size:clamp(14px,3.9vw,16px)}
+  .slide__desc{margin-top:6px}
+  .slide__links{margin-top:14px;gap:0 clamp(12px,3vw,20px)}
+
+  /* filmstrip: parte dallo stesso margine dell'header, come la reference */
+  .timeline{
+    width:calc(100% - var(--gutter));
+    margin-left:var(--gutter);margin-right:0;
+    justify-content:flex-start;
+    gap:clamp(6px,1.6vw,12px);
+    padding-bottom:clamp(12px,2.5vh,24px);
+  }
+  .timeline button{flex:0 0 clamp(40px,11vw,56px);width:clamp(40px,11vw,56px)}
+
+  /* freccia: riquadro 6em in alto a sinistra, chevron piccolo e discreto */
+  .back,
+  body:has(.panel.is-open) .back{
+    left:0;top:0;width:72px;height:72px;opacity:.55;
+  }
+  .back svg{width:24px;height:24px;margin:24px}
+}
+
 @media (prefers-reduced-motion:reduce){
   .gallery__track,.slide,.slide__inner,.slide__text,.slide__visual,.timeline button,
   .panel,.panel__inner,.back,.cursor,.cursor::after{
