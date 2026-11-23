@@ -10,23 +10,33 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
   @font-face{font-family:'Geist';font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/fonts/geist-normal.woff2) format('woff2')}
+  :root{
+    --ink:#000;
+    --mut:rgba(0,0,0,.55);
+    --line:rgba(0,0,0,.12);
+    --bg:#fff;
+    --sans:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ink:#f2f3f5;
+      --mut:rgba(242,243,245,.55);
+      --line:rgba(242,243,245,.18);
+      --bg:#14161a;
+      color-scheme:dark;
+    }
+  }
   *,*::before,*::after{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:#fff;color:#000;font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
   a{color:inherit}
-  :focus-visible{outline:2px solid #000;outline-offset:6px}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:6px}
   body{display:grid;place-items:center}
   .error{width:min(1000px,calc(100% - 300px));font-weight:200}
   .error h1{font-size:40px;font-weight:400;letter-spacing:-.03em}
-  .error p{margin-top:14px;font-size:20px;color:rgba(0,0,0,.4)}
-  .error a{display:inline-block;margin-top:40px;padding-bottom:2px;font-size:20px;border-bottom:1px solid rgba(0,0,0,.4)}
-  .error a:hover{color:#000;border-color:#000}
-  @media (prefers-color-scheme:dark){
-    html,body{background:#14161a;color:#f2f3f5}
-    :focus-visible{outline-color:#f2f3f5}
-    .error p{color:rgba(242,243,245,.55)}
-    .error a{border-bottom-color:rgba(242,243,245,.38)}
-    .error a:hover{color:#fff;border-color:#fff}
-  }
+  .error p{margin-top:14px;font-size:20px;color:var(--mut)}
+  .error a{display:inline-block;margin-top:40px;padding-bottom:2px;font-size:20px;border-bottom:1px solid var(--line)}
+  .error a:hover{color:var(--ink);border-color:var(--ink)}
   @media(max-width:600px){.error{width:calc(100% - 40px)}.error h1{font-size:32px}}
 </style>
 </head>

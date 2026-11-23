@@ -14,7 +14,7 @@
 
 :root{
   --ink:#000;
-  --mut:rgba(0,0,0,.4);
+  --mut:rgba(0,0,0,.55);
   --line:rgba(0,0,0,.12);
   --panel:rgba(255,255,255,.90);
   --bg:#fff;

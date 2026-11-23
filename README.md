@@ -29,10 +29,11 @@ Il cursore compare solo con mouse preciso (`hover:hover` e `pointer:fine`); con
 `prefers-reduced-motion` o `?nocursor=1` resta quello del browser e le animazioni
 si accorciano.
 
-Il tema segue `prefers-color-scheme`: su sistema chiaro sfondo `#ffffff` e testo
-nero, su sistema scuro sfondo `#14161a` e testo `#f2f3f5`. Non c'è un interruttore:
-basta il tema del sistema. Anche `404.html` e il colore della barra del browser
-seguono la stessa preferenza.
+Il tema segue `prefers-color-scheme`: su sistema chiaro sfondo `#ffffff`, testo
+nero e testi secondari al 55% di nero; su sistema scuro sfondo `#14161a`, testo
+`#f2f3f5` e testi secondari al 55% di bianco. Le stesse variabili (`--ink`,
+`--mut`, `--line`, `--bg`) valgono per `index.html` e `404.html`, oltre al colore
+della barra del browser. Non c'è un interruttore: basta il tema del sistema.
 
 ## La galleria
 
@@ -139,7 +140,7 @@ Per aggiungere lo stesso pulsante a un altro progetto basta l'attributo
 Dentro gli schermi ci sono **screenshot reali**, in `assets/img/screens/`:
 
 - siti live catturati con Firefox headless via WebDriver BiDi a 1280×800,
-  con **5 secondi di attesa reale** dopo `load` e scroll per le immagini lazy:
+  con **attesa reale dopo `load`** (5–12 secondi) e scroll per le immagini lazy:
   `torinosulfilo.jpg`, `sunseeker.jpg` (da
   `skippydream.github.io/SunSeeker`, con una posizione finta iniettata prima del
   caricamento per far apparire le previsioni; il sito è dark di default) e
