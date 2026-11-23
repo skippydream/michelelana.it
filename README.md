@@ -96,18 +96,17 @@ progetto è aperto. I font del testo salgono a ~15 px e l'hint sparisce (il gest
 La geometria FLIP non cambia: `main.js` misura sempre il rettangolo di
 `.slide__inner`, dentro il quale il layout è semplicemente diverso.
 
-La filmstrip è **visibile fin dalla schermata iniziale**, più in basso
-(y≈590 a 390×844), parte dallo stesso margine dell'header e usa miniature da
-~43 px. Nella schermata iniziale non ci sono anteprime dei progetti: si apre
-toccando una miniatura (o con lo swipe verticale). Quando si apre un progetto la
-striscia scende in fondo con un `transform` sulla curva `--ease`, così non copre
-il testo e resta ancorata al bottom a qualunque altezza. Sopra i 600 px resta
-come su desktop.
+Nella schermata iniziale restano le **anteprime dei progetti** (i dispositivi
+sono cliccabili); la filmstrip di miniature è nascosta come su desktop e appare
+solo quando un progetto è aperto, in fondo e senza coprire il testo. Si apre
+toccando il dispositivo o con lo swipe verticale. Sopra i 600 px il comportamento
+è identico.
 
 L'inner aperto resta largo `viewport - 40` (1641 px su desktop); la card della
 striscia è il 74% dell'inner (minimo 220 px), quindi `k < 1` e l'apertura è un
 vero enlargement anche su telefono. `--pv` è 1.6 dappertutto tranne che in
-portrait sotto i 600 px, dove scende a 1.1.
+portrait sotto i 600 px, dove scende a 1.1 per non far crescere troppo i telefoni
+nell'anteprima.
 Pachamar Yoga mostra solo il frame mobile, come Strati (nessun laptop affiancato);
 la sua miniatura nel filmstrip usa un `<picture>` con la versione mobile sotto i
 600 px e quella desktop sopra.

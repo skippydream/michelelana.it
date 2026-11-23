@@ -416,11 +416,8 @@
   thumbs.forEach(function (b) {
     b.addEventListener('click', function () {
       var to = Number(b.getAttribute('data-go'));
-      // su telefono in portrait non ci sono anteprime cliccabili: la miniatura
-      // apre il progetto, anche se è già quella selezionata
-      var phonePortrait = window.matchMedia('(max-width:600px) and (orientation:portrait)').matches;
-      if (!phonePortrait && to === index && !zoomed) return;
-      transitionTo(to, phonePortrait);
+      if (to === index && !zoomed) return;
+      transitionTo(to, false);
     });
   });
 
