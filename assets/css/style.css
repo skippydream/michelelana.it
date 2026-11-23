@@ -477,6 +477,11 @@ picture{display:block}
 
   .gallery__hint{display:none}
 
+  /* nella schermata iniziale non ci sono anteprime dei progetti: restano
+     solo l'header e la filmstrip, come nella home della reference */
+  .gallery:not(.is-zoomed) .slide__visual{opacity:0}
+  .gallery:not(.is-zoomed) .device{pointer-events:none}
+
   /* card a colonna singola: il reverse mette il dispositivo sopra il testo */
   .slide__inner{
     width:calc(100% - 2*var(--gutter));
@@ -509,9 +514,9 @@ picture{display:block}
   .slide__desc{margin-top:6px}
   .slide__links{margin-top:14px;gap:0 clamp(12px,3vw,20px)}
 
-  /* filmstrip: al centro nella schermata iniziale come la reference,
-     in fondo a progetto aperto, dove non copre il testo.
-     Si muove con un transform così resta ancorata al bottom a ogni altezza. */
+  /* filmstrip: più in basso nella schermata iniziale, in fondo a progetto
+     aperto dove non copre il testo. Si muove con un transform così resta
+     ancorata al bottom a ogni altezza. */
   .timeline{
     width:calc(100% - var(--gutter));
     margin-left:var(--gutter);margin-right:0;
@@ -519,7 +524,7 @@ picture{display:block}
     justify-content:flex-start;
     gap:clamp(6px,1.6vw,12px);
     padding-bottom:clamp(12px,2.5vh,24px);
-    transform:translateY(calc(48px - 46vh));
+    transform:translateY(calc(48px - 30vh));
     transition:transform var(--dur) var(--ease);
   }
   .gallery.is-zoomed .timeline{transform:none}
