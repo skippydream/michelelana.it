@@ -29,13 +29,13 @@
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --ink:#f2f2f3;
-    --mut:rgba(255,255,255,.45);
-    --line:rgba(255,255,255,.16);
-    --panel:rgba(12,12,14,.90);
-    --bg:#0b0b0c;
-    --ring:rgba(255,255,255,.22);
-    --shadow:rgba(0,0,0,.55);
+    --ink:#f2f3f5;
+    --mut:rgba(242,243,245,.55);
+    --line:rgba(242,243,245,.18);
+    --panel:rgba(20,22,26,.92);
+    --bg:#14161a;
+    --ring:rgba(242,243,245,.22);
+    --shadow:rgba(0,0,0,.5);
     color-scheme:dark;
   }
 }

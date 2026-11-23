@@ -30,7 +30,7 @@ Il cursore compare solo con mouse preciso (`hover:hover` e `pointer:fine`); con
 si accorciano.
 
 Il tema segue `prefers-color-scheme`: su sistema chiaro sfondo `#ffffff` e testo
-nero, su sistema scuro sfondo `#0b0b0c` e testo `#f2f2f3`. Non c'è un interruttore:
+nero, su sistema scuro sfondo `#14161a` e testo `#f2f3f5`. Non c'è un interruttore:
 basta il tema del sistema. Anche `404.html` e il colore della barra del browser
 seguono la stessa preferenza.
 
@@ -141,17 +141,19 @@ Dentro gli schermi ci sono **screenshot reali**, in `assets/img/screens/`:
 - siti live catturati con Firefox headless via WebDriver BiDi a 1280×800,
   con **5 secondi di attesa reale** dopo `load` e scroll per le immagini lazy:
   `torinosulfilo.jpg`, `sunseeker.jpg` (da
-  `skippydream.github.io/SunSeeker`, con geolocalizzazione concessa per far
-  caricare le previsioni) e `frushio-app.jpg` (da `localhost:8788`, con la
-  scrollbar nascosta per eliminare la barra nera di 15 px a destra);
+  `skippydream.github.io/SunSeeker`, con una posizione finta iniettata prima del
+  caricamento per far apparire le previsioni; il sito è dark di default) e
+  `frushio-app.jpg` (da `localhost:8788`, con la scrollbar nascosta per eliminare
+  la barra nera di 15 px a destra);
 - `pachamar.jpg` e `appunti.jpg`: altri siti live, entrambi ricatturati con la
   scrollbar nascosta prima dello scatto (su Appunti la barra scura di 15 px a
   destra era la scrollbar del browser, non parte del sito); Appunti è stato
   ricatturato con il tema scuro, coerente con il tema dark del sito;
 - `pachamar-mobile.jpg`: versione mobile, 390×844;
 - `strati-app.jpg`: screenshot dal README di `skippydream/Strati`, nel Pixel;
-- `one-piece-watcher.jpg`: immagine in testa al README di
-  `skippydream/opwatcher`, composta su nero.
+- `one-piece-watcher.jpg`: screenshot originale
+  `Developer/opwatcher/Images/5.png` composto su `#14161a`, senza inversione dei
+  colori, così lo sfondo non è più bianco e la scena resta leggibile.
 
 Le immagini sono salvate come JPEG baseline, non progressivi, così non compaiono
 a strisce durante il caricamento. Le miniature in basso sono ritagli 128×80 degli
