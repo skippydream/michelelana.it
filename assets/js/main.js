@@ -70,7 +70,14 @@
     return Math.max(0, Math.round(cw - dev - 60));
   }
 
-  // Strati ha solo il telefono: si compatta di più per non lasciare un vuoto
+  // Strati ha solo il telefono; Pachamar solo su telefono in portrait:
+  // in entrambi i casi la card si compatta di più per non lasciare un vuoto
+  function isPhoneSlide(s) {
+    return s.classList.contains('slide--phone') ||
+      (s.classList.contains('slide--pachamar') &&
+       window.matchMedia('(max-width:600px) and (orientation:portrait)').matches);
+  }
+
   function extraPhone() {
     return window.innerWidth <= 900 ? 50 : 134;
   }
@@ -96,8 +103,8 @@
     var pos = 0, offsets = [0];
     for (var j = 0; j < slides.length - 1; j++) {
       if (!zoomed) {
-        var ej = slides[j].classList.contains('slide--phone') ? extra : 0;
-        var en = slides[j + 1].classList.contains('slide--phone') ? extra : 0;
+        var ej = isPhoneSlide(slides[j]) ? extra : 0;
+        var en = isPhoneSlide(slides[j + 1]) ? extra : 0;
         pos += cw - ov - ej - en;
       } else {
         pos += vw;
@@ -201,9 +208,11 @@
         if (flipAnim && flipAnim.playState !== 'running') flipAnim = null;
       };
 
-      // Strati ha il telefono ingrandito in timeline: accompagno anche quel
-      // cambio di scala, altrimenti l'immagine si accorcia di colpo all'inizio
+      // Strati (e Pachamar su telefono) ha il telefono ingrandito in timeline:
+      // accompagno anche quel cambio di scala, altrimenti l'immagine si accorcia
+      // di colpo all'inizio
       var visual = target.querySelector('.slide__visual--phone');
+      if (!visual && isPhoneSlide(target)) visual = target.querySelector('.slide__visual');
       var pvAfter = gallery.style.getPropertyValue('--pv') || '1';
       if (visual && pvBefore !== pvAfter) {
         visual.style.transformOrigin = 'center top';

@@ -99,17 +99,21 @@ La geometria FLIP non cambia: `main.js` misura sempre il rettangolo di
 Nella schermata iniziale restano le **anteprime dei progetti** (i dispositivi
 sono cliccabili); la filmstrip di miniature è nascosta come su desktop e appare
 solo quando un progetto è aperto, in fondo e senza coprire il testo. Si apre
-toccando il dispositivo o con lo swipe verticale. Sopra i 600 px il comportamento
-è identico.
+toccando il dispositivo o con lo swipe verticale. A progetto aperto l'inner è
+spostato verso il basso di un offset proporzionale all'altezza utile (0 px a
+360×640, 60 px alle altezze maggiori), così i frame non restano attaccati al bordo
+superiore. Sopra i 600 px il comportamento è identico.
 
 L'inner aperto resta largo `viewport - 40` (1641 px su desktop); la card della
 striscia è il 74% dell'inner (minimo 220 px), quindi `k < 1` e l'apertura è un
 vero enlargement anche su telefono. `--pv` è 1.6 dappertutto tranne che in
 portrait sotto i 600 px, dove scende a 1.1 per non far crescere troppo i telefoni
 nell'anteprima.
-Pachamar Yoga mostra solo il frame mobile, come Strati (nessun laptop affiancato);
-la sua miniatura nel filmstrip usa un `<picture>` con la versione mobile sotto i
-600 px e quella desktop sopra.
+Pachamar Yoga è l'unico caso con frame diverso per viewport: su desktop mostra
+il laptop con `pachamar.jpg` affiancato al telefono; in portrait sotto i 600 px
+il laptop è nascosto via CSS e resta solo il telefono, con lo stesso `--pv` di
+Strati. Anche la sua miniatura nel filmstrip usa un `<picture>` con la versione
+mobile sotto i 600 px e quella desktop sopra.
 
 I frame sono CSS puro: laptop con lid, cinturino e base arrotondata, Pixel con
 corpo in alluminio e tasti laterali; nessuna scritta «ThinkPad» e nessun notch.

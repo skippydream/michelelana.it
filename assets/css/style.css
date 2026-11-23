@@ -477,6 +477,17 @@ picture{display:block}
 
   .gallery__hint{display:none}
 
+  /* Pachamar: su telefono resta solo il frame mobile, il laptop torna su desktop */
+  .slide--pachamar .device--laptop{display:none}
+  .gallery:not(.is-zoomed) .slide--pachamar .slide__visual{
+    transform:scale(var(--pv));transform-origin:center top;
+  }
+
+  /* a progetto aperto i frame scendono un po', se c'è spazio sotto il testo */
+  .gallery.is-zoomed .slide__inner{
+    top:calc(50% + clamp(0px,calc((100vh - 700px) * .6),60px));
+  }
+
   /* card a colonna singola: il reverse mette il dispositivo sopra il testo */
   .slide__inner{
     width:calc(100% - 2*var(--gutter));
@@ -486,6 +497,7 @@ picture{display:block}
     padding:var(--pad-top) 0 var(--pad-bottom);
   }
   .gallery.is-zoomed .slide__inner{padding-left:0;padding-right:0}
+
   .gallery:not(.is-zoomed) .slide__inner,
   .gallery:not(.is-zoomed) .slide--phone .slide__inner{left:50%;top:50%}
 
