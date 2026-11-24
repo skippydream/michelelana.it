@@ -175,7 +175,10 @@ picture{display:block}
   margin-right:calc(-1 * (var(--overlap) + var(--extra)));
 }
 .gallery:not(.is-zoomed) .slide__inner{--px:calc(-471px * var(--k))}
-.gallery:not(.is-zoomed) .slide--phone .slide__inner{--px:calc(-1015px * var(--k))}
+/* Strati: allinea il centro del telefono a quello dei device laptop.
+   Il telefono viene scalato anche come visual (--pv), quindi serve più
+   compensazione delle card normali: -919*k, non -471*k. */
+.gallery:not(.is-zoomed) .slide--phone .slide__inner{--px:calc(-919px * var(--k))}
 /* zoom-in: l'inner è centrato ed evita tagli sui laptop */
 @media (min-width:901px){
   .gallery.is-zoomed .slide__inner{left:50%;padding-left:clamp(30px,4vw,60px);padding-right:clamp(30px,4vw,60px)}
@@ -191,14 +194,59 @@ picture{display:block}
 .gallery.is-zoomed .slide__text{opacity:1;transform:none}
 .gallery:not(.is-zoomed) .slide__links{pointer-events:none}
 .gallery:not(.is-zoomed) .timeline{opacity:0;pointer-events:none}
+/* legenda dei gesti: frecce animate in CSS (nitide, niente GIF) */
 .gallery__hint{
-  position:absolute;left:50%;top:140px;transform:translateX(-50%);
-  z-index:25;font-size:14px;font-weight:200;color:var(--mut);
-  pointer-events:none;white-space:nowrap;
+  position:absolute;left:50%;bottom:max(18px, calc(10px + env(safe-area-inset-bottom, 0px)));
+  transform:translateX(-50%);
+  z-index:25;max-width:min(96vw,1240px);
+  font-size:clamp(11px,1.1vw,13px);font-weight:300;line-height:1.35;
+  color:var(--mut);text-align:center;
+  pointer-events:none;
   transition:opacity .55s var(--ease-soft);
 }
 .gallery.is-zoomed .gallery__hint{opacity:0}
-
+.gallery__hint .hint__row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px 8px}
+.gallery__hint .hint__row + .hint__row{margin-top:4px}
+.gallery__hint .hint__arrow{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:1.2em;color:var(--ink);font-weight:400;
+}
+.gallery__hint .hint__cmd{display:inline-flex;align-items:center;gap:6px}
+.gallery__hint .hint__sep{opacity:.35}
+.gallery__hint .hint--touch{display:none}
+@media (hover:none){
+  .gallery__hint .hint--touch{display:flex}
+  .gallery__hint .hint--pointer{display:none}
+}
+/* mobile: frecce incolonnate, padding, poi testo allineato */
+@media (max-width:600px),(hover:none){
+  .gallery__hint .hint__row{flex-direction:column;gap:2px 0}
+  .gallery__hint .hint__cmd{
+    display:grid;grid-template-columns:1.8em 1fr;column-gap:14px;
+    width:min(100%,230px);align-items:center;text-align:left;
+  }
+  .gallery__hint .hint__arrow{justify-self:start;width:1.8em;min-width:0}
+  .gallery__hint .hint__sep{display:none}
+}
+@media (max-width:600px) and (hover:hover){
+  .gallery__hint .hint--touch{display:flex}
+  .gallery__hint .hint--pointer{display:none}
+}
+.gallery__hint .hint__arrow--x{animation:hint-x 1.8s var(--ease-soft) infinite}
+.gallery__hint .hint__arrow--up{animation:hint-up 1.8s var(--ease-soft) infinite}
+.gallery__hint .hint__arrow--down{animation:hint-down 1.8s var(--ease-soft) infinite}
+@keyframes hint-x{
+  0%,100%{transform:translateX(-2px)}
+  50%{transform:translateX(2px)}
+}
+@keyframes hint-up{
+  0%,100%{transform:translateY(2px);opacity:.55}
+  50%{transform:translateY(-3px);opacity:1}
+}
+@keyframes hint-down{
+  0%,100%{transform:translateY(-2px);opacity:.55}
+  50%{transform:translateY(3px);opacity:1}
+}
 /* testo a sinistra, come le didascalie di Mike */
 .slide__text h2{font-size:26px;font-weight:600;line-height:1.2;letter-spacing:-.025em}
 .slide__sub{display:flex;flex-direction:column;font-size:19px;font-weight:300;line-height:1.3;margin-top:4px}
@@ -409,7 +457,6 @@ picture{display:block}
 
   .gallery:not(.is-zoomed) .slide__inner,
   .gallery:not(.is-zoomed) .slide--phone .slide__inner{--px:0px;top:50%}
-  .gallery__hint{top:calc(var(--pad-top) + 56px);font-size:clamp(10px,2.2vw,12px)}
 
   .timeline{
     width:var(--timeline-w);
@@ -642,7 +689,9 @@ picture{display:block}
     align-items:center;
     justify-content:flex-start;
     gap:4px;
-    padding:0 max(16px, env(safe-area-inset-left, 16px)) max(10px, env(safe-area-inset-bottom, 10px));
+    /* spazio sopra le thumbnail: l'attiva è alzata di 2px e con
+       overflow-y:hidden verrebbe tagliata in alto quando la timeline appare */
+    padding:8px max(16px, env(safe-area-inset-left, 16px)) max(10px, env(safe-area-inset-bottom, 10px));
     margin:0;
     overflow-x:auto;
     overflow-y:hidden;
@@ -719,26 +768,14 @@ picture{display:block}
     height:22px;
     margin:0;
   }
-
-  /* Hint */
+  /* Hint: resta in basso, compatto e leggibile anche a 390px */
   .gallery__hint{
-    display:block;
-    position:absolute;
-    left:50%;
-    top:auto;
-    bottom:max(22px, calc(10px + env(safe-area-inset-bottom, 10px)));
-    transform:translateX(-50%);
-    font-size:12px;
-    color:var(--mut);
-    pointer-events:none;
-    white-space:nowrap;
-    opacity:.55;
-    transition:opacity .45s var(--ease-soft);
+    bottom:max(16px, calc(8px + env(safe-area-inset-bottom, 0px)));
+    max-width:calc(100vw - 24px);
+    font-size:clamp(10px,2.8vw,12px);
+    opacity:.8;
   }
-  .gallery.is-zoomed .gallery__hint{
-    opacity:0;
-    pointer-events:none;
-  }
+  .back[hidden]{display:none}
 
   /* Pannelli */
   .panel{
@@ -810,4 +847,5 @@ picture{display:block}
   .panel,.panel__inner,.back,.cursor,.cursor::after{
     transition-duration:.01ms!important;transition-delay:0s!important;
   }
+  .gallery__hint .hint__arrow{animation:none}
 }

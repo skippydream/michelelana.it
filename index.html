@@ -23,7 +23,7 @@
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preload" href="assets/fonts/geist-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/style.css?v=20261124d">
+<link rel="stylesheet" href="assets/css/style.css?v=20261125e">
 
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Person","name":"Michele Lana",
@@ -75,12 +75,12 @@
 <main id="main">
 
   <!-- ── GALLERIA: una slide alla volta ─────────────────────── -->
-  <section class="gallery" id="lavori" aria-label="Lavori, slideshow">
+  <section class="gallery" id="lavori" aria-label="Lavori, slideshow" aria-describedby="gallery-help">
     <div class="gallery__viewport">
       <div class="gallery__track">
 
         <!-- 1 · Torino Sul Filo -->
-        <article class="slide is-active" aria-label="Lavoro 1 di 7: Torino Sul Filo">
+        <article class="slide is-active" aria-label="Lavoro 1 di 8: Torino Sul Filo">
           <div class="slide__inner">
             <div class="slide__text">
               <h2>Torino Sul Filo</h2>
@@ -102,8 +102,30 @@
             </div>
           </div>
         </article>
-        <!-- 2 · Pachamar Yoga -->
-        <article class="slide slide--pachamar" aria-label="Lavoro 2 di 7: Pachamar Yoga" inert aria-hidden="true">
+        <!-- 2 · Gestionale Torino Sul Filo -->
+        <article class="slide" aria-label="Lavoro 2 di 8: Gestionale Torino Sul Filo" inert aria-hidden="true">
+          <div class="slide__inner">
+            <div class="slide__text">
+              <h2>Gestionale Torino Sul Filo</h2>
+              <div class="slide__sub"><span>Web</span><span>Gestionale React</span><span class="slide__date">2026</span></div>
+              <div class="slide__meta"><h4>Associazione</h4>
+                <div class="slide__lines"><span>Torino Sul Filo</span><span>Gestionale su misura</span></div>
+              </div>
+              <div class="slide__lines slide__desc"><span>Flusso di cassa, tesseramenti e iscrizioni,</span><span>biglietti, libro soci e verbali d'assemblea.</span></div>
+            </div>
+            <div class="slide__visual">
+              <div class="device device--laptop">
+                <div class="laptop__lid">
+                  <div class="laptop__screen"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/screens/gestionale-torinosulfilo-dark.jpg"><img src="assets/img/screens/gestionale-torinosulfilo-light.jpg" alt="Gestionale Torino Sul Filo" width="1280" height="800" loading="lazy" decoding="async"></picture></div>
+                  <div class="laptop__chin" aria-hidden="true"></div>
+                </div>
+                <div class="laptop__base" aria-hidden="true"><span class="laptop__point"></span></div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <!-- 3 · Pachamar Yoga -->
+        <article class="slide slide--pachamar" aria-label="Lavoro 3 di 8: Pachamar Yoga" inert aria-hidden="true">
           <div class="slide__inner">
             <div class="slide__text">
               <h2>Pachamar Yoga</h2>
@@ -130,8 +152,8 @@
             </div>
           </div>
         </article>
-        <!-- 3 · Appunti -->
-        <article class="slide" aria-label="Lavoro 3 di 7: Appunti" inert aria-hidden="true">
+        <!-- 4 · Appunti -->
+        <article class="slide" aria-label="Lavoro 4 di 8: Appunti" inert aria-hidden="true">
           <div class="slide__inner">
             <div class="slide__text">
               <h2>Appunti</h2>
@@ -153,8 +175,8 @@
             </div>
           </div>
         </article>
-        <!-- 4 · Frushío -->
-        <article class="slide" aria-label="Lavoro 4 di 7: Frushío" inert aria-hidden="true">
+        <!-- 5 · Frushío -->
+        <article class="slide" aria-label="Lavoro 5 di 8: Frushío" inert aria-hidden="true">
           <div class="slide__inner">
             <div class="slide__text">
               <h2>Frushío</h2>
@@ -175,8 +197,8 @@
             </div>
           </div>
         </article>
-        <!-- 5 · Strati -->
-        <article class="slide slide--phone" aria-label="Lavoro 5 di 7: Strati" inert aria-hidden="true">
+        <!-- 6 · Strati -->
+        <article class="slide slide--phone" aria-label="Lavoro 6 di 8: Strati" inert aria-hidden="true">
           <div class="slide__inner">
             <div class="slide__text">
               <h2>Strati</h2>
@@ -199,8 +221,8 @@
             </div>
           </div>
         </article>
-        <!-- 6 · Sun Seeker -->
-        <article class="slide" aria-label="Lavoro 6 di 7: Sun Seeker" inert aria-hidden="true">
+        <!-- 7 · Sun Seeker -->
+        <article class="slide" aria-label="Lavoro 7 di 8: Sun Seeker" inert aria-hidden="true">
           <div class="slide__inner">
             <div class="slide__text">
               <h2>Sun Seeker</h2>
@@ -222,8 +244,8 @@
             </div>
           </div>
         </article>
-        <!-- 7 · One Piece Watcher -->
-        <article class="slide" aria-label="Lavoro 7 di 7: One Piece Watcher" inert aria-hidden="true">
+        <!-- 8 · One Piece Watcher -->
+        <article class="slide" aria-label="Lavoro 8 di 8: One Piece Watcher" inert aria-hidden="true">
           <div class="slide__inner">
             <div class="slide__text">
               <h2>One Piece Watcher</h2>
@@ -250,14 +272,31 @@
     <!-- filmstrip in basso, come la timeline di Mike -->
     <nav class="timeline" aria-label="Vai a un lavoro">
       <button type="button" data-go="0" aria-label="Torino Sul Filo" aria-current="true"><img src="assets/img/thumbs/torinosulfilo.jpg" alt="" width="128" height="80" decoding="async"></button>
-      <button type="button" data-go="1" aria-label="Pachamar Yoga"><picture><source media="(max-width:600px)" srcset="assets/img/thumbs/pachamar-mobile.jpg"><img src="assets/img/thumbs/pachamar.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
-      <button type="button" data-go="2" aria-label="Appunti"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/appunti-dark.jpg"><img src="assets/img/thumbs/appunti-light.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
-      <button type="button" data-go="3" aria-label="Frushío"><img src="assets/img/thumbs/frushio-app.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
-      <button type="button" data-go="4" aria-label="Strati"><img src="assets/img/thumbs/strati-app.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
-      <button type="button" data-go="5" aria-label="Sun Seeker"><img src="assets/img/thumbs/sunseeker.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
-      <button type="button" data-go="6" aria-label="One Piece Watcher"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/one-piece-watcher-dark.jpg"><img src="assets/img/thumbs/one-piece-watcher-light.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
+      <button type="button" data-go="1" aria-label="Gestionale Torino Sul Filo"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/gestionale-torinosulfilo-dark.jpg"><img src="assets/img/thumbs/gestionale-torinosulfilo-light.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
+      <button type="button" data-go="2" aria-label="Pachamar Yoga"><picture><source media="(max-width:600px)" srcset="assets/img/thumbs/pachamar-mobile.jpg"><img src="assets/img/thumbs/pachamar.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
+      <button type="button" data-go="3" aria-label="Appunti"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/appunti-dark.jpg"><img src="assets/img/thumbs/appunti-light.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
+      <button type="button" data-go="4" aria-label="Frushío"><img src="assets/img/thumbs/frushio-app.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
+      <button type="button" data-go="5" aria-label="Strati"><img src="assets/img/thumbs/strati-app.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
+      <button type="button" data-go="6" aria-label="Sun Seeker"><img src="assets/img/thumbs/sunseeker.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
+      <button type="button" data-go="7" aria-label="One Piece Watcher"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/one-piece-watcher-dark.jpg"><img src="assets/img/thumbs/one-piece-watcher-light.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
     </nav>
-    <p class="gallery__hint" aria-hidden="true">Scorri per esplorare &middot; clicca per aprire</p>
+    <div class="gallery__hint" aria-hidden="true">
+      <div class="hint__row hint--touch">
+        <span class="hint__cmd"><span class="hint__arrow hint__arrow--x">&#8592;&#8594;</span><span>Swipe per cambiare</span></span>
+        <span class="hint__sep">&middot;</span>
+        <span class="hint__cmd"><span class="hint__arrow hint__arrow--up">&#8593;</span><span>Swipe up, entra</span></span>
+        <span class="hint__sep">&middot;</span>
+        <span class="hint__cmd"><span class="hint__arrow hint__arrow--down">&#8595;</span><span>Swipe down, esci</span></span>
+      </div>
+      <div class="hint__row hint--pointer">
+        <span class="hint__cmd"><span class="hint__arrow hint__arrow--x">&#8592;&#8594;</span><span>Scroll per cambiare</span></span>
+        <span class="hint__sep">&middot;</span>
+        <span class="hint__cmd"><span class="hint__arrow hint__arrow--up">&#8593;</span><span>Scroll up, entra</span></span>
+        <span class="hint__sep">&middot;</span>
+        <span class="hint__cmd"><span class="hint__arrow hint__arrow--down">&#8595;</span><span>Scroll down, esci</span></span>
+      </div>
+    </div>
+    <p class="sr" id="gallery-help">Galleria di otto progetti. Con il mouse usa lo scroll orizzontale della rotellina o del trackpad, le frecce sinistra e destra o il trascinamento per cambiare progetto; usa lo scroll verticale verso l'alto, la barra spaziale o Invio per entrare nel progetto, e lo scroll verso il basso, la freccia gi&ugrave;, Escape o un altro clic per uscire. Sul touch fai swipe left o right per cambiare progetto, swipe up per entrare e swipe down per uscire, oppure tocca il dispositivo; se hai un progetto o un pannello aperto, scorri dal bordo sinistro per tornare ai lavori. Puoi anche usare le miniature in basso per scegliere un progetto.</p>
   </section>
 
   <!-- ── PANNELLI ────────────────────────────────────────────── -->
@@ -322,6 +361,6 @@
   <svg viewBox="0 0 60 60" aria-hidden="true"><path d="M26 56 4 30 26 4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
 </button>
 
-<script src="assets/js/main.js?v=20261124d" defer></script>
+<script src="assets/js/main.js?v=20261125e" defer></script>
 </body>
 </html>

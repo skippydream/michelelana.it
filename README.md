@@ -248,7 +248,7 @@ usa percorsi che iniziano con `/`: va bene perché il sito sta sulla radice del 
 
 ## Prima di pubblicare
 
-- [x] Sette lavori con titoli, anni, screenshot e funzionalità
+- [x] Otto lavori con titoli, anni, screenshot e funzionalità
 - [x] `alt` scritto su ogni immagine
 - [x] Email: `info@michelelana.it` (nessun numero di telefono sul sito)
 - [x] Link al sito solo dove il sito esiste

@@ -19,7 +19,6 @@
   var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
   var back = document.querySelector('.back');
   var cursor = document.querySelector('.cursor');
-  var hint = gallery.querySelector('.gallery__hint');
 
   var index = 0;
   var zoomed = false;
@@ -30,6 +29,7 @@
   var EASE = 'cubic-bezier(.16,1,.3,1)';
   var touchX = null, touchY = null;
   var pinchDist = null;
+  var edgeSwipeConsumed = false;
   var flipAnim = null, fadeAnims = [];
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -373,6 +373,11 @@
   }, { passive: true });
 
   viewport.addEventListener('touchend', function (e) {
+    if (edgeSwipeConsumed) {
+      edgeSwipeConsumed = false;
+      touchX = touchY = null;
+      return;
+    }
     if (pinchDist !== null && e.touches.length < 2) { pinchDist = null; return; }
     if (touchX === null || !e.changedTouches.length) return;
     var dx = e.changedTouches[0].clientX - touchX;
@@ -489,10 +494,36 @@
   navButtons.forEach(function (b) {
     b.addEventListener('click', function () { openPanel(b.getAttribute('data-panel')); });
   });
-  back.addEventListener('click', function () {
+  function goHome() {
     if (activePanel) closePanel();
-    else if (zoomed) setZoom(false);
-  });
+    if (zoomed) setZoom(false);
+  }
+  back.addEventListener('click', goHome);
+
+  /* Swipe dal bordo sinistro: torna alla home dei lavori (non alla pagina
+     precedente del browser). Si attiva solo con un progetto o un pannello aperto. */
+  var edgeX = null, edgeY = null, edgeArmed = false;
+  window.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) { edgeArmed = false; return; }
+    edgeX = e.touches[0].clientX;
+    edgeY = e.touches[0].clientY;
+    edgeArmed = edgeX <= 48 && (zoomed || !!activePanel);
+  }, { passive: true });
+  window.addEventListener('touchmove', function (e) {
+    if (!edgeArmed || edgeX === null || e.touches.length !== 1) return;
+    var dx = e.touches[0].clientX - edgeX;
+    var dy = e.touches[0].clientY - edgeY;
+    if (dx > 45 && dx > Math.abs(dy) * 1.3) {
+      edgeArmed = false;
+      edgeSwipeConsumed = true;
+      goHome();
+    }
+  }, { passive: true });
+  window.addEventListener('touchend', function () {
+    edgeArmed = false;
+    edgeX = edgeY = null;
+    edgeSwipeConsumed = false;
+  }, { passive: true });
 
   document.addEventListener('keydown', function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -513,9 +544,6 @@
   });
 
   window.addEventListener('resize', apply);
-  if (hint && window.matchMedia('(hover:none)').matches) {
-    hint.textContent = 'Scorri per esplorare · tocca per aprire';
-  }
   apply();
 
   /* ---------- cursore invertito, solo con mouse ---------- */
