@@ -30,6 +30,9 @@
   var touchX = null, touchY = null;
   var pinchDist = null;
   var edgeSwipeConsumed = false;
+  var HISTORY_KEY = 'michelelanaView';
+  var HOME_STATE = { michelelanaView: 'home' };
+  var AWAY_STATE = { michelelanaView: 'away' };
   var flipAnim = null, fadeAnims = [];
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -191,6 +194,8 @@
     if (canFlip) gallery.classList.add('no-transitions');
     index = to;
     zoomed = open;
+    if (open) markAway();
+    else if (!activePanel) markHome();
     apply();
 
     if (canFlip) {
@@ -253,6 +258,19 @@
   }
 
   function setZoom(on) { return transitionTo(index, on); }
+
+  /* Il back di sistema del browser è gestito fuori dalla pagina: gli diamo
+     una voce nella history solo quando si esce dalla home, senza cambiare URL. */
+  function isAwayState() {
+    return !!(history.state && history.state[HISTORY_KEY] === 'away');
+  }
+  function markAway() {
+    if (isAwayState()) history.replaceState(AWAY_STATE, '', location.href);
+    else history.pushState(AWAY_STATE, '', location.href);
+  }
+  function markHome() {
+    history.replaceState(HOME_STATE, '', location.href);
+  }
 
   function move(to) {
     var dest = clamp(to, 0, slides.length - 1);
@@ -461,7 +479,7 @@
   }
 
   function openPanel(id) {
-    if (id === 'lavori') { closePanel(); return; }
+    if (id === 'lavori') { goHome(); return; }
     var panel = document.getElementById(id);
     if (!panel || activePanel === id) return;
     if (activePanel) {
@@ -470,6 +488,7 @@
       old.hidden = true;
     }
     activePanel = id;
+    markAway();
     panel.hidden = false;
     void panel.offsetWidth; // fa partire la transizione dallo stato chiuso
     panel.classList.add('is-open');
@@ -497,14 +516,29 @@
   function goHome() {
     if (activePanel) closePanel();
     if (zoomed) setZoom(false);
+    markHome();
   }
   back.addEventListener('click', goHome);
 
-  /* Swipe dal bordo sinistro: torna alla home dei lavori (non alla pagina
-     precedente del browser). Si attiva solo con un progetto o un pannello aperto. */
+  /* Back/forward del browser: lo stato "away" è un pannello o un progetto aperto,
+     qualunque altro stato riporta alla home dei lavori. */
+  window.addEventListener('popstate', function (e) {
+    if (e.state && e.state[HISTORY_KEY] === 'away') {
+      markHome();
+      return;
+    }
+    if (activePanel) closePanel();
+    if (zoomed) setZoom(false);
+    markHome();
+  });
+
+  /* Swipe dal bordo sinistro: usa goHome() come il back del browser e la
+     freccia. Si attiva solo con un progetto o un pannello aperto. */
   var edgeX = null, edgeY = null, edgeArmed = false;
   window.addEventListener('touchstart', function (e) {
     if (e.touches.length !== 1) { edgeArmed = false; return; }
+    edgeSwipeConsumed = false;
+    if (e.target.closest && e.target.closest('a,button')) { edgeArmed = false; return; }
     edgeX = e.touches[0].clientX;
     edgeY = e.touches[0].clientY;
     edgeArmed = edgeX <= 48 && (zoomed || !!activePanel);
@@ -528,8 +562,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
     if (e.key === 'Escape') {
-      if (activePanel) closePanel();
-      else if (zoomed) setZoom(false);
+      goHome();
       return;
     }
     if (activePanel) return;
@@ -544,6 +577,7 @@
   });
 
   window.addEventListener('resize', apply);
+  markHome();
   apply();
 
   /* ---------- cursore invertito, solo con mouse ---------- */

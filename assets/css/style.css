@@ -222,10 +222,13 @@ picture{display:block}
 @media (max-width:600px),(hover:none){
   .gallery__hint .hint__row{flex-direction:column;gap:2px 0}
   .gallery__hint .hint__cmd{
-    display:grid;grid-template-columns:1.8em 1fr;column-gap:14px;
+    display:grid;grid-template-columns:clamp(38px,11vw,46px) 1fr;column-gap:12px;
     width:min(100%,230px);align-items:center;text-align:left;
   }
-  .gallery__hint .hint__arrow{justify-self:start;width:1.8em;min-width:0}
+  .gallery__hint .hint__arrow{
+    justify-self:start;width:auto;min-width:0;
+    font-size:clamp(17px,4.6vw,21px);line-height:1;
+  }
   .gallery__hint .hint__sep{display:none}
 }
 @media (max-width:600px) and (hover:hover){
@@ -540,8 +543,12 @@ picture{display:block}
   .brand,.brand__yr{font-size:clamp(28px,8.2vw,36px);line-height:1.2;letter-spacing:-.03em}
   .nav{margin-top:clamp(12px,2.2vh,20px)}
   .nav button{font-size:clamp(15px,4.2vw,17px);line-height:1.45}
+  /* .brand e .nav button hanno pointer-events:auto: vanno disattivati anche
+     loro, altrimenti da telefono coprono i link dei pannelli */
   body:has(.gallery.is-zoomed) .top,
   body:has(.panel.is-open) .top{opacity:0;pointer-events:none}
+  body:has(.gallery.is-zoomed) .top *,
+  body:has(.panel.is-open) .top *{pointer-events:none}
 
   /* Spaziatura uniforme orizzontale delle card nella timeline */
   .gallery:not(.is-zoomed) .slide{
