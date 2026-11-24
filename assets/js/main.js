@@ -46,15 +46,18 @@
   /* ---------- galleria ---------- */
   function innerWidth() {
     var w = window.innerWidth;
-    // compatto: inner quasi uguale al viewport; desktop: 1641px come reference
-    return w <= 900 ? w - 40 : 1641;
+    if (w <= 600) return w - 40;
+    if (w <= 900) return w - 40;
+    return clamp(w - 120, 1000, 1440);
   }
 
   function cardWidth() {
     var w = window.innerWidth;
+    if (w <= 600) return Math.round(w * 0.78);
     if (w <= 900) return Math.max(220, Math.round((w - 40) * 0.74));
     // la card è una frazione dell'inner: k<1 rende visibile l'enlargement
-    return clamp(Math.round(w * 0.86), 900, 1400);
+    var iw = innerWidth();
+    return clamp(Math.round(iw * 0.78), 780, 1120);
   }
 
   // il dispositivo è limitato dall'altezza utile; sui compact lo scala in JS
@@ -66,20 +69,33 @@
 
   // le card si sovrappongono: resta un piccolo spazio tra le immagini
   function overlap(cw, iw) {
+    var w = window.innerWidth;
+    if (w <= 600) return -16; // 16px di spazio pulito tra card in mobile portrait
     var dev = visualMax() * cw / iw;
     return Math.max(0, Math.round(cw - dev - 60));
   }
 
-  // Strati ha solo il telefono; Pachamar solo su telefono in portrait:
-  // in entrambi i casi la card si compatta di più per non lasciare un vuoto
+  // Strati ha solo il telefono su desktop/tablet: la card si compatta di più
+  // Su mobile portrait tutte le card hanno larghezza e spaziatura uniformi
   function isPhoneSlide(s) {
-    return s.classList.contains('slide--phone') ||
-      (s.classList.contains('slide--pachamar') &&
-       window.matchMedia('(max-width:600px) and (orientation:portrait)').matches);
+    if (window.innerWidth <= 600) return false;
+    return s.classList.contains('slide--phone');
   }
 
   function extraPhone() {
+    if (window.innerWidth <= 600) return 0;
     return window.innerWidth <= 900 ? 50 : 134;
+  }
+
+  function centerActiveThumb(i) {
+    if (i < 0 || i >= thumbs.length) return;
+    var thumb = thumbs[i];
+    var tl = gallery.querySelector('.timeline');
+    if (!thumb || !tl) return;
+    if (tl.scrollWidth > tl.clientWidth) {
+      var target = thumb.offsetLeft - (tl.clientWidth - thumb.clientWidth) / 2;
+      tl.scrollTo({ left: Math.max(0, target), behavior: reduce.matches ? 'auto' : 'smooth' });
+    }
   }
 
   function apply() {
@@ -99,7 +115,7 @@
     gallery.style.setProperty('--k', zoomed ? '1' : k.toFixed(4));
     gallery.style.setProperty('--slide-w', (zoomed ? vw : cw) + 'px');
     gallery.style.setProperty('--slide-h', Math.round(vh) + 'px');
-    // posizioni cumulative: Strati occupa meno spazio dei vicini
+    // posizioni cumulative: Strati occupa meno spazio dei vicini su desktop
     var pos = 0, offsets = [0];
     for (var j = 0; j < slides.length - 1; j++) {
       if (!zoomed) {
@@ -147,6 +163,7 @@
       if (i === index) b.setAttribute('aria-current', 'true');
       else b.removeAttribute('aria-current');
     });
+    centerActiveThumb(index);
   }
 
   function lock() {
@@ -215,7 +232,7 @@
       if (!visual && isPhoneSlide(target)) visual = target.querySelector('.slide__visual');
       var pvAfter = gallery.style.getPropertyValue('--pv') || '1';
       if (visual && pvBefore !== pvAfter) {
-        visual.style.transformOrigin = 'center top';
+        visual.style.transformOrigin = 'center center';
         var pvAnim = visual.animate(
           [{ transform: 'scale(' + pvBefore + ')' }, { transform: 'scale(' + pvAfter + ')' }],
           { duration: FLY, easing: EASE, fill: 'none' }
@@ -538,7 +555,11 @@
       tx = e.clientX; ty = e.clientY;
       wake();
       var el = e.target;
-      cursor.classList.toggle('is-over', !!(el && el.closest && el.closest('a,button,.slide,.device,.brand')));
+      var isInteractive = el && el.closest && (
+        el.closest('a, button, [role="button"], .brand') ||
+        (!zoomed && el.closest('.device, .slide.is-active'))
+      );
+      cursor.classList.toggle('is-over', !!isInteractive);
     }, { passive: true });
     document.addEventListener('mouseleave', function () { cursor.style.opacity = '0'; });
     document.addEventListener('mouseenter', function () { cursor.style.opacity = '1'; wake(); });
