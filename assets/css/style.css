@@ -222,12 +222,41 @@ picture{display:block}
 @media (max-width:600px),(hover:none){
   .gallery__hint .hint__row{flex-direction:column;gap:2px 0}
   .gallery__hint .hint__cmd{
-    display:grid;grid-template-columns:clamp(38px,11vw,46px) 1fr;column-gap:12px;
+    display:grid;grid-template-columns:28px 1fr;column-gap:12px;
     width:min(100%,230px);align-items:center;text-align:left;
   }
+  /* frecce disegnate in CSS: stessa scatola e stesso asse Y su ogni piattaforma */
   .gallery__hint .hint__arrow{
-    justify-self:start;width:auto;min-width:0;
-    font-size:clamp(17px,4.6vw,21px);line-height:1;
+    position:relative;justify-self:start;
+    width:24px;height:24px;min-width:0;
+    font-size:0;line-height:0;
+  }
+  .gallery__hint .hint__arrow::before,
+  .gallery__hint .hint__arrow::after{content:"";position:absolute}
+  .gallery__hint .hint__arrow--x{
+    background:linear-gradient(currentColor,currentColor) center/18px 2px no-repeat;
+  }
+  .gallery__hint .hint__arrow--x::before,
+  .gallery__hint .hint__arrow--x::after{
+    top:7px;border-top:5px solid transparent;border-bottom:5px solid transparent;
+  }
+  .gallery__hint .hint__arrow--x::before{left:0;border-right:7px solid currentColor}
+  .gallery__hint .hint__arrow--x::after{right:0;border-left:7px solid currentColor}
+  .gallery__hint .hint__arrow--up::before{
+    left:11px;top:10px;width:2px;height:11px;background:currentColor;
+  }
+  .gallery__hint .hint__arrow--up::after{
+    left:6px;top:3px;
+    border-left:6px solid transparent;border-right:6px solid transparent;
+    border-bottom:8px solid currentColor;
+  }
+  .gallery__hint .hint__arrow--down::before{
+    left:11px;top:3px;width:2px;height:11px;background:currentColor;
+  }
+  .gallery__hint .hint__arrow--down::after{
+    left:6px;top:13px;
+    border-left:6px solid transparent;border-right:6px solid transparent;
+    border-top:8px solid currentColor;
   }
   .gallery__hint .hint__sep{display:none}
 }
