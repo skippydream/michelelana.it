@@ -18,10 +18,12 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Michele Lana, sviluppo siti, piattaforme gestionali e applicazioni">
+<meta property="og:locale" content="it_IT">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://michelelana.it/assets/img/og-image.jpg">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="assets/js/i18n.js?v=20261126a"></script>
 <script>
   (function () {
     var saved = null;
@@ -31,15 +33,21 @@
     } catch (e) {}
     if (saved) document.documentElement.setAttribute('data-theme', saved);
 
-    /* Una sola funzione per le varianti light/dark: la usa anche main.js.
-       Deve girare prima che il browser scelga le immagini, non solo al click. */
+    /* Nessun cursore artistico quando lo chiede l'URL o il sistema chiede meno
+       movimento: il CSS legge questa classe e lascia il cursore del browser. */
+    if (/[?&]nocursor=1/.test(location.search) ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('no-cursor');
+    }
+
+    /* Una sola funzione per light/dark: la usa anche main.js. Sceglie l'immagine
+       prima che il browser ne scarichi una sbagliata. */
     window.__themeMedia = function (choice) {
       var dark = choice === 'dark' ||
         (choice === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      var sources = document.querySelectorAll('picture source[data-auto-media], picture source[media*="prefers-color-scheme: dark"]');
-      Array.prototype.forEach.call(sources, function (s) {
-        if (!s.getAttribute('data-auto-media')) s.setAttribute('data-auto-media', s.getAttribute('media'));
-        s.setAttribute('media', choice === 'auto' ? s.getAttribute('data-auto-media') : (dark ? 'all' : 'not all'));
+      var imgs = document.querySelectorAll('img[data-light][data-dark]');
+      Array.prototype.forEach.call(imgs, function (img) {
+        img.src = dark ? img.getAttribute('data-dark') : img.getAttribute('data-light');
       });
       var metas = document.querySelectorAll('meta[name="theme-color"]');
       Array.prototype.forEach.call(metas, function (meta, i) {
@@ -53,9 +61,9 @@
   })();
 </script>
 <link rel="preload" href="assets/fonts/geist-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/style.css?v=20261126r">
+<link rel="stylesheet" href="assets/css/style.css?v=20261126s">
 
-<script type="application/ld+json">
+<script type="application/ld+json" id="schema-person">
 {"@context":"https://schema.org","@type":"Person","name":"Michele Lana",
 "url":"https://michelelana.it/","image":"https://michelelana.it/assets/img/michele.jpg","email":"mailto:info@michelelana.it",
 "jobTitle":"Sviluppatore web e consulente di privacy digitale",
@@ -63,7 +71,8 @@
 </script>
 <noscript><style>
   html,body{position:static!important;overflow:auto!important;height:auto!important}
-  .cursor,.timeline,.back,.nav,.theme-toggle,.copy-mail{display:none!important}
+  html,body,a,button,*{cursor:auto!important}
+  .cursor,.timeline,.back,.nav,.theme-toggle,.lang-toggle,.copy-mail{display:none!important}
   .gallery{position:static!important;height:auto!important;overflow:visible!important}
   .gallery__viewport{overflow:visible!important}
   .gallery__track{display:block!important;transform:none!important}
@@ -91,28 +100,10 @@
 
 <header class="top">
   <div class="top__frame">
-    <button class="brand" type="button" data-panel="lavori" aria-label="Torna ai lavori">
+    <button class="brand" type="button" data-panel="lavori" aria-label="Torna ai lavori" data-i18n-aria-label="nav.brandBack">
       <span>Michele Lana</span><span class="brand__yr"><span id="year" role="img" aria-label="2026">2026</span></span>
     </button>
     <div class="nav-wrap">
-      <button class="theme-toggle" type="button" data-theme-toggle data-state="auto"
-              aria-label="Tema: Auto. Attiva per passare a Chiaro" title="Tema: Auto">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <g class="theme-icon theme-icon--auto">
-            <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/>
-          </g>
-          <g class="theme-icon theme-icon--light">
-            <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19"
-                  fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </g>
-          <g class="theme-icon theme-icon--dark">
-            <path d="M20.2 15.2A8.6 8.6 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"
-                  fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-          </g>
-        </svg>
-      </button>
       <nav class="nav" aria-label="Navigazione">
         <button type="button" data-panel="lavori" aria-current="true">Lavori</button>
         <button type="button" data-panel="chi-sono">Chi sono</button>
@@ -120,6 +111,28 @@
         <button type="button" data-panel="contatti">Contatti</button>
       </nav>
     </div>
+    <button class="theme-toggle" type="button" data-theme-toggle data-state="auto"
+            aria-label="Tema: Auto. Attiva per passare a Chiaro" title="Tema: Auto">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g class="theme-icon theme-icon--auto">
+          <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/>
+        </g>
+        <g class="theme-icon theme-icon--light">
+          <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19"
+                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+        <g class="theme-icon theme-icon--dark">
+          <path d="M20.2 15.2A8.6 8.6 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"
+                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </button>
+    <button class="lang-toggle" type="button" data-lang-toggle data-state="en"
+            aria-label="Language: English. Click to switch to Italian" title="Language: English">
+      <span class="lang-toggle__label" aria-hidden="true">EN</span>
+    </button>
   </div>
 </header>
 
@@ -167,7 +180,7 @@
             <div class="slide__visual">
               <div class="device device--laptop">
                 <div class="laptop__lid">
-                  <div class="laptop__screen"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/screens/gestionale-torinosulfilo-dark.jpg"><img src="assets/img/screens/gestionale-torinosulfilo-light.jpg" alt="Gestionale Torino Sul Filo" width="1280" height="800" loading="lazy" decoding="async"></picture></div>
+                  <div class="laptop__screen"><img data-light="assets/img/screens/gestionale-torinosulfilo-light.jpg" data-dark="assets/img/screens/gestionale-torinosulfilo-dark.jpg" alt="Gestionale Torino Sul Filo" width="1280" height="800" loading="lazy" decoding="async"><noscript><img src="assets/img/screens/gestionale-torinosulfilo-light.jpg" alt="Gestionale Torino Sul Filo" width="1280" height="800"></noscript></div>
                   <div class="laptop__chin" aria-hidden="true"></div>
                 </div>
                 <div class="laptop__base" aria-hidden="true"><span class="laptop__point"></span></div>
@@ -189,7 +202,7 @@
             <div class="slide__visual slide__visual--phone">
               <div class="device device--phone">
                 <div class="phone__body">
-                  <div class="phone__screen"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/screens/biglietto-vohf-dark.jpg?v=20261126i"><img src="assets/img/screens/biglietto-vohf-light.jpg?v=20261126i" alt="Biglietto dimostrativo del Valle Orco Highline Festival: nome fittizio e QR non valido" width="390" height="844" loading="lazy" decoding="async"></picture></div>
+                  <div class="phone__screen"><img data-light="assets/img/screens/biglietto-vohf-light.jpg?v=20261126i" data-dark="assets/img/screens/biglietto-vohf-dark.jpg?v=20261126i" alt="Biglietto dimostrativo del Valle Orco Highline Festival: nome fittizio e QR non valido" width="390" height="844" loading="lazy" decoding="async"><noscript><img src="assets/img/screens/biglietto-vohf-light.jpg?v=20261126i" alt="Biglietto dimostrativo del Valle Orco Highline Festival: nome fittizio e QR non valido" width="390" height="844"></noscript></div>
                 </div>
               </div>
             </div>
@@ -238,7 +251,7 @@
             <div class="slide__visual">
               <div class="device device--laptop">
                 <div class="laptop__lid">
-                  <div class="laptop__screen"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/screens/appunti-dark.jpg"><img src="assets/img/screens/appunti-light.jpg" alt="Homepage dell'app web Appunti" width="1280" height="800" loading="lazy" decoding="async"></picture></div>
+                  <div class="laptop__screen"><img data-light="assets/img/screens/appunti-light.jpg" data-dark="assets/img/screens/appunti-dark.jpg" alt="Homepage dell'app web Appunti" width="1280" height="800" loading="lazy" decoding="async"><noscript><img src="assets/img/screens/appunti-light.jpg" alt="Homepage dell'app web Appunti" width="1280" height="800"></noscript></div>
                   <div class="laptop__chin" aria-hidden="true"></div>
                 </div>
                 <div class="laptop__base" aria-hidden="true"><span class="laptop__point"></span></div>
@@ -329,7 +342,7 @@
             <div class="slide__visual">
               <div class="device device--laptop">
                 <div class="laptop__lid">
-                  <div class="laptop__screen"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/screens/one-piece-watcher-dark.jpg"><img src="assets/img/screens/one-piece-watcher-light.jpg" alt="Schermata dell'app One Piece Watcher dal README del progetto" width="1280" height="800" loading="lazy" decoding="async"></picture></div>
+                  <div class="laptop__screen"><img data-light="assets/img/screens/one-piece-watcher-light.jpg" data-dark="assets/img/screens/one-piece-watcher-dark.jpg" alt="Schermata dell'app One Piece Watcher dal README del progetto" width="1280" height="800" loading="lazy" decoding="async"><noscript><img src="assets/img/screens/one-piece-watcher-light.jpg" alt="Schermata dell'app One Piece Watcher dal README del progetto" width="1280" height="800"></noscript></div>
                   <div class="laptop__chin" aria-hidden="true"></div>
                 </div>
                 <div class="laptop__base" aria-hidden="true"><span class="laptop__point"></span></div>
@@ -352,7 +365,7 @@
             <div class="slide__visual">
               <div class="device device--laptop">
                 <div class="laptop__lid">
-                  <div class="laptop__screen"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/screens/unsplash-dark.jpg?v=20261126l"><img src="assets/img/screens/unsplash-light.jpg?v=20261126l" alt="Griglia di foto dal profilo Unsplash di Michele Lana" width="1280" height="800" loading="lazy" decoding="async"></picture><span class="screen-logo screen-logo--unsplash" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><use href="#logo-unsplash"></use></svg></span></div>
+                  <div class="laptop__screen"><img data-light="assets/img/screens/unsplash-light.jpg?v=20261126l" data-dark="assets/img/screens/unsplash-dark.jpg?v=20261126l" alt="Griglia di foto dal profilo Unsplash di Michele Lana" width="1280" height="800" loading="lazy" decoding="async"><noscript><img src="assets/img/screens/unsplash-light.jpg?v=20261126l" alt="Griglia di foto dal profilo Unsplash di Michele Lana" width="1280" height="800"></noscript><span class="screen-logo screen-logo--unsplash" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><use href="#logo-unsplash"></use></svg></span></div>
                   <div class="laptop__chin" aria-hidden="true"></div>
                 </div>
                 <div class="laptop__base" aria-hidden="true"><span class="laptop__point"></span></div>
@@ -375,7 +388,7 @@
             <div class="slide__visual">
               <div class="device device--laptop">
                 <div class="laptop__lid">
-                  <div class="laptop__screen"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/screens/soundcloud-dark.jpg?v=20261126l"><img src="assets/img/screens/soundcloud-light.jpg?v=20261126l" alt="Griglia delle copertine delle mie tracce dal profilo SoundCloud di Michele Lana" width="1280" height="800" loading="lazy" decoding="async"></picture><span class="screen-logo screen-logo--soundcloud" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><use href="#logo-soundcloud"></use></svg></span></div>
+                  <div class="laptop__screen"><img data-light="assets/img/screens/soundcloud-light.jpg?v=20261126l" data-dark="assets/img/screens/soundcloud-dark.jpg?v=20261126l" alt="Griglia delle copertine delle mie tracce dal profilo SoundCloud di Michele Lana" width="1280" height="800" loading="lazy" decoding="async"><noscript><img src="assets/img/screens/soundcloud-light.jpg?v=20261126l" alt="Griglia delle copertine delle mie tracce dal profilo SoundCloud di Michele Lana" width="1280" height="800"></noscript><span class="screen-logo screen-logo--soundcloud" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><use href="#logo-soundcloud"></use></svg></span></div>
                   <div class="laptop__chin" aria-hidden="true"></div>
                 </div>
                 <div class="laptop__base" aria-hidden="true"><span class="laptop__point"></span></div>
@@ -389,16 +402,16 @@
     <!-- filmstrip in basso, come la timeline di Mike -->
     <nav class="timeline" aria-label="Vai a un lavoro">
       <button type="button" data-go="0" aria-label="Torino Sul Filo" aria-current="true"><img src="assets/img/thumbs/torinosulfilo.jpg" alt="" width="128" height="80" decoding="async"></button>
-      <button type="button" data-go="1" aria-label="Gestionale Torino Sul Filo"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/gestionale-torinosulfilo-dark.jpg"><img src="assets/img/thumbs/gestionale-torinosulfilo-light.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
-      <button type="button" data-go="2" aria-label="Biglietto Valle Orco Highline Festival"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/biglietto-vohf-dark.jpg?v=20261126i"><img src="assets/img/thumbs/biglietto-vohf-light.jpg?v=20261126i" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
+      <button type="button" data-go="1" aria-label="Gestionale Torino Sul Filo"><img data-light="assets/img/thumbs/gestionale-torinosulfilo-light.jpg" data-dark="assets/img/thumbs/gestionale-torinosulfilo-dark.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
+      <button type="button" data-go="2" aria-label="Biglietto Valle Orco Highline Festival"><img data-light="assets/img/thumbs/biglietto-vohf-light.jpg?v=20261126i" data-dark="assets/img/thumbs/biglietto-vohf-dark.jpg?v=20261126i" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
       <button type="button" data-go="3" aria-label="Pachamar Yoga"><picture><source media="(max-width:600px)" srcset="assets/img/thumbs/pachamar-mobile.jpg"><img src="assets/img/thumbs/pachamar.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
-      <button type="button" data-go="4" aria-label="Appunti"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/appunti-dark.jpg"><img src="assets/img/thumbs/appunti-light.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
+      <button type="button" data-go="4" aria-label="Appunti"><img data-light="assets/img/thumbs/appunti-light.jpg" data-dark="assets/img/thumbs/appunti-dark.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
       <button type="button" data-go="5" aria-label="Frushío"><img src="assets/img/thumbs/frushio-app.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
       <button type="button" data-go="6" aria-label="Strati"><img src="assets/img/thumbs/strati-app.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
       <button type="button" data-go="7" aria-label="Sun Seeker"><img src="assets/img/thumbs/sunseeker.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
-      <button type="button" data-go="8" aria-label="One Piece Watcher"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/one-piece-watcher-dark.jpg"><img src="assets/img/thumbs/one-piece-watcher-light.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
-      <button type="button" data-go="9" aria-label="Unsplash"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/unsplash-dark.jpg?v=20261126l"><img src="assets/img/thumbs/unsplash-light.jpg?v=20261126l" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
-      <button type="button" data-go="10" aria-label="SoundCloud"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/soundcloud-dark.jpg?v=20261126l"><img src="assets/img/thumbs/soundcloud-light.jpg?v=20261126l" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
+      <button type="button" data-go="8" aria-label="One Piece Watcher"><img data-light="assets/img/thumbs/one-piece-watcher-light.jpg" data-dark="assets/img/thumbs/one-piece-watcher-dark.jpg" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
+      <button type="button" data-go="9" aria-label="Unsplash"><img data-light="assets/img/thumbs/unsplash-light.jpg?v=20261126l" data-dark="assets/img/thumbs/unsplash-dark.jpg?v=20261126l" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
+      <button type="button" data-go="10" aria-label="SoundCloud"><img data-light="assets/img/thumbs/soundcloud-light.jpg?v=20261126l" data-dark="assets/img/thumbs/soundcloud-dark.jpg?v=20261126l" alt="" width="128" height="80" loading="lazy" decoding="async"></button>
     </nav>
     <div class="thumb-tooltip" id="thumb-tooltip"></div>
     <div class="gallery__hint" aria-hidden="true">
@@ -499,6 +512,6 @@
 <script>
   if (window.__themeMedia) window.__themeMedia(document.documentElement.getAttribute('data-theme') || 'auto');
 </script>
-<script src="assets/js/main.js?v=20261126t" defer></script>
+<script src="assets/js/main.js?v=20261126u" defer></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ assets/img/           screenshot nei frame, foto (michele.jpg) e anteprima socia
                       screens/ ha gli screenshot, thumbs/ le miniature della timeline
 favicon.svg           icona della scheda
 robots.txt sitemap.xml
-tools/                strumenti locali (fuori dal sito)
+tools/                strumenti locali (server, verifica UI, anteprima OG)
 ```
 
 ## Il design
@@ -29,11 +29,12 @@ Il cursore compare solo con mouse preciso (`hover:hover` e `pointer:fine`); con
 `prefers-reduced-motion` o `?nocursor=1` resta quello del browser e le animazioni
 si accorciano.
 
-Il tema segue `prefers-color-scheme`: su sistema chiaro sfondo `#ffffff`, testo
-nero e testi secondari al 55% di nero; su sistema scuro sfondo `#14161a`, testo
-`#f2f3f5` e testi secondari al 55% di bianco. Le stesse variabili (`--ink`,
-`--mut`, `--line`, `--bg`) valgono per `index.html` e `404.html`, oltre al colore
-della barra del browser. Non c'è un interruttore: basta il tema del sistema.
+Il tema parte da `prefers-color-scheme`: su sistema chiaro sfondo `#ffffff`,
+testo nero e testi secondari al 55% di nero; su sistema scuro sfondo `#14161a`,
+testo `#f2f3f5` e testi secondari al 55% di bianco. Le stesse variabili
+(`--ink`, `--mut`, `--line`, `--bg`) valgono per `index.html` e `404.html`, oltre
+al colore della barra del browser. L'icona accanto alla navigazione permette di
+scegliere **Chiaro** o **Scuro**: la scelta è salvata e vale anche sulla 404.
 
 ## La galleria
 
@@ -61,7 +62,7 @@ striscia è più piccola (`--card-w`, ~1238 px a 1440 px, ~259 px a 390 px di
 larghezza) e l'elemento aperto è più grande. L'apertura è un **FLIP**
 sull'inner: la geometria viene scambiata a transizioni spente e l'immagine viene
 riportata al suo rettangolo di partenza, poi rilasciata sulla curva esponenziale
-(`--ease`, 950 ms). Così la card cresce dov'è, senza lo scorrimento del track;
+(`--ease`, 520 ms). Così la card cresce dov'è, senza lo scorrimento del track;
 anche padding e scala dei telefoni (Strati e Pachamar) sono animati insieme. Il FLIP è
 interrompibile e i dettagli entrano in ritardo senza spostare l'immagine.
 Filmstrip, pannelli, frecce e cursore usano la stessa curva, con tempi più
@@ -193,11 +194,46 @@ pagina resta leggibile.
   destra. L'SVG cambia stato (mezzo cerchio, sole, luna) e l'`aria-label` annuncia
   il tema attuale e il prossimo. La scelta è salvata in `localStorage` con la
   chiave `michelelana-theme`; finché non viene scelta, `Auto` segue
-  `prefers-color-scheme`. Il tema aggiorna variabili CSS, colori delle varianti
-  light/dark delle immagini e `<meta name="theme-color">`. Due piccoli script
-  inline applicano il tema salvato prima del primo paint: uno nell'`<head>`
-  imposta `data-theme` e i colori, uno in fondo alla pagina sceglie le immagini.
-  L'indirizzo copiato è letto dal link mailto, quindi va aggiornato un solo punto.
+  `prefers-color-scheme`. Il tema aggiorna variabili CSS, il `src` delle immagini
+  con `data-light`/`data-dark` e `<meta name="theme-color">`. Uno script nell'`<head>`
+  imposta `data-theme` e i meta prima del primo paint; uno in fondo sceglie le
+  immagini una volta che il DOM esiste. L'indirizzo copiato è letto dal link
+  mailto, quindi va aggiornato un solo punto.
+
+## La lingua
+
+Il sito è **italiano/inglese**. All'apertura `assets/js/i18n.js` legge
+`navigator.languages`: se una delle lingue è `it` (o `it-IT`, `it-CH`, …) mostra
+l'italiano, altrimenti l'inglese. Finché non si clicca il pulsante non viene
+salvato nulla: cambiando lingua del sistema cambia anche il sito. Dopo un clic
+la scelta resta in `localStorage` con la chiave `michelelana-lang` e ha la
+precedenza sulle impostazioni del sistema.
+
+Il pulsante **IT / EN** sta a sinistra di quello del tema, sulla stessa riga;
+su telefono è in alto a destra, accanto al tema. Il `title` e l'`aria-label`
+sono tradotti e annunciano la lingua attuale e quella successiva.
+
+Tutte le traduzioni stanno nei due dizionari in `assets/js/i18n.js`: lo script
+indicizza le stringhe italiane e traduce i nodi di testo e gli attributi
+`alt`, `title` e `aria-label` senza bisogno di un attributo su ogni elemento.
+L'HTML resta quindi leggibile in italiano; senza JavaScript resta in italiano.
+Prima del primo paint lo script aggiorna `lang`, `<title>`, description,
+`og:title`, `og:description`, `og:image:alt`, `og:locale` e il `jobTitle` dei
+dati strutturati. Anche `404.html` usa lo stesso modulo e segue la lingua
+salvata o quella del sistema (senza pulsante di cambio). Le etichette create
+dal JavaScript (tema, tooltip delle miniature, copia email, versione APK) si
+aggiornano all'evento `michelelana:langchange`.
+
+Per aggiungere o cambiare una traduzione basta una voce con la stessa chiave
+in `it` e `en`; il valore italiano deve corrispondere al testo nell'HTML.
+Gli screenshot dentro i frame restano nelle loro lingue originali: sono
+catture reali dei progetti, non testi del sito.
+
+- `tools/check-ui.py` verifica le etichette in EN e IT (back e miniature), il
+  ciclo del tema, la persistenza dopo il reload, la 404, le varianti delle
+  immagini, le frecce con il focus sulle miniature e il Back/Forward del browser.
+  Serve `websocket-client` e avvia da sé Firefox
+  headless e un server locale: `python3 tools/check-ui.py`.
 
 ## Il download dell'APK
 
@@ -274,10 +310,12 @@ titolo nel pannello aperto. Quello di Unsplash segue il colore del testo,
 quello di SoundCloud resta arancione. In dark è disattivato il riflesso
 diagonale solo su queste due card, così l'attenuazione non viene alterata.
 
-Gli screenshot seguono il tema del sistema dove esiste una variante
-(`appunti-*`, `one-piece-watcher-*`, `unsplash-*` e `soundcloud-*`) o dove il tema
-è parte del disegno (`biglietto-*`): questi stanno dentro un `<picture>` con un
-`<source media="(prefers-color-scheme: dark)">` e l'immagine chiara come fallback.
+Gli screenshot seguono il tema scelto dove esiste una variante (`appunti-*`,
+`one-piece-watcher-*`, `unsplash-*` e `soundcloud-*`) o dove il tema è parte del
+disegno (`biglietto-*`): ogni `<img>` ha `data-light` e `data-dark`, e lo script
+in fondo alla pagina imposta `src` prima che il browser scarichi una variante
+sbagliata. Con JavaScript disattivato un `<noscript>` accanto a ogni immagine
+mostra la versione chiara. Anche `gestionale-torinosulfilo-*` usa questo sistema.
 Gli altri progetti (Torino Sul Filo, Frushío, Strati, SunSeeker e Pachamar)
 hanno una sola immagine, identica nei due temi: non ha senso fabbricare varianti
 sintetiche di siti che non le offrono. Torino Sul Filo ha pure `data-theme`, ma
@@ -341,6 +379,7 @@ usa percorsi che iniziano con `/`: va bene perché il sito sta sulla radice del 
 - [x] `assets/img/og-image.jpg` (1200×630) aggiornata con foto e consulenza
 - [x] `404.html` allineata al resto del sito
 - [x] Tema chiaro e scuro automatico (`prefers-color-scheme`)
+- [x] Lingue italiano/inglese con rilevamento automatico e pulsante di cambio
 - [ ] Progetto Cloudflare Pages creato, dominio `michelelana.it` collegato, HTTPS attivo
 - [ ] Provato almeno una volta da telefono vero, non solo restringendo la finestra
 - [ ] Decidere se tenere l'icona di One Piece Watcher (marchio non tuo)

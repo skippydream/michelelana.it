@@ -8,6 +8,14 @@
 (function () {
   'use strict';
 
+  /* La lingua è applicata subito: i testi dell'HTML vengono tradotti prima
+     che questo script legga label e tooltip. */
+  if (window.MicheleI18n) window.MicheleI18n.applyBody();
+
+  function tr(key) {
+    return window.MicheleI18n ? window.MicheleI18n.t(key) : key;
+  }
+
   var yearEl = document.getElementById('year');
 
   var gallery = document.querySelector('.gallery');
@@ -35,7 +43,7 @@
   var edgeSwipeConsumed = false;
   var HISTORY_KEY = 'michelelanaView';
   var HOME_STATE = { michelelanaView: 'home' };
-  var AWAY_STATE = { michelelanaView: 'away' };
+  var restoring = false;   // true mentre rimetiamo una vista dopo Back/Forward
   var flipAnim = null, fadeAnims = [];
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -43,7 +51,6 @@
   var root = document.documentElement;
   var THEME_KEY = 'michelelana-theme';
   var themeToggle = document.querySelector('[data-theme-toggle]');
-  var THEME_LABELS = { auto: 'Auto', light: 'Chiaro', dark: 'Scuro' };
   var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
   /* Auto è solo il punto di partenza: al primo clic si passa al tema opposto
@@ -67,10 +74,11 @@
       if (save) { try { localStorage.setItem(THEME_KEY, choice); } catch (e) {} }
     }
     if (themeToggle) {
-      var label = THEME_LABELS[choice];
+      var label = tr('theme.' + choice);
       themeToggle.setAttribute('data-state', choice);
-      themeToggle.setAttribute('title', 'Tema: ' + label);
-      themeToggle.setAttribute('aria-label', 'Tema: ' + label + '. Attiva per passare a ' + THEME_LABELS[nextTheme(choice)]);
+      themeToggle.setAttribute('title', tr('theme.prefix') + label);
+      themeToggle.setAttribute('aria-label', tr('theme.prefix') + label +
+        tr('theme.action') + tr('theme.' + nextTheme(choice)));
     }
     /* Le varianti light/dark seguono il tema scelto, non solo il sistema.
        La funzione è definita nell'head, prima del primo paint. */
@@ -106,13 +114,25 @@
     tooltip.classList.add('is-visible');
   }
 
+  /* Il titolo di ogni miniatura resta anche dopo che l'aria-label è diventato
+     "titolo · anno": serve per ricalcolare il tooltip quando cambia lingua. */
+  function refreshThumbTips() {
+    thumbs.forEach(function (b) {
+      if (window.MicheleI18n) {
+        var translated = window.MicheleI18n.current(b, 'aria-label');
+        if (translated) b.setAttribute('data-title', translated);
+      }
+      var slide = slides[Number(b.getAttribute('data-go'))];
+      var date = slide && slide.querySelector('.slide__date');
+      var title = b.getAttribute('data-title') || '';
+      var tip = title + (date ? ' · ' + date.textContent.trim() : '');
+      b.setAttribute('data-tip', tip);
+      b.setAttribute('aria-label', tip);
+    });
+  }
+  refreshThumbTips();
+
   thumbs.forEach(function (b) {
-    var slide = slides[Number(b.getAttribute('data-go'))];
-    var date = slide && slide.querySelector('.slide__date');
-    var title = b.getAttribute('aria-label') || (slide && slide.getAttribute('aria-label')) || '';
-    var tip = title + (date ? ' · ' + date.textContent.trim() : '');
-    b.setAttribute('data-tip', tip);
-    b.setAttribute('aria-label', tip);
     b.addEventListener('pointerenter', function () {
       if (hoverCapable.matches) showThumbTip(b);
     });
@@ -366,7 +386,7 @@
     setYear(newYear);
     if (back) {
       back.hidden = !zoomed && !activePanel;
-      back.setAttribute('aria-label', activePanel ? 'Torna ai lavori' : 'Torna alla timeline');
+      back.setAttribute('aria-label', activePanel ? tr('nav.brandBack') : tr('nav.backTimeline'));
     }
     slides.forEach(function (s, i) {
       var on = i === index;
@@ -409,7 +429,7 @@
     if (canFlip) gallery.classList.add('no-transitions');
     index = to;
     zoomed = open;
-    if (open) markAway();
+    if (open) markAway({ type: 'slide', index: to });
     else if (!activePanel) markHome();
     apply();
 
@@ -479,9 +499,13 @@
   function isAwayState() {
     return !!(history.state && history.state[HISTORY_KEY] === 'away');
   }
-  function markAway() {
-    if (isAwayState()) history.replaceState(AWAY_STATE, '', location.href);
-    else history.pushState(AWAY_STATE, '', location.href);
+  function markAway(view) {
+    /* La vista salvata permette a Forward di riaprire esattamente il progetto
+       o il pannello che Back aveva chiuso. */
+    var state = { michelelanaView: 'away', view: view || { type: 'slide', index: index } };
+    if (restoring) return;
+    if (isAwayState()) history.replaceState(state, '', location.href);
+    else history.pushState(state, '', location.href);
   }
   function markHome() {
     history.replaceState(HOME_STATE, '', location.href);
@@ -491,6 +515,7 @@
     var dest = clamp(to, 0, slides.length - 1);
     if (dest === index) return false;
     index = dest;
+    if (zoomed && !activePanel && isAwayState()) markAway({ type: 'slide', index: index });
     apply();
     return true;
   }
@@ -703,7 +728,7 @@
       old.hidden = true;
     }
     activePanel = id;
-    markAway();
+    markAway({ type: 'panel', panel: id });
     panel.hidden = false;
     void panel.offsetWidth; // fa partire la transizione dallo stato chiuso
     panel.classList.add('is-open');
@@ -720,7 +745,7 @@
     window.setTimeout(function () { if (activePanel !== id) panel.hidden = true; }, reduce.matches ? 20 : 750);
     activePanel = null;
     back.hidden = !zoomed;
-    if (zoomed) back.setAttribute('aria-label', 'Torna alla timeline');
+    if (zoomed) back.setAttribute('aria-label', tr('nav.backTimeline'));
     gallery.removeAttribute('inert');
     setNav('lavori');
   }
@@ -766,21 +791,25 @@
 
   /* ---------- copia email ---------- */
   var copyButton = document.querySelector('.copy-mail');
+  var copyStatus, copyLabel, copyTimer, lastCopyOk;
   if (copyButton) {
-    var copyStatus = document.getElementById('copy-status');
-    var copyLabel = copyButton.textContent.trim();
-    var copyTimer = null;
+    copyStatus = document.getElementById('copy-status');
+    copyLabel = copyButton.textContent.trim();
+    copyTimer = null;
+    lastCopyOk = false;
 
     function copyFeedback(message, ok) {
+      lastCopyOk = !!ok;
       copyButton.textContent = message;
-      copyButton.classList.toggle('is-done', !!ok);
+      copyButton.classList.toggle('is-done', lastCopyOk);
       if (copyStatus) {
-        copyStatus.textContent = ok
-          ? 'Indirizzo email copiato negli appunti.'
-          : 'Non è stato possibile copiare l’indirizzo email.';
+        copyStatus.textContent = lastCopyOk
+          ? tr('contact.copiedStatus')
+          : tr('contact.copyFailedStatus');
       }
       window.clearTimeout(copyTimer);
       copyTimer = window.setTimeout(function () {
+        copyTimer = null;
         copyButton.textContent = copyLabel;
         copyButton.classList.remove('is-done');
         if (copyStatus) copyStatus.textContent = '';
@@ -799,7 +828,7 @@
       var ok = false;
       try { ok = document.execCommand('copy'); } catch (e) {}
       document.body.removeChild(field);
-      copyFeedback(ok ? 'Copiato ✓' : 'Copia non riuscita', ok);
+      copyFeedback(ok ? tr('contact.copied') : tr('contact.copyFailed'), ok);
     }
 
     copyButton.addEventListener('click', function () {
@@ -807,7 +836,7 @@
       var text = mail ? mail.getAttribute('href').replace(/^mailto:/, '') : '';
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(function () {
-          copyFeedback('Copiato ✓', true);
+          copyFeedback(tr('contact.copied'), true);
         }, function () { copyFallback(text); });
       } else {
         copyFallback(text);
@@ -822,12 +851,28 @@
   }
   back.addEventListener('click', goHome);
 
-  /* Back/forward del browser: lo stato "away" è un pannello o un progetto aperto,
-     qualunque altro stato riporta alla home dei lavori. */
+  /* Back/forward del browser: lo stato "away" porta con sé la vista aperta,
+     così Forward può riaprirla. Qualunque altro stato torna ai lavori. */
+  function restoreView(view) {
+    if (!view) return false;
+    if (view.type === 'panel') {
+      if (!document.getElementById(view.panel)) return false;
+      openPanel(view.panel);
+      return true;
+    }
+    if (view.type === 'slide' && typeof view.index === 'number') {
+      transitionTo(view.index, true);
+      return true;
+    }
+    return false;
+  }
+
   window.addEventListener('popstate', function (e) {
     if (e.state && e.state[HISTORY_KEY] === 'away') {
-      markHome();
-      return;
+      restoring = true;
+      var restored = restoreView(e.state.view);
+      restoring = false;
+      if (restored) return;
     }
     if (activePanel) closePanel();
     if (zoomed) setZoom(false);
@@ -869,17 +914,50 @@
     }
     if (activePanel) return;
     var el = document.activeElement;
+    /* Le frecce devono funzionare anche quando il focus è su una miniatura:
+       è il modo normale di navigare la galleria da tastiera. Space/Invio
+       restano al pulsante, così selezionano la slide come al solito. */
+    var onThumb = !!(el && el.closest && el.closest('.timeline button'));
     if (el && el !== document.body && el !== document.documentElement &&
-        el.closest('a,button,input,textarea,select,[contenteditable="true"]')) return;
+        el.closest('a,button,input,textarea,select,[contenteditable="true"]') && !onThumb) return;
     if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
     /* le verticali seguono lo swipe: su entra nella card, giù ne esce */
     else if (e.key === 'ArrowUp') { e.preventDefault(); setZoom(true); }
     else if (e.key === 'ArrowDown') { e.preventDefault(); setZoom(false); }
-    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setZoom(!zoomed); }
+    else if (e.key === ' ' || e.key === 'Enter') {
+      if (!onThumb) { e.preventDefault(); setZoom(!zoomed); }
+    }
     else if (e.key === 'Home') { e.preventDefault(); move(0); }
     else if (e.key === 'End') { e.preventDefault(); move(slides.length - 1); }
   });
+
+  /* Etichette generate dal JS: vanno aggiornate quando cambia la lingua. */
+  function refreshLanguage() {
+    applyTheme(currentChoice(), false);
+    refreshThumbTips();
+    if (back) {
+      back.setAttribute('aria-label', activePanel ? tr('nav.brandBack') : tr('nav.backTimeline'));
+    }
+    if (copyButton) {
+      copyLabel = tr('contact.copy');
+      if (copyTimer) {
+        copyButton.textContent = lastCopyOk ? tr('contact.copied') : tr('contact.copyFailed');
+        if (copyStatus) {
+          copyStatus.textContent = lastCopyOk ? tr('contact.copiedStatus') : tr('contact.copyFailedStatus');
+        }
+      } else {
+        copyButton.textContent = copyLabel;
+        if (copyStatus) copyStatus.textContent = '';
+      }
+    }
+    document.querySelectorAll('a[data-apk][data-apk-version]').forEach(function (link) {
+      link.title = tr('apk.version') + link.getAttribute('data-apk-version');
+    });
+  }
+  if (window.MicheleI18n) {
+    document.addEventListener(window.MicheleI18n.event, refreshLanguage);
+  }
 
   window.addEventListener('resize', apply);
   markHome();
@@ -952,7 +1030,10 @@
           });
           risolto = apk[0].browser_download_url;
           link.href = risolto;
-          if (d.tag_name) link.title = 'Versione ' + d.tag_name;
+          if (d.tag_name) {
+            link.setAttribute('data-apk-version', d.tag_name);
+            link.title = tr('apk.version') + d.tag_name;
+          }
           return risolto;
         })
         .catch(function () { inCorso = null; return null; });

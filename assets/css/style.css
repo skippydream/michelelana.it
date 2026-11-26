@@ -84,6 +84,9 @@ picture{display:block}
 .cursor{display:none}
 @media (hover:hover) and (pointer:fine){
   html,body,a,button,*{cursor:none!important}
+  /* ?nocursor=1, prefers-reduced-motion e nessun JS: niente cerchio e cursore nativo */
+  html.no-cursor,html.no-cursor *{cursor:auto!important}
+  html.no-cursor .cursor{display:none!important}
   .cursor{
     display:block;position:fixed;top:0;left:0;width:48px;height:48px;
     z-index:10000;pointer-events:none;will-change:transform;
@@ -147,17 +150,25 @@ picture{display:block}
 .nav button:hover,.nav button[aria-current="true"]{color:var(--ink)}
 .nav-wrap{pointer-events:auto;display:flex;align-items:flex-start;gap:14px}
 .nav-wrap .nav{margin-top:0}
-.theme-toggle{
-  pointer-events:auto;flex:0 0 auto;
-  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+.theme-toggle,.lang-toggle{
+  pointer-events:auto;position:fixed;
+  top:clamp(20px,3vw,36px);right:clamp(20px,3vw,36px);z-index:41;
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
   color:var(--mut);border:1px solid var(--line);border-radius:50%;
-  transition:color .25s,border-color .25s,transform .4s var(--ease);
+  background:color-mix(in srgb,var(--bg) 84%,transparent);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  transition:color .25s,border-color .25s,transform .4s var(--ease),background-color .25s;
 }
+/* il selettore di lingua sta a sinistra del tema, sulla stessa riga */
+.lang-toggle{right:calc(clamp(20px,3vw,36px) + 44px)}
 .theme-toggle[data-state="light"],
-.theme-toggle[data-state="dark"]{color:var(--ink)}
+.theme-toggle[data-state="dark"],
+.lang-toggle{color:var(--ink)}
 .theme-toggle:hover{
   color:var(--ink);border-color:var(--ink);transform:rotate(12deg);
 }
+.lang-toggle:hover{color:var(--ink);border-color:var(--ink)}
+.lang-toggle__label{font-size:11px;line-height:1;letter-spacing:.02em;font-weight:400}
 .theme-toggle svg{width:18px;height:18px;display:block}
 .theme-icon{display:none}
 .theme-toggle[data-state="auto"] .theme-icon--auto,
@@ -530,6 +541,7 @@ picture{display:block}
 .cv__ttl{font-size:17px;font-weight:500;letter-spacing:-.01em}
 .cv__desc{font-size:14px;line-height:1.36;color:var(--mut);margin-top:1px}
 .cv__desc a{border-bottom:1px solid var(--line)}
+.cv-group[data-cv="competenze"] .cv__yr{font-weight:500;color:var(--ink)}
 
 /* freccia di ritorno: appena sopra la colonna di testo, non più nell'angolo */
 .back{
@@ -689,11 +701,12 @@ picture{display:block}
   .nav{margin-top:clamp(12px,2.2vh,20px)}
   .nav button{font-size:clamp(15px,4.2vw,17px);line-height:1.45}
   .nav-wrap{display:block}
-  .theme-toggle{
+  .theme-toggle,.lang-toggle{
     position:fixed;z-index:1;
-    top:calc(var(--pad-top) - 1px);right:var(--gutter);
+    top:calc(var(--pad-top) + 10px);right:calc(var(--gutter) + 2px);
     width:34px;height:34px;
   }
+  .lang-toggle{right:calc(var(--gutter) + 46px)}
   /* .brand e .nav button hanno pointer-events:auto: vanno disattivati anche
      loro, altrimenti da telefono coprono i link dei pannelli */
   body:has(.gallery.is-zoomed) .top,
@@ -993,6 +1006,11 @@ picture{display:block}
     font-variant-numeric:tabular-nums;
     padding-top:1px;
     white-space:nowrap;
+  }
+  .cv-group[data-cv="competenze"] .cv__yr{
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink);
   }
   .cv__ttl{
     font-size:15px;
