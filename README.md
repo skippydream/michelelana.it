@@ -254,7 +254,7 @@ Il logo del servizio è doppio: un badge in basso a destra dello schermo del
 laptop, ben visibile sia in timeline sia in zoom, e una versione accanto al
 titolo nel pannello aperto. Quello di Unsplash segue il colore del testo,
 quello di SoundCloud resta arancione. In dark è disattivato il riflesso
-diagonale sullo schermo, così l'attenuazione non viene alterata.
+diagonale solo su queste due card, così l'attenuazione non viene alterata.
 
 Gli screenshot seguono il tema del sistema dove esiste una variante
 (`appunti-*`, `one-piece-watcher-*`, `unsplash-*` e `soundcloud-*`) o dove il tema

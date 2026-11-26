@@ -322,9 +322,9 @@ picture{display:block}
   background:linear-gradient(135deg,rgba(255,255,255,.07) 0%,transparent 45%);
   pointer-events:none;z-index:4;
 }
-/* in dark niente riflesso bianco: lascerebbe una sfumatura sul nero */
+/* in dark niente riflesso bianco sulle due card attenuate */
 @media (prefers-color-scheme:dark){
-  .laptop__screen::after{background:none}
+  .slide--profile .laptop__screen::after{background:none}
 }
 .laptop__screen img{
   position:absolute;inset:0;width:100%;height:100%;

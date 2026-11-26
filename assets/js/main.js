@@ -145,7 +145,6 @@
     function slot(ee, gw, shift) {
       var step = 2 * (cw - ov - ee) - dn;      // spazio disponibile tra i vicini
       return {
-        width: gw,
         px: pxBase + (gw - dn) / 2 - shift,
         margin: (gw + 2 * gap - step) / 2
       };
@@ -659,7 +658,6 @@
     cvTabs.forEach(function (b) {
       var on = b.getAttribute('data-cv-tab') === name;
       b.setAttribute('aria-selected', on ? 'true' : 'false');
-      b.tabIndex = on ? 0 : -1;
     });
     cvGroups.forEach(function (g) {
       g.hidden = mobile && g.getAttribute('data-cv') !== name;
@@ -670,7 +668,6 @@
     if (window.innerWidth > 600) {
       cvTabs.forEach(function (b) {
         b.setAttribute('aria-selected', 'false');
-        b.tabIndex = 0;
       });
       cvGroups.forEach(function (g) { g.hidden = false; });
     } else {
