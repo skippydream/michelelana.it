@@ -136,15 +136,11 @@ picture{display:block}
   display:inline-flex;
   font-variant-numeric:tabular-nums;
 }
-/* ogni cifra è uno span: scorre solo quella che cambia, le altre restano ferme */
-#year .year__digit{
-  display:inline-block;
-  will-change:transform,opacity;
-  transition:opacity .06s var(--ease-soft),transform .06s var(--ease);
-}
-#year .year__digit.is-changing{
-  opacity:0;
-  transform:translateY(6px);
+/* ogni cifra è uno span: cambia solo quella che cambia, le altre restano ferme */
+#year .year__digit{display:inline-block;position:relative}
+#year .year__face,#year .year__ghost{display:inline-block}
+#year .year__ghost{
+  position:absolute;left:0;top:0;z-index:1;pointer-events:none;
 }
 .nav{pointer-events:auto;display:flex;flex-direction:column;align-items:flex-start;margin-top:2px;font-weight:200}
 .nav button{
@@ -154,7 +150,7 @@ picture{display:block}
 .nav button:hover,.nav button[aria-current="true"]{color:var(--ink)}
 .nav-wrap{pointer-events:auto;display:flex;align-items:flex-start;gap:14px}
 .nav-wrap .nav{margin-top:0}
-.theme-toggle,.lang-toggle{
+.theme-toggle,.lang-toggle,.info-toggle{
   pointer-events:auto;position:fixed;
   top:clamp(20px,3vw,36px);right:clamp(20px,3vw,36px);z-index:41;
   width:34px;height:34px;display:flex;align-items:center;justify-content:center;
@@ -731,12 +727,10 @@ picture{display:block}
     width:34px;height:34px;
   }
   .lang-toggle{right:calc(var(--gutter) + 46px)}
-  /* "i" accanto all'anno, con lo stesso cerchio degli altri due pulsanti */
-  .brand-cluster{position:relative;display:block}
+  /* "i" sotto il tema, stesso cerchio e stessa colonna degli altri pulsanti */
+  .brand-cluster{display:block}
   .info-toggle{
-    position:absolute;top:auto;right:auto;
-    left:calc(2.3 * var(--brand-fs) + 8px);
-    top:calc(1.8 * var(--brand-fs) - 17px);
+    top:calc(var(--pad-top) + 52px);
     display:flex;pointer-events:auto;
     font:400 15px/1 var(--sans);
   }

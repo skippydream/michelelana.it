@@ -398,33 +398,102 @@
     }
   }
 
-  /* L'anno scorre tutti gli anni intermedi, in su o in giù secondo la
-     direzione del cambio. Ogni anno resta visibile, poi sfuma; il tempo si
-     accorcia in modo esponenziale. */
+  /* L'anno scorre tutti gli anni intermedi in su o in giù, con il tempo che
+     si accorcia in modo esponenziale. Il cambio di cifra non è più uno scatto:
+     vecchia e nuova cifra si incrociano con un fade direzionale. */
   var ROLL_START_MS = 120;
   var ROLL_ACCEL = 0.86;
   var ROLL_MIN_MS = 30;
   var ROLL_FADE_MS = 45;
   var yearRoll = 0;
+  var yearTimer = 0;
 
   function rollDelay(i) {
     return Math.max(ROLL_MIN_MS, Math.round(ROLL_START_MS * Math.pow(ROLL_ACCEL, i)));
   }
 
+  function clearDigitAnim(d) {
+    if (d.faceAnim) { d.faceAnim.cancel(); d.faceAnim = null; }
+    if (d.ghostAnim) { d.ghostAnim.cancel(); d.ghostAnim = null; }
+    if (d.ghost && d.ghost.parentNode) d.ghost.parentNode.removeChild(d.ghost);
+    d.ghost = null;
+  }
+
+  function clearYearRoll() {
+    yearRoll += 1;
+    if (yearTimer) window.clearTimeout(yearTimer);
+    yearTimer = 0;
+    yearDigits.forEach(clearDigitAnim);
+  }
+
+  function setYearDigits(value) {
+    var str = String(value);
+    if (yearDigits.length === str.length) {
+      for (var i = 0; i < yearDigits.length; i++) {
+        yearDigits[i].face.textContent = yearDigits[i].yearValue = str.charAt(i);
+      }
+      return;
+    }
+    yearEl.textContent = '';
+    yearDigits = [];
+    for (var j = 0; j < str.length; j++) {
+      var digit = document.createElement('span');
+      var face = document.createElement('span');
+      digit.className = 'year__digit';
+      digit.setAttribute('aria-hidden', 'true');
+      face.className = 'year__face';
+      face.textContent = str.charAt(j);
+      digit.appendChild(face);
+      digit.face = face;
+      digit.yearValue = str.charAt(j);
+      yearEl.appendChild(digit);
+      yearDigits.push(digit);
+    }
+  }
+
   // Aggiorna solo le cifre che cambiano: 18->19 tocca l'ultima, 19->20 tocca
   // le ultime due. Le altre restano ferme.
-  function showYear(year) {
-    var str = String(year), changed = [];
+  function showYear(year, dir, fade) {
+    var str = String(year);
     for (var i = 0; i < yearDigits.length; i++) {
       var ch = str.charAt(i);
-      if (yearDigits[i].yearValue !== ch) {
-        yearDigits[i].yearValue = ch;
-        yearDigits[i].textContent = ch;
-        yearDigits[i].classList.remove('is-changing');
-        changed.push(yearDigits[i]);
+      var d = yearDigits[i];
+      if (d.yearValue === ch) continue;
+      clearDigitAnim(d);
+
+      var ghost = document.createElement('span');
+      ghost.className = 'year__ghost';
+      ghost.textContent = d.yearValue;
+      d.appendChild(ghost);
+      d.face.textContent = ch;
+      d.yearValue = ch;
+      d.ghost = ghost;
+
+      if (reduce.matches || !fade || !d.face.animate || !ghost.animate) {
+        if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+        d.ghost = null;
+        continue;
       }
+      var coming = dir > 0 ? '0.35em' : '-0.35em';
+      var leaving = dir > 0 ? '-0.35em' : '0.35em';
+      var timing = { duration: fade, easing: EASE };
+      d.faceAnim = d.face.animate([
+        { opacity: 0, transform: 'translateY(' + coming + ')' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], timing);
+      (function (digit, oldFace) {
+        digit.ghostAnim = oldFace.animate([
+          { opacity: 1, transform: 'translateY(0)' },
+          { opacity: 0, transform: 'translateY(' + leaving + ')' }
+        ], timing);
+        digit.ghostAnim.onfinish = function () {
+          if (digit.ghost !== oldFace) return;
+          digit.ghostAnim = null;
+          digit.ghost = null;
+          if (oldFace.parentNode) oldFace.parentNode.removeChild(oldFace);
+        };
+      })(d, ghost);
     }
-    return changed;
   }
 
   function setYear(value) {
@@ -432,28 +501,21 @@
     var next = String(value || '');
     var prev = yearEl.getAttribute('data-year');
     if (prev === next) return;
-    var token = ++yearRoll;
-    yearDigits.forEach(function (d) { d.classList.remove('is-changing'); });
+    clearYearRoll();
+    var token = yearRoll;
     yearEl.setAttribute('data-year', next);
     yearEl.setAttribute('aria-label', next);
 
     if (!prev || !yearDigits.length || prev.length !== next.length) {
-      yearEl.textContent = '';
-      yearDigits = [];
-      for (var j = 0; j < next.length; j++) {
-        var digit = document.createElement('span');
-        digit.className = 'year__digit';
-        digit.setAttribute('aria-hidden', 'true');
-        digit.textContent = digit.yearValue = next.charAt(j);
-        yearEl.appendChild(digit);
-        yearDigits.push(digit);
-      }
+      setYearDigits(next);
       return;
     }
-
-    var from = parseInt(prev, 10), to = parseInt(next, 10);
+    // Un roll interrotto riparte dall'anno visibile: data-year contiene già
+    // il target della transizione annullata, non quello che l'utente vede.
+    var visible = yearDigits.map(function (d) { return d.yearValue; }).join('');
+    var from = parseInt(visible, 10), to = parseInt(next, 10);
     if (reduce.matches || isNaN(from) || isNaN(to) || from === to) {
-      showYear(next);
+      showYear(next, 0, 0);
       return;
     }
     var dir = to > from ? 1 : -1;
@@ -463,16 +525,12 @@
     function step() {
       if (token !== yearRoll || i >= years.length) return;
       var hold = rollDelay(i++);
-      var digits = showYear(years[i - 1]);
-      window.setTimeout(function () {
+      var fade = Math.min(ROLL_FADE_MS, hold);
+      showYear(years[i - 1], dir, fade);
+      yearTimer = window.setTimeout(function () {
         if (token !== yearRoll) return;
-        digits.forEach(function (d) { d.classList.add('is-changing'); });
-        window.setTimeout(function () {
-          if (token !== yearRoll) return;
-          digits.forEach(function (d) { d.classList.remove('is-changing'); });
-          step();
-        }, ROLL_FADE_MS);
-      }, hold);
+        step();
+      }, hold + fade);
     }
     step();
   }
