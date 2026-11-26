@@ -20,6 +20,8 @@
   --bg:#fff;
   --ring:rgba(0,0,0,.15);
   --shadow:rgba(0,0,0,.12);
+  --thumb-bg:rgba(0,0,0,.06);
+  --thumb-ring:rgba(0,0,0,.08);
   --sans:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
   /* curva esponenziale: partenza decisa, arresto lungo e senza rimbalzi */
   --ease:cubic-bezier(.16,1,.3,1);
@@ -27,8 +29,10 @@
   --dur:.5s;
   color-scheme:light;
 }
+/* Auto segue il sistema; Chiaro e Scuro forzano le variabili. */
 @media (prefers-color-scheme:dark){
-  :root{
+  :root:not([data-theme]),
+  :root[data-theme="auto"]{
     --ink:#f2f3f5;
     --mut:rgba(242,243,245,.55);
     --line:rgba(242,243,245,.18);
@@ -36,8 +40,22 @@
     --bg:#14161a;
     --ring:rgba(242,243,245,.22);
     --shadow:rgba(0,0,0,.5);
+    --thumb-bg:rgba(255,255,255,.06);
+    --thumb-ring:rgba(255,255,255,.1);
     color-scheme:dark;
   }
+}
+:root[data-theme="dark"]{
+  --ink:#f2f3f5;
+  --mut:rgba(242,243,245,.55);
+  --line:rgba(242,243,245,.18);
+  --panel:rgba(20,22,26,.92);
+  --bg:#14161a;
+  --ring:rgba(242,243,245,.22);
+  --shadow:rgba(0,0,0,.5);
+  --thumb-bg:rgba(255,255,255,.06);
+  --thumb-ring:rgba(255,255,255,.1);
+  color-scheme:dark;
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -127,6 +145,24 @@ picture{display:block}
   transition:color .25s;
 }
 .nav button:hover,.nav button[aria-current="true"]{color:var(--ink)}
+.nav-wrap{pointer-events:auto;display:flex;align-items:flex-start;gap:14px}
+.nav-wrap .nav{margin-top:0}
+.theme-toggle{
+  pointer-events:auto;flex:0 0 auto;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  color:var(--mut);border:1px solid var(--line);border-radius:50%;
+  transition:color .25s,border-color .25s,transform .4s var(--ease);
+}
+.theme-toggle[data-state="light"],
+.theme-toggle[data-state="dark"]{color:var(--ink)}
+.theme-toggle:hover{
+  color:var(--ink);border-color:var(--ink);transform:rotate(12deg);
+}
+.theme-toggle svg{width:18px;height:18px;display:block}
+.theme-icon{display:none}
+.theme-toggle[data-state="auto"] .theme-icon--auto,
+.theme-toggle[data-state="light"] .theme-icon--light,
+.theme-toggle[data-state="dark"] .theme-icon--dark{display:block}
 
 /* ---------- galleria ---------- */
 .gallery{position:fixed;inset:0;overflow:hidden}
@@ -385,23 +421,18 @@ picture{display:block}
   padding-bottom:18px;
 }
 .timeline button{
+  position:relative;
   flex:0 0 auto;
   /* 11 miniature: anche su desktop la larghezza segue lo spazio utile,
      così la striscia non sborda; 120 px resta il tetto sui monitor larghi. */
   width:clamp(72px,calc((min(1240px,100vw - clamp(24px,14vw,200px)) - 10*var(--thumb-gap) - 2px)/11),120px);
   aspect-ratio:16/10;height:auto;display:block;
   padding:0;border:0;border-radius:4px;overflow:hidden;opacity:.32;
-  background:rgba(0,0,0,.06);
-  box-shadow:0 0 0 1px rgba(0,0,0,.08);
+  background:var(--thumb-bg);
+  box-shadow:0 0 0 1px var(--thumb-ring);
   transform-origin:bottom center;
   transition:opacity .55s var(--ease-soft),box-shadow .4s var(--ease-soft),transform .75s var(--ease);
   cursor:pointer;
-}
-@media (prefers-color-scheme:dark){
-  .timeline button{
-    background:rgba(255,255,255,.06);
-    box-shadow:0 0 0 1px rgba(255,255,255,.1);
-  }
 }
 .timeline button picture,
 .timeline button img{
@@ -410,6 +441,19 @@ picture{display:block}
 }
 .timeline button:hover{opacity:.8}
 .timeline button[aria-current="true"]{opacity:1;box-shadow:0 0 0 1.5px var(--ink);transform:translateY(-8px) scale(1.04)}
+
+/* Tooltip fuori dal flusso: non altera la larghezza della filmstrip. */
+.thumb-tooltip{
+  position:fixed;left:0;top:0;z-index:25;
+  padding:6px 8px;border-radius:4px;
+  background:var(--ink);color:var(--bg);
+  font-size:11px;font-weight:400;line-height:1;white-space:nowrap;
+  letter-spacing:.01em;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transform:translate(-50%,-100%);
+  transition:opacity .2s var(--ease-soft);
+}
+.thumb-tooltip.is-visible{opacity:1;visibility:visible}
 
 /* ---------- pannelli ---------- */
 .panel{
@@ -442,11 +486,31 @@ picture{display:block}
 .panel__text p + p{margin-top:20px}
 .panel__visual{flex:1 1;display:flex;justify-content:flex-start}
 .panel__visual img{width:100%;max-width:340px;aspect-ratio:1;object-fit:cover;filter:grayscale(1)}
-.panel__links{display:flex;gap:60px;margin-top:40px;color:var(--mut)}
-.panel__links a{display:inline-block;padding:2px 0;font-size:20px;transition:color .25s}
-.panel__links a:hover{color:var(--ink)}
+.panel__links{display:flex;align-items:baseline;gap:60px;margin-top:40px;color:var(--mut)}
+.panel__links a,
+.panel__links button{
+  display:inline-block;padding:2px 0;font-size:20px;
+  border-bottom:1px solid transparent;
+  transition:color .25s,border-color .25s;
+}
+.panel__links a:hover,
+.panel__links button:hover,
+.panel__links button.is-done{color:var(--ink);border-bottom-color:var(--ink)}
 .panel__mail{font-size:clamp(26px,4vw,44px);letter-spacing:-.03em;border-bottom:1px solid var(--ink)}
 .panel__note{margin-top:28px!important;color:var(--mut);font-size:18px!important}
+.availability{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:500;letter-spacing:.02em;color:var(--mut);
+}
+.availability__dot{
+  width:6px;height:6px;flex:0 0 auto;border-radius:50%;
+  background:currentColor;
+  animation:availability-pulse 2.6s var(--ease-soft) infinite;
+}
+@keyframes availability-pulse{
+  0%,100%{opacity:.35;transform:scale(.8)}
+  50%{opacity:1;transform:scale(1)}
+}
 
 .panel--list .panel__inner{
   display:grid;
@@ -571,7 +635,8 @@ picture{display:block}
   .panel__text p{font-size:clamp(14px,2.5vw,18px)}
   .panel__visual img{max-width:min(100%,240px)}
   .panel__links{gap:clamp(16px,4vw,40px);margin-top:clamp(16px,4vw,36px)}
-  .panel__links a{font-size:clamp(14px,2.5vw,18px)}
+  .panel__links a,
+  .panel__links button{font-size:clamp(14px,2.5vw,18px)}
   .cv__list li{grid-template-columns:clamp(56px,12vw,90px) 1fr;gap:clamp(6px,2vw,16px)}
 
   .back{
@@ -623,6 +688,12 @@ picture{display:block}
   .brand,.brand__yr{font-size:clamp(28px,8.2vw,36px);line-height:1.2;letter-spacing:-.03em}
   .nav{margin-top:clamp(12px,2.2vh,20px)}
   .nav button{font-size:clamp(15px,4.2vw,17px);line-height:1.45}
+  .nav-wrap{display:block}
+  .theme-toggle{
+    position:fixed;z-index:1;
+    top:calc(var(--pad-top) - 1px);right:var(--gutter);
+    width:34px;height:34px;
+  }
   /* .brand e .nav button hanno pointer-events:auto: vanno disattivati anche
      loro, altrimenti da telefono coprono i link dei pannelli */
   body:has(.gallery.is-zoomed) .top,
@@ -799,18 +870,13 @@ picture{display:block}
     border-radius:4px;
     overflow:hidden;
     opacity:.35;
-    background:rgba(0,0,0,.08);
-    box-shadow:0 0 0 1px rgba(0,0,0,.08);
+    background:var(--thumb-bg);
+    box-shadow:0 0 0 1px var(--thumb-ring);
     transform:none;
     transition:opacity .3s var(--ease-soft),box-shadow .3s var(--ease-soft),transform .3s var(--ease-soft);
     cursor:pointer;
   }
-  @media (prefers-color-scheme:dark){
-    .timeline button{
-      background:rgba(255,255,255,.08);
-      box-shadow:0 0 0 1px rgba(255,255,255,.1);
-    }
-  }
+  .thumb-tooltip{display:none}
   .timeline button:hover{
     opacity:.8;
   }
@@ -947,5 +1013,6 @@ picture{display:block}
   .panel,.panel__inner,.back,.cursor,.cursor::after,#year .year__digit{
     transition-duration:.01ms!important;transition-delay:0s!important;
   }
-  .gallery__hint .hint__arrow{animation:none}
+  .gallery__hint .hint__arrow,
+  .availability__dot{animation:none}
 }

@@ -181,6 +181,24 @@ Senza JavaScript un foglio dentro `<noscript>` riporta tutto a scorrimento
 normale, impila le slide una sotto l'altra e mostra i pannelli in fondo: la
 pagina resta leggibile.
 
+## Dettagli minimi
+
+- Le miniature della filmstrip mostrano un tooltip con titolo e anno al passaggio
+  del mouse o al focus da tastiera; su telefono non compaiono.
+- In **Contatti** c'è il badge «Disponibile per progetti» e il pulsante **Copia**
+  accanto all'email, con feedback visivo e un messaggio per gli screen reader.
+- L'icona del tema parte da **Auto**: al primo clic passa al tema opposto a
+  quello mostrato dal sistema e da lì alterna solo **Chiaro / Scuro**. Su tablet
+  e desktop è appena a sinistra della navigazione, su telefono sta in alto a
+  destra. L'SVG cambia stato (mezzo cerchio, sole, luna) e l'`aria-label` annuncia
+  il tema attuale e il prossimo. La scelta è salvata in `localStorage` con la
+  chiave `michelelana-theme`; finché non viene scelta, `Auto` segue
+  `prefers-color-scheme`. Il tema aggiorna variabili CSS, colori delle varianti
+  light/dark delle immagini e `<meta name="theme-color">`. Due piccoli script
+  inline applicano il tema salvato prima del primo paint: uno nell'`<head>`
+  imposta `data-theme` e i colori, uno in fondo alla pagina sceglie le immagini.
+  L'indirizzo copiato è letto dal link mailto, quindi va aggiornato un solo punto.
+
 ## Il download dell'APK
 
 Il pulsante sulla scheda di Strati **non dipende né dal tag né dal nome del

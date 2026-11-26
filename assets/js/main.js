@@ -39,6 +39,89 @@
   var flipAnim = null, fadeAnims = [];
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  /* ---------- tema: auto / chiaro / scuro ---------- */
+  var root = document.documentElement;
+  var THEME_KEY = 'michelelana-theme';
+  var themeToggle = document.querySelector('[data-theme-toggle]');
+  var THEME_LABELS = { auto: 'Auto', light: 'Chiaro', dark: 'Scuro' };
+  var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+  /* Auto è solo il punto di partenza: al primo clic si passa al tema opposto
+     a quello che il sistema sta mostrando, poi si alterna chiaro/scuro. */
+  function nextTheme(choice) {
+    if (choice === 'auto') return darkQuery.matches ? 'light' : 'dark';
+    return choice === 'light' ? 'dark' : 'light';
+  }
+  function currentChoice() {
+    var value = root.getAttribute('data-theme');
+    return value === 'light' || value === 'dark' ? value : 'auto';
+  }
+
+  function applyTheme(choice, save) {
+    choice = choice === 'light' || choice === 'dark' ? choice : 'auto';
+    if (choice === 'auto') {
+      root.removeAttribute('data-theme');
+      if (save) { try { localStorage.removeItem(THEME_KEY); } catch (e) {} }
+    } else {
+      root.setAttribute('data-theme', choice);
+      if (save) { try { localStorage.setItem(THEME_KEY, choice); } catch (e) {} }
+    }
+    if (themeToggle) {
+      var label = THEME_LABELS[choice];
+      themeToggle.setAttribute('data-state', choice);
+      themeToggle.setAttribute('title', 'Tema: ' + label);
+      themeToggle.setAttribute('aria-label', 'Tema: ' + label + '. Attiva per passare a ' + THEME_LABELS[nextTheme(choice)]);
+    }
+    /* Le varianti light/dark seguono il tema scelto, non solo il sistema.
+       La funzione è definita nell'head, prima del primo paint. */
+    if (window.__themeMedia) window.__themeMedia(choice);
+  }
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function () {
+      applyTheme(nextTheme(currentChoice()), true);
+    });
+  }
+  function onSchemeChange() { if (currentChoice() === 'auto') applyTheme('auto', false); }
+  if (darkQuery.addEventListener) darkQuery.addEventListener('change', onSchemeChange);
+  else if (darkQuery.addListener) darkQuery.addListener(onSchemeChange);
+  applyTheme(currentChoice(), false);
+
+  /* Tooltip delle miniature: titolo e anno presi dalla slide corrispondente.
+     Il tooltip è un elemento fisso, così non cambia la larghezza della striscia. */
+  var tooltip = document.getElementById('thumb-tooltip');
+  var hoverCapable = window.matchMedia('(hover:hover) and (pointer:fine)');
+
+  function hideThumbTip() {
+    if (!tooltip) return;
+    tooltip.classList.remove('is-visible');
+  }
+
+  function showThumbTip(button) {
+    if (!tooltip) return;
+    var rect = button.getBoundingClientRect();
+    tooltip.textContent = button.getAttribute('data-tip') || '';
+    tooltip.style.left = Math.round(rect.left + rect.width / 2) + 'px';
+    tooltip.style.top = Math.round(rect.top - 10) + 'px';
+    tooltip.classList.add('is-visible');
+  }
+
+  thumbs.forEach(function (b) {
+    var slide = slides[Number(b.getAttribute('data-go'))];
+    var date = slide && slide.querySelector('.slide__date');
+    var title = b.getAttribute('aria-label') || (slide && slide.getAttribute('aria-label')) || '';
+    var tip = title + (date ? ' · ' + date.textContent.trim() : '');
+    b.setAttribute('data-tip', tip);
+    b.setAttribute('aria-label', tip);
+    b.addEventListener('pointerenter', function () {
+      if (hoverCapable.matches) showThumbTip(b);
+    });
+    b.addEventListener('pointerleave', hideThumbTip);
+    b.addEventListener('focus', function () { showThumbTip(b); });
+    b.addEventListener('blur', hideThumbTip);
+  });
+  window.addEventListener('resize', hideThumbTip);
+
   var lastSlideTime = 0;
   var lastWheelTime = 0;
   var yearDigits = [];
@@ -680,6 +763,57 @@
   });
   window.addEventListener('resize', syncCv);
   syncCv();
+
+  /* ---------- copia email ---------- */
+  var copyButton = document.querySelector('.copy-mail');
+  if (copyButton) {
+    var copyStatus = document.getElementById('copy-status');
+    var copyLabel = copyButton.textContent.trim();
+    var copyTimer = null;
+
+    function copyFeedback(message, ok) {
+      copyButton.textContent = message;
+      copyButton.classList.toggle('is-done', !!ok);
+      if (copyStatus) {
+        copyStatus.textContent = ok
+          ? 'Indirizzo email copiato negli appunti.'
+          : 'Non è stato possibile copiare l’indirizzo email.';
+      }
+      window.clearTimeout(copyTimer);
+      copyTimer = window.setTimeout(function () {
+        copyButton.textContent = copyLabel;
+        copyButton.classList.remove('is-done');
+        if (copyStatus) copyStatus.textContent = '';
+      }, 1800);
+    }
+
+    function copyFallback(text) {
+      var field = document.createElement('textarea');
+      field.value = text;
+      field.setAttribute('readonly', '');
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      field.style.userSelect = 'text';
+      document.body.appendChild(field);
+      field.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(field);
+      copyFeedback(ok ? 'Copiato ✓' : 'Copia non riuscita', ok);
+    }
+
+    copyButton.addEventListener('click', function () {
+      var mail = document.querySelector('.panel__mail');
+      var text = mail ? mail.getAttribute('href').replace(/^mailto:/, '') : '';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          copyFeedback('Copiato ✓', true);
+        }, function () { copyFallback(text); });
+      } else {
+        copyFallback(text);
+      }
+    });
+  }
 
   function goHome() {
     if (activePanel) closePanel();

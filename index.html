@@ -22,8 +22,38 @@
 <meta name="twitter:image" content="https://michelelana.it/assets/img/og-image.jpg">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var saved = null;
+    try {
+      var value = localStorage.getItem('michelelana-theme');
+      if (value === 'light' || value === 'dark') saved = value;
+    } catch (e) {}
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+    /* Una sola funzione per le varianti light/dark: la usa anche main.js.
+       Deve girare prima che il browser scelga le immagini, non solo al click. */
+    window.__themeMedia = function (choice) {
+      var dark = choice === 'dark' ||
+        (choice === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var sources = document.querySelectorAll('picture source[data-auto-media], picture source[media*="prefers-color-scheme: dark"]');
+      Array.prototype.forEach.call(sources, function (s) {
+        if (!s.getAttribute('data-auto-media')) s.setAttribute('data-auto-media', s.getAttribute('media'));
+        s.setAttribute('media', choice === 'auto' ? s.getAttribute('data-auto-media') : (dark ? 'all' : 'not all'));
+      });
+      var metas = document.querySelectorAll('meta[name="theme-color"]');
+      Array.prototype.forEach.call(metas, function (meta, i) {
+        var darkMeta = i === 1;
+        meta.setAttribute('media', choice === 'auto'
+          ? (darkMeta ? '(prefers-color-scheme: dark)' : '(prefers-color-scheme: light)')
+          : (dark === darkMeta ? 'all' : 'not all'));
+      });
+    };
+    if (saved) window.__themeMedia(saved);
+  })();
+</script>
 <link rel="preload" href="assets/fonts/geist-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/style.css?v=20261126o">
+<link rel="stylesheet" href="assets/css/style.css?v=20261126r">
 
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Person","name":"Michele Lana",
@@ -33,7 +63,7 @@
 </script>
 <noscript><style>
   html,body{position:static!important;overflow:auto!important;height:auto!important}
-  .cursor,.timeline,.back,.nav{display:none!important}
+  .cursor,.timeline,.back,.nav,.theme-toggle,.copy-mail{display:none!important}
   .gallery{position:static!important;height:auto!important;overflow:visible!important}
   .gallery__viewport{overflow:visible!important}
   .gallery__track{display:block!important;transform:none!important}
@@ -64,12 +94,32 @@
     <button class="brand" type="button" data-panel="lavori" aria-label="Torna ai lavori">
       <span>Michele Lana</span><span class="brand__yr"><span id="year" role="img" aria-label="2026">2026</span></span>
     </button>
-    <nav class="nav" aria-label="Navigazione">
-      <button type="button" data-panel="lavori" aria-current="true">Lavori</button>
-      <button type="button" data-panel="chi-sono">Chi sono</button>
-      <button type="button" data-panel="percorso">Percorso</button>
-      <button type="button" data-panel="contatti">Contatti</button>
-    </nav>
+    <div class="nav-wrap">
+      <button class="theme-toggle" type="button" data-theme-toggle data-state="auto"
+              aria-label="Tema: Auto. Attiva per passare a Chiaro" title="Tema: Auto">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g class="theme-icon theme-icon--auto">
+            <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/>
+          </g>
+          <g class="theme-icon theme-icon--light">
+            <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M5 5l1.8 1.8M17.2 17.2 19 19M19 5l-1.8 1.8M6.8 17.2 5 19"
+                  fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+          <g class="theme-icon theme-icon--dark">
+            <path d="M20.2 15.2A8.6 8.6 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"
+                  fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          </g>
+        </svg>
+      </button>
+      <nav class="nav" aria-label="Navigazione">
+        <button type="button" data-panel="lavori" aria-current="true">Lavori</button>
+        <button type="button" data-panel="chi-sono">Chi sono</button>
+        <button type="button" data-panel="percorso">Percorso</button>
+        <button type="button" data-panel="contatti">Contatti</button>
+      </nav>
+    </div>
   </div>
 </header>
 
@@ -350,6 +400,7 @@
       <button type="button" data-go="9" aria-label="Unsplash"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/unsplash-dark.jpg?v=20261126l"><img src="assets/img/thumbs/unsplash-light.jpg?v=20261126l" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
       <button type="button" data-go="10" aria-label="SoundCloud"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/img/thumbs/soundcloud-dark.jpg?v=20261126l"><img src="assets/img/thumbs/soundcloud-light.jpg?v=20261126l" alt="" width="128" height="80" loading="lazy" decoding="async"></picture></button>
     </nav>
+    <div class="thumb-tooltip" id="thumb-tooltip"></div>
     <div class="gallery__hint" aria-hidden="true">
       <div class="hint__row hint--touch">
         <span class="hint__cmd"><span class="hint__arrow hint__arrow--x">&#8592;&#8594;</span><span>Swipe per cambiare</span></span>
@@ -428,8 +479,13 @@
     <div class="panel__inner">
       <div class="panel__text">
         <p>Hai un progetto in mente? Scrivimi.</p>
-        <div class="panel__links"><div><a class="panel__mail" href="mailto:info@michelelana.it">info@michelelana.it</a></div></div>
+        <p class="availability"><span class="availability__dot" aria-hidden="true"></span>Disponibile per progetti</p>
+        <div class="panel__links">
+          <div><a class="panel__mail" href="mailto:info@michelelana.it">info@michelelana.it</a></div>
+          <div><button class="copy-mail" type="button" aria-label="Copia indirizzo email">Copia</button></div>
+        </div>
         <p class="panel__note">Torino, Italia &middot; solo da remoto</p>
+        <p class="sr" id="copy-status" role="status" aria-live="polite"></p>
       </div>
     </div>
   </section>
@@ -440,6 +496,9 @@
   <svg viewBox="0 0 60 60" aria-hidden="true"><path d="M26 56 4 30 26 4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
 </button>
 
-<script src="assets/js/main.js?v=20261126m" defer></script>
+<script>
+  if (window.__themeMedia) window.__themeMedia(document.documentElement.getAttribute('data-theme') || 'auto');
+</script>
+<script src="assets/js/main.js?v=20261126t" defer></script>
 </body>
 </html>
