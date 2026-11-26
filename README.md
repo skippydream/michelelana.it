@@ -46,7 +46,10 @@ Come nella reference ci sono **due stati**, su desktop e su mobile:
   spostato di conseguenza). Si vede solo l'immagine, senza titolo, e le card
   lontane si schiariscono. Le card si sovrappongono di ~650 px: tra un'immagine
   e l'altra resta uno spazio di circa 60 px. Si scorre **lateralmente** con
-  rotellina/trackpad orizzontale, swipe, frecce `←`/`→` o `Home`/`End`.
+  rotellina/trackpad orizzontale, trascinamento con mouse/dito/penna, swipe,
+  frecce `←`/`→` o `Home`/`End`. La card segue il puntatore in tempo reale; al
+  rilascio conta la velocità (flick) o la distanza. Alle estremità non si avvolge:
+  la card oppone resistenza e **rimbalza** con una molla.
 - **Zoom in (gallery).** Cliccando l'immagine di una card (o con rotellina
   verticale, freccia `↑`, swipe verso l'alto, barra spaziale/Invio) la card si apre a schermo intero: a
   sinistra compaiono titolo, sottotitolo, dettagli e link, a destra il progetto
@@ -74,12 +77,20 @@ l'anno cambia scatta solo la cifra (o le cifre) che è davvero cambiata, senza
 far lampeggiare quelle uguali. La rotellina verticale comanda lo zoom, quella orizzontale il paging;
 da tastiera `←`/`→` fanno il paging, mentre `↑` entra nella card e `↓` ne esce,
 come gli swipe verticali. Sul touch vale la stessa distinzione tra swipe verticale
-e orizzontale, più il pizzico. `main.js` blocca solo il paging per 300 ms (120 ms con reduced motion)
-e assorbe la rotellina per 450 ms dopo uno scatto, mentre lo zoom resta sempre
-cliccabile. In basso la
+e orizzontale, più il pizzico. Gesti e rotellina sono bloccati sull'asse scelto al
+primo movimento: un gesto produce **una sola azione** e si riarma dopo 90 ms di
+silenzio, senza cooldown fissi. In basso la
 **timeline** di miniature resta disponibile nello zoom-in: un clic apre direttamente
 il progetto scelto e torna allo zoom-out. Nello zoom-in le slide inattive hanno
 `inert` e `aria-hidden="true"`.
+
+Sotto l'hint c'è una **barra di avanzamento** minima (2 px, lunghezza
+proporzionale a `index + 1 / numero di slide`) che indica la posizione; lo
+screen reader riceve lo stesso stato in un `#gallery-status` con `aria-live`.
+Etichette delle slide e testo d'aiuto sono generati da `slides.length`, quindi
+non c'è più nessun «11» scritto a mano. Appena si cambia slide le immagini delle
+due card vicine passano a `loading="eager"`, così lo scatto successivo non
+aspetta il caricamento.
 
 ### Responsive: desktop ≥ 1241 px, tablet 601–1240 px, telefono sotto i 600 px
 
@@ -89,10 +100,18 @@ dispositivo a destra, header e filmstrip dove sono su desktop) ma ogni misura è
 fluida via `clamp()` e cinque variabili (`--pad-top`, `--pad-bottom`,
 `--gutter`, `--content-w`, `--timeline-w`). Le 11 miniature della filmstrip, in
 particolare, sono calcolate dallo spazio realmente disponibile
-(`clamp(36px, …/11, 120px)`) invece di restare fisse a 120 px: non vengono più
-tagliate sul lato sinistro quando la finestra si restringe, e scalano anche su
-desktop per restare dentro la larghezza utile. `main.js` usa la stessa soglia
-di 1240 px per inner, card, dispositivi e compattazione di Strati.
+(`clamp(36px, …/var(--slide-count), 120px)`) invece di restare fisse a 120 px:
+non vengono più tagliate sul lato sinistro quando la finestra si restringe, e
+scalano anche su desktop per restare dentro la larghezza utile.
+
+Tutte le misure usate da `main.js` (`--inner-w`, `--card-w`, `--dev-w`,
+`--phone-w`, `--col1`, `--gap`, `--pair-gap`, `--extra`, `--overlap-floor`,
+`--pad-top`, `--pad-bottom`, `--desktop`, `--pv-start`) sono dichiarate nel CSS
+con `@property` e lette con `getComputedStyle`: non esistono più due copie delle
+stesse soglie e formule. JS conserva solo i calcoli derivati (k, overlap,
+allineamento del visuale). Il resize è limitato a un `requestAnimationFrame`,
+quindi anche un trascinamento della finestra non produce più un ricalcolo per
+ogni evento.
 
 In landscape compatto (altezza ≤ 520 px) si riducono i font, si sposta la
 freccia e cresce il padding inferiore; i dispositivi sono limitati dall'altezza
@@ -170,7 +189,10 @@ Chi sono, Percorso e Contatti non sono più sotto lo slideshow: sono **pannelli*
 sovrapposti che si aprono dalla navigazione in alto (come l'About di Mike) e si
 chiudono con la freccia (nella colonna del testo, in alto a sinistra sul telefono),
 con `Escape` o cliccando «Lavori».
-Mentre un pannello è aperto la galleria diventa `inert`.
+Mentre un pannello è aperto la galleria diventa `inert`: il pannello è un
+`role="dialog"` con `aria-modal="true"`, riceve il focus appena si apre,
+intrappola `Tab` al suo interno e restituisce il focus al pulsante che l'ha
+aperto quando si chiude.
 
 Il pannello **Percorso** è diviso in tre gruppi: Esperienza, Formazione e
 Competenze. Su desktop e tablet sono una griglia a due colonne, con Formazione
@@ -184,6 +206,10 @@ pagina resta leggibile.
 
 ## Dettagli minimi
 
+- La history del browser ha una sola voce «away» per progetto e pannello
+  insieme (`{ slide, panel }`): Back torna sempre ai lavori, Forward ripristina
+  entrambi. Durante il ripristino non viene scritta alcuna voce, altrimenti il
+  Forward successivo verrebbe cancellato.
 - Le miniature della filmstrip mostrano un tooltip con titolo e anno al passaggio
   del mouse o al focus da tastiera; su telefono non compaiono.
 - In **Contatti** c'è il badge «Disponibile per progetti» e il pulsante **Copia**
@@ -229,11 +255,14 @@ in `it` e `en`; il valore italiano deve corrispondere al testo nell'HTML.
 Gli screenshot dentro i frame restano nelle loro lingue originali: sono
 catture reali dei progetti, non testi del sito.
 
-- `tools/check-ui.py` verifica le etichette in EN e IT (back e miniature), il
-  ciclo del tema, la persistenza dopo il reload, la 404, le varianti delle
-  immagini, le frecce con il focus sulle miniature e il Back/Forward del browser.
-  Serve `websocket-client` e avvia da sé Firefox
-  headless e un server locale: `python3 tools/check-ui.py`.
+- `tools/check-ui.py` verifica le etichette in EN e IT (back, miniature, slide e
+  aiuto con il numero giusto), il ciclo del tema, la persistenza dopo il reload,
+  la 404, le varianti delle immagini, frecce rapide e focus sulle miniature,
+  rimbalzo ai bordi, drag live e flick, progress bar, annuncio e preload, focus e trap dei dialog,
+  il layout su desktop/tablet/telefono e il Back/Forward del browser. Serve
+  `websocket-client` e avvia da sé Firefox headless e un server locale:
+  `python3 tools/check-ui.py`. Con `python3 tools/check-ui.py --shots DIR` salva
+  anche tre screenshot (desktop, tablet, telefono) da guardare a occhio.
 
 ## Il download dell'APK
 

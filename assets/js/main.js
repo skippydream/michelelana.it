@@ -15,6 +15,16 @@
   function tr(key) {
     return window.MicheleI18n ? window.MicheleI18n.t(key) : key;
   }
+  function format(key, values) {
+    var text = tr(key);
+    Object.keys(values).forEach(function (k) {
+      text = text.replace('{' + k + '}', function () { return values[k]; });
+    });
+    return text;
+  }
+  function focusableIn(el) {
+    return Array.prototype.slice.call(el.querySelectorAll('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])'));
+  }
 
   var yearEl = document.getElementById('year');
 
@@ -26,6 +36,7 @@
   var pairSlides = Array.prototype.slice.call(gallery.querySelectorAll('.slide--pachamar'));
   var phoneSlides = Array.prototype.slice.call(gallery.querySelectorAll('.slide--phone'));
   var thumbs = Array.prototype.slice.call(gallery.querySelectorAll('.timeline button'));
+  gallery.style.setProperty('--slide-count', slides.length);
   var navButtons = Array.prototype.slice.call(document.querySelectorAll('.nav button[data-panel]'));
   var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
   var back = document.querySelector('.back');
@@ -35,6 +46,7 @@
   var zoomed = false;
   var locked = false;       // solo per il paging orizzontale
   var activePanel = null;
+  var panelTrigger = null;
   var LOCK = 300;           // cooldown reattivo tra uno scatto e l'altro
   var FLY = 520;            // durata scattante e fluida dell'enlargement (GPU composited)
   var EASE = 'cubic-bezier(.16,1,.3,1)';
@@ -131,6 +143,40 @@
     });
   }
   refreshThumbTips();
+
+  /* Etichette, annuncio e preload: non toccano lo scroll né la geometria. */
+  function slideLabel(i) {
+    var h2 = slides[i].querySelector('.slide__text h2');
+    return format('gallery.slide', {
+      n: i + 1, total: slides.length,
+      title: h2 ? h2.textContent.trim() : ''
+    });
+  }
+  function refreshSlideLabels() {
+    slides.forEach(function (s, i) { s.setAttribute('aria-label', slideLabel(i)); });
+  }
+  function updateSlideUi() {
+    var fill = gallery.querySelector('.gallery__progress-fill');
+    if (fill) fill.style.width = ((index + 1) / slides.length * 100) + '%';
+    var status = document.getElementById('gallery-status');
+    var text = slideLabel(index);
+    if (status && status.textContent !== text) status.textContent = text;
+  }
+  function preloadNeighbours() {
+    [index - 1, index + 1].forEach(function (i) {
+      var s = slides[i];
+      if (!s) return;
+      Array.prototype.forEach.call(s.querySelectorAll('img'), function (img) {
+        img.loading = 'eager';
+      });
+    });
+  }
+  function refreshHelp() {
+    var help = document.getElementById('gallery-help');
+    if (help) help.textContent = format('nav.help', { n: slides.length });
+  }
+  refreshSlideLabels();
+  refreshHelp();
 
   thumbs.forEach(function (b) {
     b.addEventListener('pointerenter', function () {
@@ -402,6 +448,8 @@
       else b.removeAttribute('aria-current');
     });
     centerActiveThumb(index);
+    updateSlideUi();
+    preloadNeighbours();
   }
 
   function lock() {
@@ -517,6 +565,9 @@
     index = dest;
     if (zoomed && !activePanel && isAwayState()) markAway({ type: 'slide', index: index });
     apply();
+    var onThumb = document.activeElement && document.activeElement.closest &&
+      document.activeElement.closest('.timeline button');
+    if (onThumb) thumbs[index].focus({ preventScroll: true });
     return true;
   }
 
@@ -707,10 +758,17 @@
       var to = Number(b.getAttribute('data-go'));
       if (to === index && !zoomed) return;
       transitionTo(to, false);
+      b.focus({ preventScroll: true });
     });
   });
 
   /* ---------- pannelli ---------- */
+  panels.forEach(function (p) {
+    p.setAttribute('role', 'dialog');
+    p.setAttribute('aria-modal', 'true');
+    p.setAttribute('tabindex', '-1');
+  });
+
   function setNav(id) {
     navButtons.forEach(function (b) {
       if (b.getAttribute('data-panel') === id) b.setAttribute('aria-current', 'true');
@@ -718,10 +776,11 @@
     });
   }
 
-  function openPanel(id) {
+  function openPanel(id, trigger) {
     if (id === 'lavori') { goHome(); return; }
     var panel = document.getElementById(id);
     if (!panel || activePanel === id) return;
+    if (!activePanel) panelTrigger = trigger || document.activeElement;
     if (activePanel) {
       var old = document.getElementById(activePanel);
       old.classList.remove('is-open');
@@ -732,9 +791,12 @@
     panel.hidden = false;
     void panel.offsetWidth; // fa partire la transizione dallo stato chiuso
     panel.classList.add('is-open');
+    void panel.offsetWidth; // rende visibile il pannello prima di spostare il focus
     back.hidden = false;
     gallery.toggleAttribute('inert', true);
     setNav(id);
+    var first = focusableIn(panel)[0] || panel;
+    first.focus({ preventScroll: true });
   }
 
   function closePanel() {
@@ -748,10 +810,12 @@
     if (zoomed) back.setAttribute('aria-label', tr('nav.backTimeline'));
     gallery.removeAttribute('inert');
     setNav('lavori');
+    if (panelTrigger && panelTrigger.isConnected) panelTrigger.focus({ preventScroll: true });
+    panelTrigger = null;
   }
 
   navButtons.forEach(function (b) {
-    b.addEventListener('click', function () { openPanel(b.getAttribute('data-panel')); });
+    b.addEventListener('click', function () { openPanel(b.getAttribute('data-panel'), b); });
   });
 
   /* Percorso: su telefono le tre sezioni diventano tab; su desktop e tablet
@@ -907,12 +971,21 @@
   }, { passive: true });
 
   document.addEventListener('keydown', function (e) {
-    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
     if (e.key === 'Escape') {
       goHome();
       return;
     }
-    if (activePanel) return;
+    if (activePanel) {
+      if (e.key !== 'Tab') return;
+      var items = focusableIn(document.getElementById(activePanel));
+      if (!items.length) return;
+      var first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      return;
+    }
+    if (e.shiftKey) return;
     var el = document.activeElement;
     /* Le frecce devono funzionare anche quando il focus è su una miniatura:
        è il modo normale di navigare la galleria da tastiera. Space/Invio
@@ -936,6 +1009,9 @@
   function refreshLanguage() {
     applyTheme(currentChoice(), false);
     refreshThumbTips();
+    refreshSlideLabels();
+    refreshHelp();
+    updateSlideUi();
     if (back) {
       back.setAttribute('aria-label', activePanel ? tr('nav.brandBack') : tr('nav.backTimeline'));
     }

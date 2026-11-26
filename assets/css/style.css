@@ -27,6 +27,10 @@
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-soft:cubic-bezier(.22,1,.36,1);
   --dur:.5s;
+  /* paging: partenza graduale e decelerazione morbida, senza lo scatto iniziale
+     di --ease. Separata da --dur perché non cambi le altre transizioni. */
+  --paging-dur:.6s;
+  --paging-ease:cubic-bezier(.25,.46,.45,.94);
   color-scheme:light;
 }
 /* Auto segue il sistema; Chiaro e Scuro forzano le variabili. */
@@ -198,7 +202,7 @@ picture{display:block}
 
 /* ---------- zoom: la stessa card che scala, senza rimbalzi né tagli ---------- */
 .gallery{--card-w:1240px;--inner-w:1641px;--k:1;--overlap:0px;--extra:0px;--pv:1}
-.gallery__track{transition:transform var(--dur) var(--ease)}
+.gallery__track{transition:transform var(--paging-dur) var(--paging-ease)}
 .slide{
   width:var(--slide-w,100vw);flex-basis:var(--slide-w,100vw);
   height:var(--slide-h,100vh);
@@ -257,6 +261,14 @@ picture{display:block}
   transition:opacity .55s var(--ease-soft);
 }
 .gallery.is-zoomed .gallery__hint{opacity:0}
+.gallery__hint .gallery__progress{
+  width:min(180px,42vw);height:2px;margin:0 auto 9px;border-radius:2px;
+  background:var(--line);overflow:hidden;
+}
+.gallery__hint .gallery__progress-fill{
+  display:block;width:0;height:100%;background:var(--ink);
+  transition:width var(--dur) var(--ease);
+}
 .gallery__hint .hint__row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px 8px}
 .gallery__hint .hint__row + .hint__row{margin-top:4px}
 .gallery__hint .hint__arrow{
@@ -436,7 +448,7 @@ picture{display:block}
   flex:0 0 auto;
   /* 11 miniature: anche su desktop la larghezza segue lo spazio utile,
      così la striscia non sborda; 120 px resta il tetto sui monitor larghi. */
-  width:clamp(72px,calc((min(1240px,100vw - clamp(24px,14vw,200px)) - 10*var(--thumb-gap) - 2px)/11),120px);
+  width:clamp(72px,calc((min(1240px,100vw - clamp(24px,14vw,200px)) - (var(--slide-count,11) - 1)*var(--thumb-gap) - 2px)/var(--slide-count,11)),120px);
   aspect-ratio:16/10;height:auto;display:block;
   padding:0;border:0;border-radius:4px;overflow:hidden;opacity:.32;
   background:var(--thumb-bg);
@@ -473,11 +485,12 @@ picture{display:block}
   background:var(--panel);
   backdrop-filter:blur(24px) saturate(180%);
   -webkit-backdrop-filter:blur(24px) saturate(180%);
-  opacity:0;visibility:hidden;
-  transition:opacity .65s var(--ease-soft),visibility .65s;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .65s var(--ease-soft);
 }
+.panel:not([hidden]){visibility:visible}
 .panel[hidden]{display:none}
-.panel.is-open{opacity:1;visibility:visible}
+.panel.is-open{opacity:1;pointer-events:auto}
 .panel .panel__inner{
   opacity:.55;transform:translateY(18px);
   transition:opacity .7s var(--ease-soft) .08s,transform .9s var(--ease) .08s;
@@ -627,7 +640,7 @@ picture{display:block}
     flex:0 0 auto;
     /* 11 miniature: la larghezza deriva dallo spazio utile, così la prima
        non viene più tagliata a sinistra quando la finestra si stringe */
-    width:clamp(36px,calc((100vw - clamp(24px,14vw,200px) - 10*var(--thumb-gap) - 2px)/11),120px);
+    width:clamp(36px,calc((100vw - clamp(24px,14vw,200px) - (var(--slide-count,11) - 1)*var(--thumb-gap) - 2px)/var(--slide-count,11)),120px);
     aspect-ratio:16/10;
     height:auto;
   }

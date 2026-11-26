@@ -34,7 +34,7 @@
         label: 'Navigazione',
         labelGallery: 'Lavori, slideshow',
         goTo: 'Vai a un lavoro',
-        help: `Galleria di undici progetti. Con il mouse usa lo scroll orizzontale della rotellina o del trackpad, le frecce sinistra e destra o il trascinamento per cambiare progetto; usa lo scroll verticale verso l'alto, la freccia su, la barra spaziale o Invio per entrare nel progetto, e lo scroll verso il basso, la freccia giù, Escape o un altro clic per uscire. Sul touch fai swipe left o right per cambiare progetto, swipe up per entrare e swipe down per uscire, oppure tocca il dispositivo; se hai un progetto o un pannello aperto, scorri dal bordo sinistro o usa il pulsante indietro del browser per tornare ai lavori. Puoi anche usare le miniature in basso per scegliere un progetto.`,
+        help: `Galleria di {n} progetti. Con il mouse usa lo scroll orizzontale della rotellina o del trackpad, le frecce sinistra e destra o il trascinamento per cambiare progetto; usa lo scroll verticale verso l'alto, la freccia su, la barra spaziale o Invio per entrare nel progetto, e lo scroll verso il basso, la freccia giù, Escape o un altro clic per uscire. Sul touch fai swipe left o right per cambiare progetto, swipe up per entrare e swipe down per uscire, oppure tocca il dispositivo; se hai un progetto o un pannello aperto, scorri dal bordo sinistro o usa il pulsante indietro del browser per tornare ai lavori. Puoi anche usare le miniature in basso per scegliere un progetto.`,
         brandBack: 'Torna ai lavori',
         backTimeline: 'Torna alla timeline'
       },
@@ -60,18 +60,8 @@
         scrollOpen: 'Scroll up, entra',
         scrollClose: 'Scroll down, esci'
       },
-      slide: {
-        1: 'Lavoro 1 di 11: Torino Sul Filo',
-        2: 'Lavoro 2 di 11: Gestionale Torino Sul Filo',
-        3: 'Lavoro 3 di 11: Biglietto Valle Orco Highline Festival',
-        4: 'Lavoro 4 di 11: Pachamar Yoga',
-        5: 'Lavoro 5 di 11: Appunti',
-        6: 'Lavoro 6 di 11: Frushío',
-        7: 'Lavoro 7 di 11: Strati',
-        8: 'Lavoro 8 di 11: Sun Seeker',
-        9: 'Lavoro 9 di 11: One Piece Watcher',
-        10: 'Lavoro 10 di 11: Unsplash',
-        11: 'Lavoro 11 di 11: SoundCloud'
+      gallery: {
+        slide: 'Lavoro {n} di {total}: {title}'
       },
       s1: {
         sub2: 'Sito e piattaforma biglietti',
@@ -256,7 +246,7 @@
         label: 'Navigation',
         labelGallery: 'Work, slideshow',
         goTo: 'Go to a project',
-        help: `A gallery of eleven projects. With a mouse, use horizontal scrolling on the wheel or trackpad, the left and right arrow keys, or drag to change project; use vertical scroll up, the up arrow, Space or Enter to open a project, and scroll down, the down arrow, Escape or another click to close it. On touch, swipe left or right to change project, swipe up to open and swipe down to close, or tap the device; if a project or panel is open, swipe from the left edge or use the browser's back button to return to the work. You can also use the thumbnails at the bottom to pick a project.`,
+        help: `A gallery of {n} projects. With a mouse, use horizontal scrolling on the wheel or trackpad, the left and right arrow keys, or drag to change project; use vertical scroll up, the up arrow, Space or Enter to open a project, and scroll down, the down arrow, Escape or another click to close it. On touch, swipe left or right to change project, swipe up to open and swipe down to close, or tap the device; if a project or panel is open, swipe from the left edge or use the browser's back button to return to the work. You can also use the thumbnails at the bottom to pick a project.`,
         brandBack: 'Back to work',
         backTimeline: 'Back to timeline'
       },
@@ -282,18 +272,8 @@
         scrollOpen: 'Scroll up to open',
         scrollClose: 'Scroll down to close'
       },
-      slide: {
-        1: 'Project 1 of 11: Torino Sul Filo',
-        2: 'Project 2 of 11: Torino Sul Filo admin dashboard',
-        3: 'Project 3 of 11: Valle Orco Highline Festival ticket',
-        4: 'Project 4 of 11: Pachamar Yoga',
-        5: 'Project 5 of 11: Appunti',
-        6: 'Project 6 of 11: Frushío',
-        7: 'Project 7 of 11: Strati',
-        8: 'Project 8 of 11: Sun Seeker',
-        9: 'Project 9 of 11: One Piece Watcher',
-        10: 'Project 10 of 11: Unsplash',
-        11: 'Project 11 of 11: SoundCloud'
+      gallery: {
+        slide: 'Project {n} of {total}: {title}'
       },
       s1: {
         sub2: 'Website and ticketing platform',
