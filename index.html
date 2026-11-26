@@ -100,9 +100,15 @@
 
 <header class="top">
   <div class="top__frame">
-    <button class="brand" type="button" data-panel="lavori" aria-label="Torna ai lavori" data-i18n-aria-label="nav.brandBack">
-      <span>Michele Lana</span><span class="brand__yr"><span id="year" role="img" aria-label="2026">2026</span></span>
-    </button>
+    <div class="brand-cluster">
+      <button class="brand" type="button" data-panel="lavori" aria-label="Torna ai lavori" data-i18n-aria-label="nav.brandBack">
+        <span>Michele Lana</span><span class="brand__yr"><span id="year" role="img" aria-label="2026">2026</span></span>
+      </button>
+      <button class="info-toggle" type="button" data-info-toggle
+              aria-label="Istruzioni" title="Istruzioni"
+              data-i18n-aria-label="nav.info.label" data-i18n-title="nav.info.label"
+              aria-expanded="false" aria-controls="info-popover"><span aria-hidden="true">i</span></button>
+    </div>
     <div class="nav-wrap">
       <nav class="nav" aria-label="Navigazione">
         <button type="button" data-panel="lavori" aria-current="true">Lavori</button>
@@ -133,6 +139,24 @@
             aria-label="Language: English. Click to switch to Italian" title="Language: English">
       <span class="lang-toggle__label" aria-hidden="true">EN</span>
     </button>
+    <div class="info-backdrop" id="info-backdrop" hidden></div>
+    <div class="info-popover" id="info-popover" role="dialog" aria-labelledby="info-title" hidden>
+      <div class="info-popover__head">
+        <span id="info-title" data-i18n="nav.info.title">Guida ai gesti</span>
+        <button class="info-popover__close" type="button" data-info-close
+                aria-label="Chiudi la guida" title="Chiudi la guida"
+                data-i18n-aria-label="nav.info.close" data-i18n-title="nav.info.close">&times;</button>
+      </div>
+      <div class="gallery__hint">
+        <div class="hint__row hint--touch">
+          <span class="hint__cmd"><span class="hint__arrow hint__arrow--x">&#8592;&#8594;</span><span>Swipe per cambiare</span></span>
+          <span class="hint__sep">&middot;</span>
+          <span class="hint__cmd"><span class="hint__arrow hint__arrow--up">&#8593;</span><span>Swipe up, entra</span></span>
+          <span class="hint__sep">&middot;</span>
+          <span class="hint__cmd"><span class="hint__arrow hint__arrow--down">&#8595;</span><span>Swipe down, esci</span></span>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 

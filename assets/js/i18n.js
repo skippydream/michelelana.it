@@ -36,7 +36,12 @@
         goTo: 'Vai a un lavoro',
         help: `Galleria di {n} progetti. Con il mouse usa lo scroll orizzontale della rotellina o del trackpad, le frecce sinistra e destra o il trascinamento per cambiare progetto; usa lo scroll verticale verso l'alto, la freccia su, la barra spaziale o Invio per entrare nel progetto, e lo scroll verso il basso, la freccia giù, Escape o un altro clic per uscire. Sul touch fai swipe left o right per cambiare progetto, swipe up per entrare e swipe down per uscire, oppure tocca il dispositivo; se hai un progetto o un pannello aperto, scorri dal bordo sinistro o usa il pulsante indietro del browser per tornare ai lavori. Puoi anche usare le miniature in basso per scegliere un progetto.`,
         brandBack: 'Torna ai lavori',
-        backTimeline: 'Torna alla timeline'
+        backTimeline: 'Torna alla timeline',
+        info: {
+          label: 'Istruzioni',
+          title: 'Guida ai gesti',
+          close: 'Chiudi la guida'
+        }
       },
       theme: {
         prefix: 'Tema: ',
@@ -248,7 +253,12 @@
         goTo: 'Go to a project',
         help: `A gallery of {n} projects. With a mouse, use horizontal scrolling on the wheel or trackpad, the left and right arrow keys, or drag to change project; use vertical scroll up, the up arrow, Space or Enter to open a project, and scroll down, the down arrow, Escape or another click to close it. On touch, swipe left or right to change project, swipe up to open and swipe down to close, or tap the device; if a project or panel is open, swipe from the left edge or use the browser's back button to return to the work. You can also use the thumbnails at the bottom to pick a project.`,
         brandBack: 'Back to work',
-        backTimeline: 'Back to timeline'
+        backTimeline: 'Back to timeline',
+        info: {
+          label: 'Instructions',
+          title: 'Gesture guide',
+          close: 'Close the guide'
+        }
       },
       theme: {
         prefix: 'Theme: ',

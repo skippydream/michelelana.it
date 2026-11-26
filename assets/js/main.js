@@ -56,12 +56,51 @@
   var restoring = false;   // true mentre rimetiamo una vista dopo Back/Forward
   var flipAnim = null, fadeAnims = [];
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var mobilePortrait = window.matchMedia('(max-width:600px) and (orientation:portrait)');
+  var MOBILE_GESTURE_GAIN = 2;
 
   /* ---------- tema: auto / chiaro / scuro ---------- */
   var root = document.documentElement;
   var THEME_KEY = 'michelelana-theme';
   var themeToggle = document.querySelector('[data-theme-toggle]');
   var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+  /* ---------- popup info (solo telefono) ---------- */
+  var infoToggle = document.querySelector('[data-info-toggle]');
+  var infoPopover = document.getElementById('info-popover');
+  var infoBackdrop = document.getElementById('info-backdrop');
+  var infoClose = infoPopover ? infoPopover.querySelector('[data-info-close]') : null;
+
+  function infoIsOpen() { return !!(infoPopover && !infoPopover.hidden); }
+  function closeInfo(restoreFocus) {
+    if (!infoIsOpen()) return;
+    infoPopover.hidden = true;
+    if (infoBackdrop) infoBackdrop.hidden = true;
+    if (infoToggle) infoToggle.setAttribute('aria-expanded', 'false');
+    if (restoreFocus && infoToggle) infoToggle.focus({ preventScroll: true });
+  }
+  function openInfo() {
+    if (!infoPopover || infoIsOpen() || !mobilePortrait.matches) return;
+    infoPopover.hidden = false;
+    if (infoBackdrop) infoBackdrop.hidden = false;
+    if (infoToggle) infoToggle.setAttribute('aria-expanded', 'true');
+    if (infoClose) infoClose.focus({ preventScroll: true });
+  }
+  if (infoToggle) {
+    infoToggle.addEventListener('click', function () {
+      if (infoIsOpen()) closeInfo(true);
+      else openInfo();
+    });
+  }
+  if (infoClose) infoClose.addEventListener('click', function () { closeInfo(true); });
+  document.addEventListener('pointerdown', function (e) {
+    if (!infoIsOpen()) return;
+    if (infoPopover.contains(e.target) || (infoToggle && infoToggle.contains(e.target))) return;
+    closeInfo(false);
+  });
+  function onMobileChange() { closeInfo(false); }
+  if (mobilePortrait.addEventListener) mobilePortrait.addEventListener('change', onMobileChange);
+  else if (mobilePortrait.addListener) mobilePortrait.addListener(onMobileChange);
 
   /* Auto è solo il punto di partenza: al primo clic si passa al tema opposto
      a quello che il sistema sta mostrando, poi si alterna chiaro/scuro. */
@@ -204,6 +243,12 @@
   var touchAxis = null;
 
   function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+  /* Su telefono il passo tra card è quasi largo quanto lo schermo: il gesto
+     vale il doppio, così bastano swipe corti per passare da una all'altra. */
+  function gestureDelta(dx) {
+    return dx * (mobilePortrait.matches ? MOBILE_GESTURE_GAIN : 1);
+  }
 
   /* ---------- galleria ---------- */
   // 601–1240 px è la viewport tablet: stesse regole fluide del CSS.
@@ -353,16 +398,33 @@
     }
   }
 
-  /* L'anno è una cifra per span: quando cambia, viene aggiornata e fatta
-     scattare solo la cifra (o delle cifre) che è davvero cambiata. */
-  function flashDigit(digit, value) {
-    clearTimeout(digit.yearTimer);
-    digit.yearValue = value;
-    digit.classList.add('is-changing');
-    digit.yearTimer = setTimeout(function () {
-      digit.textContent = value;
-      digit.classList.remove('is-changing');
-    }, 140);
+  /* L'anno scorre tutti gli anni intermedi, in su o in giù secondo la
+     direzione del cambio. Ogni anno resta visibile, poi sfuma; il tempo si
+     accorcia in modo esponenziale. */
+  var ROLL_START_MS = 120;
+  var ROLL_ACCEL = 0.86;
+  var ROLL_MIN_MS = 30;
+  var ROLL_FADE_MS = 45;
+  var yearRoll = 0;
+
+  function rollDelay(i) {
+    return Math.max(ROLL_MIN_MS, Math.round(ROLL_START_MS * Math.pow(ROLL_ACCEL, i)));
+  }
+
+  // Aggiorna solo le cifre che cambiano: 18->19 tocca l'ultima, 19->20 tocca
+  // le ultime due. Le altre restano ferme.
+  function showYear(year) {
+    var str = String(year), changed = [];
+    for (var i = 0; i < yearDigits.length; i++) {
+      var ch = str.charAt(i);
+      if (yearDigits[i].yearValue !== ch) {
+        yearDigits[i].yearValue = ch;
+        yearDigits[i].textContent = ch;
+        yearDigits[i].classList.remove('is-changing');
+        changed.push(yearDigits[i]);
+      }
+    }
+    return changed;
   }
 
   function setYear(value) {
@@ -370,6 +432,8 @@
     var next = String(value || '');
     var prev = yearEl.getAttribute('data-year');
     if (prev === next) return;
+    var token = ++yearRoll;
+    yearDigits.forEach(function (d) { d.classList.remove('is-changing'); });
     yearEl.setAttribute('data-year', next);
     yearEl.setAttribute('aria-label', next);
 
@@ -387,9 +451,30 @@
       return;
     }
 
-    for (var i = 0; i < next.length; i++) {
-      if (yearDigits[i].yearValue !== next.charAt(i)) flashDigit(yearDigits[i], next.charAt(i));
+    var from = parseInt(prev, 10), to = parseInt(next, 10);
+    if (reduce.matches || isNaN(from) || isNaN(to) || from === to) {
+      showYear(next);
+      return;
     }
+    var dir = to > from ? 1 : -1;
+    var years = [];
+    for (var y = from + dir; dir > 0 ? y <= to : y >= to; y += dir) years.push(y);
+    var i = 0;
+    function step() {
+      if (token !== yearRoll || i >= years.length) return;
+      var hold = rollDelay(i++);
+      var digits = showYear(years[i - 1]);
+      window.setTimeout(function () {
+        if (token !== yearRoll) return;
+        digits.forEach(function (d) { d.classList.add('is-changing'); });
+        window.setTimeout(function () {
+          if (token !== yearRoll) return;
+          digits.forEach(function (d) { d.classList.remove('is-changing'); });
+          step();
+        }, ROLL_FADE_MS);
+      }, hold);
+    }
+    step();
   }
 
   function apply() {
@@ -403,8 +488,7 @@
     // riduce perché la filmstrip sta al centro e il telefono alto la coprirebbe.
     // Su tablet/desktop cardAlign limita lo scale ai tablet stretti, così il
     // telefono non esce dalla card; in zoom torna sempre a 1.
-    var pv = zoomed ? 1 : (align ? align.pv :
-      (window.matchMedia('(max-width:600px) and (orientation:portrait)').matches ? 1.1 : 1.6));
+    var pv = zoomed ? 1 : (align ? align.pv : (mobilePortrait.matches ? 1.1 : 1.6));
     var extra = extraPhone();
     gallery.style.setProperty('--card-w', cw + 'px');
     gallery.style.setProperty('--inner-w', iw + 'px');
@@ -556,6 +640,7 @@
     if (canFlip) gallery.classList.add('no-transitions');
     index = to;
     zoomed = open;
+    if (open) closeInfo(false);
     if (open) markAway({ type: 'slide', index: to });
     else if (!activePanel) markHome();
     apply();
@@ -699,7 +784,7 @@
     } else if (absX > 1) {
       // Asse orizzontale: il track segue il delta, poi si aggancia al centro.
       prevDeltaY = 0;
-      scrollBy(-dx);
+      scrollBy(gestureDelta(-dx));
       e.preventDefault();
     }
   }
@@ -738,7 +823,7 @@
     }
     if (touchAxis === 'x') {
       beginScroll();
-      dragPx = clampTrackPx(touchStartOffset + dx);
+      dragPx = clampTrackPx(touchStartOffset + gestureDelta(dx));
       setTrackPx(dragPx);
     }
   }, { passive: true });
@@ -764,7 +849,7 @@
     touchAxis = null;
     if (Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx)) { setZoom(dy < 0); return; }
     if (Math.abs(dx) >= 45 && Math.abs(dx) > Math.abs(dy)) {
-      scrollBy(-dx);
+      scrollBy(gestureDelta(-dx));
       finishScroll();
     } else if (scrolling) {
       // Un tap durante lo snap ha già fermato il timer in touchstart.
@@ -805,7 +890,7 @@
     }
     if (hasDragged) {
       beginScroll();
-      dragPx = clampTrackPx(dragStartOffset + dx);
+      dragPx = clampTrackPx(dragStartOffset + gestureDelta(dx));
       setTrackPx(dragPx);
     }
   });
@@ -854,6 +939,7 @@
   }
 
   function openPanel(id, trigger) {
+    closeInfo(false);
     if (id === 'lavori') { goHome(); return; }
     var panel = document.getElementById(id);
     if (!panel || activePanel === id) return;
@@ -1050,6 +1136,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     if (e.key === 'Escape') {
+      if (infoIsOpen()) { closeInfo(true); return; }
       goHome();
       return;
     }

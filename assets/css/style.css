@@ -136,15 +136,15 @@ picture{display:block}
   display:inline-flex;
   font-variant-numeric:tabular-nums;
 }
-/* ogni cifra è uno span: scatta solo quella che cambia, le altre restano ferme */
+/* ogni cifra è uno span: scorre solo quella che cambia, le altre restano ferme */
 #year .year__digit{
   display:inline-block;
   will-change:transform,opacity;
-  transition:opacity .25s var(--ease-soft),transform .25s var(--ease);
+  transition:opacity .06s var(--ease-soft),transform .06s var(--ease);
 }
 #year .year__digit.is-changing{
   opacity:0;
-  transform:translateY(8px);
+  transform:translateY(6px);
 }
 .nav{pointer-events:auto;display:flex;flex-direction:column;align-items:flex-start;margin-top:2px;font-weight:200}
 .nav button{
@@ -253,6 +253,11 @@ picture{display:block}
 .gallery.is-zoomed .slide__text{opacity:1;transform:none}
 .gallery:not(.is-zoomed) .slide__links{pointer-events:none}
 .gallery:not(.is-zoomed) .timeline{opacity:0;pointer-events:none}
+/* info e popup servono solo sul telefono: altrove restano fuori dal flusso */
+.info-toggle,.info-popover,.info-backdrop{display:none}
+/* il wrapper non altera il flex dell'header su tablet/desktop */
+.brand-cluster{display:contents}
+
 /* legenda dei gesti: frecce animate in CSS (nitide, niente GIF) */
 .gallery__hint{
   position:absolute;left:50%;bottom:max(18px, calc(10px + env(safe-area-inset-bottom, 0px)));
@@ -265,7 +270,7 @@ picture{display:block}
 }
 .gallery.is-zoomed .gallery__hint{opacity:0}
 .gallery__hint .gallery__progress{
-  width:min(180px,42vw);height:2px;margin:0 auto 9px;border-radius:2px;
+  width:min(180px,42vw);height:2px;margin:0 auto 18px;border-radius:2px;
   background:var(--line);overflow:hidden;
 }
 .gallery__hint .gallery__progress-fill{
@@ -705,6 +710,7 @@ picture{display:block}
     --pad-top:max(20px, env(safe-area-inset-top, 20px));
     --pad-bottom:max(16px, env(safe-area-inset-bottom, 16px));
     --gutter:clamp(24px, 7vw, 36px);
+    --brand-fs:clamp(28px,8.2vw,36px);
   }
 
   .top{transition:opacity .45s var(--ease-soft)}
@@ -713,16 +719,61 @@ picture{display:block}
     display:block;
     padding:var(--pad-top) 0 0;
   }
-  .brand,.brand__yr{font-size:clamp(28px,8.2vw,36px);line-height:1.2;letter-spacing:-.03em}
+  .brand,.brand__yr{font-size:var(--brand-fs);line-height:1.2;letter-spacing:-.03em}
   .nav-wrap .nav{margin-top:clamp(13px,2.5vh,22px)}
   .nav button{font-size:clamp(15px,4.2vw,17px);line-height:1.45}
   .nav-wrap{display:block}
-  .theme-toggle,.lang-toggle{
+  .theme-toggle,.lang-toggle,.info-toggle{
     position:fixed;z-index:1;
     top:calc(var(--pad-top) + 10px);right:calc(var(--gutter) + 2px);
     width:34px;height:34px;
   }
   .lang-toggle{right:calc(var(--gutter) + 46px)}
+  /* "i" accanto all'anno, con lo stesso cerchio degli altri due pulsanti */
+  .brand-cluster{position:relative;display:block}
+  .info-toggle{
+    position:absolute;top:auto;right:auto;
+    left:calc(2.3 * var(--brand-fs) + 8px);
+    top:calc(1.8 * var(--brand-fs) - 17px);
+    display:flex;pointer-events:auto;
+    font:400 15px/1 var(--sans);
+  }
+  .info-toggle:hover{color:var(--ink);border-color:var(--ink)}
+  .info-backdrop{
+    display:none;pointer-events:auto;
+    position:fixed;inset:0;z-index:41;
+    background:rgba(0,0,0,.18);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  }
+  .info-backdrop:not([hidden]){display:block}
+  .info-popover{
+    display:none;pointer-events:auto;
+    position:fixed;
+    top:50%;left:50%;right:auto;transform:translate(-50%,-50%);
+    width:min(320px,calc(100vw - 2*var(--gutter)));
+    max-height:calc(100svh - 40px);overflow-y:auto;
+    z-index:42;
+    padding:14px 16px 16px;
+    border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    box-shadow:0 12px 40px var(--shadow);
+  }
+  .info-popover:not([hidden]){display:block}
+  .info-popover__head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-bottom:10px;color:var(--ink);font-size:13px;font-weight:400;
+  }
+  .info-popover__close{
+    flex:0 0 auto;width:26px;height:26px;
+    display:flex;align-items:center;justify-content:center;
+    padding:0;border:1px solid var(--line);border-radius:50%;
+    background:transparent;color:var(--mut);font-size:18px;line-height:1;
+  }
+  .info-popover .gallery__hint{
+    position:static;transform:none;left:auto;right:auto;bottom:auto;
+    max-width:none;font-size:12px;opacity:1;text-align:left;pointer-events:auto;
+  }
   /* .brand e .nav button hanno pointer-events:auto: vanno disattivati anche
      loro, altrimenti da telefono coprono i link dei pannelli */
   body:has(.gallery.is-zoomed) .top,
@@ -818,14 +869,13 @@ picture{display:block}
   }
 
   /* Dimensioni dispositivi coerenti */
-  /* Immagini più grandi: il 135% della colonna cresce anche sulle card
-     più strette, con un tetto sui telefoni più larghi. */
+  /* Dimensioni mobile originali: lasciano margine nelle card aperte. */
   .device--laptop{
-    width:min(135%,378px);
+    width:min(100%,280px);
     flex:0 0 auto;
   }
   .device--phone{
-    width:min(135%,175.5px);
+    width:min(100%,130px);
     flex:0 0 auto;
   }
   .slide__visual--pair{
@@ -835,13 +885,13 @@ picture{display:block}
     gap:8px;
   }
   .slide__visual--pair .device--laptop{
-    width:94.5%;
-    max-width:270px;
+    width:70%;
+    max-width:200px;
     flex:0 0 auto;
   }
   .slide__visual--pair .device--phone{
-    width:35.1%;
-    max-width:101.5px;
+    width:26%;
+    max-width:75px;
     flex:0 0 auto;
     transform:none;
   }
@@ -849,15 +899,35 @@ picture{display:block}
     display:none;
   }
   .slide--pachamar .device--phone{
-    width:min(135%,175.5px);
-    /* La regola --pair limita il telefono a 101,5 px: qui il laptop è nascosto
+    width:min(100%,130px);
+    /* La regola --pair limita il telefono a 75 px: qui il laptop è nascosto
        e il telefono deve occupare la stessa larghezza delle altre card. */
     max-width:none;
     transform:none;
   }
+  /* Timeline: immagini +25%; a card aperta restano le dimensioni safe. */
+  .gallery:not(.is-zoomed) .device--laptop{width:min(125%,350px)}
+  .gallery:not(.is-zoomed) .device--phone{width:min(125%,162.5px)}
+  .gallery:not(.is-zoomed) .slide__visual--pair .device--laptop{
+    width:87.5%;
+    max-width:250px;
+  }
+  .gallery:not(.is-zoomed) .slide__visual--pair .device--phone{
+    width:32.5%;
+    max-width:93.75px;
+  }
+  .gallery:not(.is-zoomed) .slide--pachamar .device--phone{
+    width:min(125%,162.5px);
+    max-width:none;
+  }
   .gallery:not(.is-zoomed) .slide--pachamar .slide__visual{
     transform:scale(var(--pv));
     transform-origin:center center;
+  }
+  /* Nel file sorgente il contenuto è spostato ~15 px a destra: scala e
+     traslazione minime lo ricentrano senza scoprire i bordi del riquadro. */
+  .slide--pachamar .phone__screen img{
+    transform:translateX(-2%) scale(1.05);
   }
 
   /* Tipografia mobile zoomata */
@@ -962,6 +1032,17 @@ picture{display:block}
     max-width:calc(100vw - 24px);
     font-size:clamp(10px,2.8vw,12px);
     opacity:.8;
+  }
+  /* Su telefono la legenda sta nel popup: in basso resta solo il progresso,
+     largo come la card e allineato agli stessi margini del resto della UI. */
+  .gallery > .gallery__hint{
+    position:absolute;transform:none;
+    left:var(--gutter);right:var(--gutter);bottom:max(28px, calc(20px + env(safe-area-inset-bottom, 0px)));
+    width:auto;max-width:none;text-align:center;
+  }
+  .gallery > .gallery__hint .hint__row{display:none}
+  .gallery > .gallery__hint .gallery__progress{
+    width:100%;margin:0;
   }
   .back[hidden]{display:none}
 
