@@ -442,6 +442,8 @@ picture{display:block}
 .slide__visual--pair{gap:clamp(12px,2vw,28px);align-items:flex-end}
 .slide__visual--pair .device--laptop{width:min(100%,540px)}
 .slide__visual--pair .device--phone{width:min(22%,130px);transform:translateY(12%)}
+/* telefono: il visual dedicato sostituisce il gruppo laptop+telefono */
+.slide--pachamar .slide__visual--pachamar-phone{display:none}
 
 /* ---------- filmstrip (solo in gallery) ---------- */
 .timeline{
@@ -895,16 +897,9 @@ picture{display:block}
     flex:0 0 auto;
     transform:none;
   }
-  .slide--pachamar .device--laptop{
-    display:none;
-  }
-  .slide--pachamar .device--phone{
-    width:min(100%,130px);
-    /* La regola --pair limita il telefono a 75 px: qui il laptop è nascosto
-       e il telefono deve occupare la stessa larghezza delle altre card. */
-    max-width:none;
-    transform:none;
-  }
+  /* Pachamar su telefono: stesso schema di Strati, senza il gruppo pair */
+  .gallery .slide--pachamar .slide__visual--pair{display:none}
+  .gallery .slide--pachamar .slide__visual--pachamar-phone{display:flex}
   /* Timeline: immagini +25%; a card aperta restano le dimensioni safe. */
   .gallery:not(.is-zoomed) .device--laptop{width:min(125%,350px)}
   .gallery:not(.is-zoomed) .device--phone{width:min(125%,162.5px)}
@@ -916,18 +911,9 @@ picture{display:block}
     width:32.5%;
     max-width:93.75px;
   }
-  .gallery:not(.is-zoomed) .slide--pachamar .device--phone{
-    width:min(125%,162.5px);
-    max-width:none;
-  }
-  .gallery:not(.is-zoomed) .slide--pachamar .slide__visual{
+  .gallery:not(.is-zoomed) .slide--pachamar .slide__visual--pachamar-phone{
     transform:scale(var(--pv));
     transform-origin:center center;
-  }
-  /* Nel file sorgente il contenuto è spostato ~15 px a destra: scala e
-     traslazione minime lo ricentrano senza scoprire i bordi del riquadro. */
-  .slide--pachamar .phone__screen img{
-    transform:translateX(-2%) scale(1.05);
   }
 
   /* Tipografia mobile zoomata */
