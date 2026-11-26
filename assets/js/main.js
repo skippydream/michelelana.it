@@ -14,6 +14,9 @@
   var viewport = gallery.querySelector('.gallery__viewport');
   var track = gallery.querySelector('.gallery__track');
   var slides = Array.prototype.slice.call(gallery.querySelectorAll('.slide'));
+  // le card con un visual diverso dal laptop: vanno riallineate su tablet
+  var pairSlides = Array.prototype.slice.call(gallery.querySelectorAll('.slide--pachamar'));
+  var phoneSlides = Array.prototype.slice.call(gallery.querySelectorAll('.slide--phone'));
   var thumbs = Array.prototype.slice.call(gallery.querySelectorAll('.timeline button'));
   var navButtons = Array.prototype.slice.call(document.querySelectorAll('.nav button[data-panel]'));
   var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
@@ -38,7 +41,7 @@
 
   var lastSlideTime = 0;
   var lastWheelTime = 0;
-  var yearTimer;
+  var yearDigits = [];
   var prevDeltaX = 0;
   var prevDeltaY = 0;
   var wheelAccumX = 0;
@@ -47,17 +50,18 @@
   function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
   /* ---------- galleria ---------- */
+  // 601–1240 px è la viewport tablet: stesse regole fluide del CSS.
   function innerWidth() {
     var w = window.innerWidth;
     if (w <= 600) return w - 40;
-    if (w <= 900) return w - 40;
+    if (w <= 1240) return w - 40;
     return clamp(w - 120, 1000, 1440);
   }
 
   function cardWidth() {
     var w = window.innerWidth;
     if (w <= 600) return Math.round(w * 0.78);
-    if (w <= 900) return Math.max(220, Math.round((w - 40) * 0.74));
+    if (w <= 1240) return Math.max(220, Math.round((w - 40) * 0.74));
     // la card è una frazione dell'inner: k<1 rende visibile l'enlargement
     var iw = innerWidth();
     return clamp(Math.round(iw * 0.78), 780, 1120);
@@ -66,7 +70,7 @@
   // il dispositivo è limitato dall'altezza utile; sui compact lo scala in JS
   function visualMax() {
     var w = window.innerWidth, h = window.innerHeight;
-    if (w <= 900) return Math.min(700, Math.round(h * 1.1));
+    if (w <= 1240) return Math.min(700, Math.round(h * 1.1));
     return 700;
   }
 
@@ -87,7 +91,100 @@
 
   function extraPhone() {
     if (window.innerWidth <= 600) return 0;
-    return window.innerWidth <= 900 ? 50 : 134;
+    return window.innerWidth <= 1240 ? 50 : 134;
+  }
+
+  /* In timeline il visual sta a destra della colonna di testo: centro la card
+     spostando l'inner, non il track, così l'immagine (non il riquadro) resta
+     esattamente al centro dello schermo. Pachamar e Strati ricevono lo stesso
+     spostamento più la correzione della loro larghezza: gruppi e spaziature
+     restano allineati ai laptop. Nessuna misura del DOM (funziona a metà FLIP);
+     in zoom e su telefono i valori inline vengono rimossi. */
+  function cardAlign() {
+    var w = window.innerWidth, h = window.innerHeight;
+    if (zoomed || w <= 600) return null;
+
+    var desktop = w > 1240;
+    var iw = innerWidth(), cw = cardWidth(), k = cw / iw;
+    var ov = overlap(cw, iw), e = extraPhone(), pv = 1.6;
+    var col, dnCss, dn, pairW, phoneW;
+
+    if (desktop) {
+      // la prima colonna desktop è minmax(260px,360px): si espande a 360
+      col = iw - 360 - clamp(w * .05, 40, 90);
+      dnCss = Math.min(col, 700);
+      dn = dnCss * k;
+      pairW = Math.min(col, 540) + clamp(w * .02, 12, 28) + Math.min(col * .22, 130);
+      phoneW = Math.min(col, 210);
+    } else {
+      // il landscape compatto alza il padding inferiore (vedi @media nel CSS)
+      var padBottom = (w > h && h <= 520) ? clamp(h * .18, 78, 100) : clamp(h * .11, 64, 104);
+      var usableH = h - clamp(h * .09, 56, 96) - padBottom;
+      col = iw - clamp(w * .32, 112, 300) - clamp(w * .022, 8, 26);
+      dnCss = Math.min(col, 700, usableH * 1.45);
+      dn = dnCss * k;
+      pairW = Math.min(col * .7, usableH * 1.45) +
+              clamp(w * .015, 6, 20) + Math.min(col * .24, usableH * .52);
+      phoneW = Math.min(col, 250, usableH * .52);
+    }
+
+    // il visual è fissato a destra della colonna: il suo centro è a
+    // (iw - dnCss)/2 dall'inner. Il translate parte dal centro dell'inner,
+    // quindi lo spostamento va moltiplicato per k (non per k²).
+    var pxBase = -k * (iw - dnCss) / 2;
+
+    // Sui tablet più stretti 250px * 1.6 supera la colonna del visual e il
+    // telefono verrebbe tagliato dal .slide{overflow:hidden}. Limito lo scale
+    // alla larghezza disponibile: il bordo destro torna dentro la card senza
+    // toccare i margini che allineano i gruppi. Desktop e mobile invariati.
+    if (phoneW > 0) pv = Math.min(pv, dnCss / phoneW);
+
+    var gap = cw - ov - dn;                    // passo tra due laptop vicini
+    var phoneShift = (pv - 1) * col * k / 2;   // lo scale sposta il bordo destro
+
+    function slot(ee, gw, shift) {
+      var step = 2 * (cw - ov - ee) - dn;      // spazio disponibile tra i vicini
+      return {
+        width: gw,
+        px: pxBase + (gw - dn) / 2 - shift,
+        margin: (gw + 2 * gap - step) / 2
+      };
+    }
+
+    return {
+      ov: ov, extra: e, pv: pv, pxBase: pxBase,
+      pair: slot(0, pairW * k, 0),
+      phone: slot(e, phoneW * pv * k, phoneShift)
+    };
+  }
+
+  function applyCardAlign(a) {
+    // tutte le card ricevono lo spostamento che centra il visual; le due
+    // speciali lo sovrascrivono qui sotto con il loro valore corretto
+    slides.forEach(function (s) {
+      var inner = s.querySelector('.slide__inner');
+      if (!inner) return;
+      if (!a) inner.style.removeProperty('--px');
+      else inner.style.setProperty('--px', a.pxBase.toFixed(2) + 'px');
+    });
+    var special = [
+      { list: pairSlides, e: 0, cfg: a && a.pair, ov: a && a.ov },
+      { list: phoneSlides, e: a && a.extra, cfg: a && a.phone, ov: a && a.ov }
+    ];
+    special.forEach(function (s) {
+      s.list.forEach(function (el) {
+        var inner = el.querySelector('.slide__inner');
+        if (!a || !s.cfg) {
+          el.style.marginLeft = '';
+          el.style.marginRight = '';
+          if (inner) inner.style.removeProperty('--px');
+          return;
+        }
+        el.style.marginLeft = (-s.e + s.cfg.margin) + 'px';
+        el.style.marginRight = (-(s.ov + s.e) + s.cfg.margin) + 'px';
+        if (inner) inner.style.setProperty('--px', s.cfg.px.toFixed(2) + 'px');
+      });
+    });
   }
 
   function centerActiveThumb(i) {
@@ -101,30 +198,79 @@
     }
   }
 
+  /* L'anno è una cifra per span: quando cambia, viene aggiornata e fatta
+     scattare solo la cifra (o delle cifre) che è davvero cambiata. */
+  function flashDigit(digit, value) {
+    clearTimeout(digit.yearTimer);
+    digit.yearValue = value;
+    digit.classList.add('is-changing');
+    digit.yearTimer = setTimeout(function () {
+      digit.textContent = value;
+      digit.classList.remove('is-changing');
+    }, 140);
+  }
+
+  function setYear(value) {
+    if (!yearEl) return;
+    var next = String(value || '');
+    var prev = yearEl.getAttribute('data-year');
+    if (prev === next) return;
+    yearEl.setAttribute('data-year', next);
+    yearEl.setAttribute('aria-label', next);
+
+    if (!prev || !yearDigits.length || prev.length !== next.length) {
+      yearEl.textContent = '';
+      yearDigits = [];
+      for (var j = 0; j < next.length; j++) {
+        var digit = document.createElement('span');
+        digit.className = 'year__digit';
+        digit.setAttribute('aria-hidden', 'true');
+        digit.textContent = digit.yearValue = next.charAt(j);
+        yearEl.appendChild(digit);
+        yearDigits.push(digit);
+      }
+      return;
+    }
+
+    for (var i = 0; i < next.length; i++) {
+      if (yearDigits[i].yearValue !== next.charAt(i)) flashDigit(yearDigits[i], next.charAt(i));
+    }
+  }
+
   function apply() {
     var cw = cardWidth(), iw = innerWidth();
     var k = cw / iw;
     var vw = window.innerWidth, vh = window.innerHeight;
     var ov = overlap(cw, iw);
+    var align = cardAlign();
     // il telefono in timeline resta ingrandito; su telefono in portrait lo si
-    // riduce perché la filmstrip sta al centro e il telefono alto la coprirebbe
-    var pv = window.matchMedia('(max-width:600px) and (orientation:portrait)').matches ? 1.1 : 1.6;
+    // riduce perché la filmstrip sta al centro e il telefono alto la coprirebbe.
+    // Su tablet/desktop cardAlign limita lo scale ai tablet stretti, così il
+    // telefono non esce dalla card; in zoom torna sempre a 1.
+    var pv = zoomed ? 1 : (align ? align.pv :
+      (window.matchMedia('(max-width:600px) and (orientation:portrait)').matches ? 1.1 : 1.6));
     var extra = extraPhone();
     gallery.style.setProperty('--card-w', cw + 'px');
     gallery.style.setProperty('--inner-w', iw + 'px');
     gallery.style.setProperty('--overlap', ov + 'px');
     gallery.style.setProperty('--extra', extra + 'px');
-    gallery.style.setProperty('--pv', zoomed ? '1' : String(pv));
+    gallery.style.setProperty('--pv', String(pv));
     gallery.style.setProperty('--k', zoomed ? '1' : k.toFixed(4));
     gallery.style.setProperty('--slide-w', (zoomed ? vw : cw) + 'px');
     gallery.style.setProperty('--slide-h', Math.round(vh) + 'px');
+    applyCardAlign(align);
     // posizioni cumulative: Strati occupa meno spazio dei vicini su desktop
+    var shift = function (s) {
+      if (align && s.classList.contains('slide--pachamar')) return align.pair.margin;
+      if (align && isPhoneSlide(s)) return align.phone.margin;
+      return 0;
+    };
     var pos = 0, offsets = [0];
     for (var j = 0; j < slides.length - 1; j++) {
       if (!zoomed) {
         var ej = isPhoneSlide(slides[j]) ? extra : 0;
         var en = isPhoneSlide(slides[j + 1]) ? extra : 0;
-        pos += cw - ov - ej - en;
+        pos += cw - ov - ej - en + shift(slides[j]) + shift(slides[j + 1]);
       } else {
         pos += vw;
       }
@@ -135,20 +281,7 @@
     gallery.classList.toggle('is-zoomed', zoomed);
     var date = slides[index].querySelector('.slide__date');
     var newYear = date ? date.textContent.trim() : '';
-    if (yearEl) {
-      clearTimeout(yearTimer);
-      if (!yearEl.textContent) {
-        yearEl.textContent = newYear;
-      } else if (yearEl.textContent !== newYear) {
-        yearEl.classList.add('is-changing');
-        yearTimer = setTimeout(function () {
-          yearEl.textContent = newYear;
-          yearEl.classList.remove('is-changing');
-        }, 140);
-      } else {
-        yearEl.classList.remove('is-changing');
-      }
-    }
+    setYear(newYear);
     if (back) {
       back.hidden = !zoomed && !activePanel;
       back.setAttribute('aria-label', activePanel ? 'Torna ai lavori' : 'Torna alla timeline');
@@ -513,6 +646,44 @@
   navButtons.forEach(function (b) {
     b.addEventListener('click', function () { openPanel(b.getAttribute('data-panel')); });
   });
+
+  /* Percorso: su telefono le tre sezioni diventano tab; su desktop e tablet
+     restano tutte visibili nella griglia. */
+  var cvTabs = Array.prototype.slice.call(document.querySelectorAll('[data-cv-tab]'));
+  var cvGroups = Array.prototype.slice.call(document.querySelectorAll('.cv-group'));
+  var cvCurrent = 'esperienza';
+
+  function showCv(name) {
+    cvCurrent = name;
+    var mobile = window.innerWidth <= 600;
+    cvTabs.forEach(function (b) {
+      var on = b.getAttribute('data-cv-tab') === name;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+    });
+    cvGroups.forEach(function (g) {
+      g.hidden = mobile && g.getAttribute('data-cv') !== name;
+    });
+  }
+
+  function syncCv() {
+    if (window.innerWidth > 600) {
+      cvTabs.forEach(function (b) {
+        b.setAttribute('aria-selected', 'false');
+        b.tabIndex = 0;
+      });
+      cvGroups.forEach(function (g) { g.hidden = false; });
+    } else {
+      showCv(cvCurrent);
+    }
+  }
+
+  cvTabs.forEach(function (b) {
+    b.addEventListener('click', function () { showCv(b.getAttribute('data-cv-tab')); });
+  });
+  window.addEventListener('resize', syncCv);
+  syncCv();
+
   function goHome() {
     if (activePanel) closePanel();
     if (zoomed) setZoom(false);
@@ -569,8 +740,11 @@
     var el = document.activeElement;
     if (el && el !== document.body && el !== document.documentElement &&
         el.closest('a,button,input,textarea,select,[contenteditable="true"]')) return;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); step(1); }
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    /* le verticali seguono lo swipe: su entra nella card, giù ne esce */
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setZoom(true); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); setZoom(false); }
     else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setZoom(!zoomed); }
     else if (e.key === 'Home') { e.preventDefault(); move(0); }
     else if (e.key === 'End') { e.preventDefault(); move(slides.length - 1); }

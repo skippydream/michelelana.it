@@ -39,18 +39,19 @@ della barra del browser. Non c'è un interruttore: basta il tema del sistema.
 
 Come nella reference ci sono **due stati**, su desktop e su mobile:
 
-- **Zoom out (timeline).** I progetti sono card allineate in basso, centrate
-  sull'attiva; si vede solo l'immagine, senza titolo, e le card lontane si
-  schiariscono. Le card si sovrappongono di ~650 px: tra un'immagine e l'altra
-  resta uno spazio di circa 60 px. La miniatura di Strati (solo telefono) è
-  ridimensionata e centrata per non sovrapporsi a Pachamar. Si scorre **lateralmente** con rotellina/trackpad orizzontale,
-  swipe, frecce `←`/`→` o `Home`/`End`.
+- **Zoom out (timeline).** I progetti sono card allineate in basso: su tablet e
+  desktop è il **visuale** della card attiva a stare esattamente al centro dello
+  schermo, prima e dopo lo scorrimento (il riquadro della slide può essere
+  spostato di conseguenza). Si vede solo l'immagine, senza titolo, e le card
+  lontane si schiariscono. Le card si sovrappongono di ~650 px: tra un'immagine
+  e l'altra resta uno spazio di circa 60 px. Si scorre **lateralmente** con
+  rotellina/trackpad orizzontale, swipe, frecce `←`/`→` o `Home`/`End`.
 - **Zoom in (gallery).** Cliccando l'immagine di una card (o con rotellina
-  verticale, swipe verso l'alto, barra spaziale/Invio) la card si apre a schermo intero: a
+  verticale, freccia `↑`, swipe verso l'alto, barra spaziale/Invio) la card si apre a schermo intero: a
   sinistra compaiono titolo, sottotitolo, dettagli e link, a destra il progetto
   dentro un frame **ThinkPad** o **Google Pixel 10a**, entrambi in CSS puro.
   I dettagli esistono solo in questo stato. `Escape`, un altro clic, la rotellina
-  verticale contraria o lo swipe verso il basso riportano alla timeline.
+  verticale contraria, la freccia `↓` o lo swipe verso il basso riportano alla timeline.
 
 Lo zoom non scatta e non gonfia l'immagine: `.slide__inner` ha **sempre** la
 dimensione finale (`--inner-w`, 1641 px su desktop) e in timeline viene solo
@@ -67,24 +68,49 @@ Filmstrip, pannelli, frecce e cursore usano la stessa curva, con tempi più
 lunghi sulle aperture e più corti sugli hover.
 L'anno nell'header non è fisso: `apply()` legge
 il `.slide__date` della slide attiva, quindi passa da 2026 a 2025 su One Piece
-Watcher. La rotellina verticale comanda lo zoom, quella orizzontale il paging;
-sul touch vale la stessa distinzione tra swipe verticale e orizzontale, più il
-pizzico. `main.js` blocca solo il paging per 300 ms (120 ms con reduced motion)
+Watcher, a 2020 su Unsplash e a 2018 su SoundCloud. Ogni cifra è uno span a sé: quando
+l'anno cambia scatta solo la cifra (o le cifre) che è davvero cambiata, senza
+far lampeggiare quelle uguali. La rotellina verticale comanda lo zoom, quella orizzontale il paging;
+da tastiera `←`/`→` fanno il paging, mentre `↑` entra nella card e `↓` ne esce,
+come gli swipe verticali. Sul touch vale la stessa distinzione tra swipe verticale
+e orizzontale, più il pizzico. `main.js` blocca solo il paging per 300 ms (120 ms con reduced motion)
 e assorbe la rotellina per 450 ms dopo uno scatto, mentre lo zoom resta sempre
 cliccabile. In basso la
 **timeline** di miniature resta disponibile nello zoom-in: un clic apre direttamente
 il progetto scelto e torna allo zoom-out. Nello zoom-in le slide inattive hanno
 `inert` e `aria-hidden="true"`.
 
-### Responsive: desktop/tablet a griglia, telefono come mikematas.com
+### Responsive: desktop ≥ 1241 px, tablet 601–1240 px, telefono sotto i 600 px
 
-Sopra i 600 px (e in landscape) c'è una sola griglia: sotto i 900 px cambiano
-le misure, non la struttura — testo a sinistra, dispositivo a destra, header e
-timeline dove sono su desktop. Tutto usa `clamp()` e quattro variabili fluide
-(`--pad-top`, `--pad-bottom`, `--gutter`, `--content-w`, `--timeline-w`). In
-landscape compatto (altezza ≤ 520 px) si riducono soltanto i font e si sposta la
-freccia; i dispositivi sono limitati dall'altezza utile della slide, così non
-finiscono sotto la filmstrip.
+Tre viewport. Sopra i 1240 px la griglia desktop conserva le misure fisse; tra
+601 e 1240 px scatta la **viewport tablet**: stessa struttura (testo a sinistra,
+dispositivo a destra, header e filmstrip dove sono su desktop) ma ogni misura è
+fluida via `clamp()` e cinque variabili (`--pad-top`, `--pad-bottom`,
+`--gutter`, `--content-w`, `--timeline-w`). Le 11 miniature della filmstrip, in
+particolare, sono calcolate dallo spazio realmente disponibile
+(`clamp(36px, …/11, 120px)`) invece di restare fisse a 120 px: non vengono più
+tagliate sul lato sinistro quando la finestra si restringe, e scalano anche su
+desktop per restare dentro la larghezza utile. `main.js` usa la stessa soglia
+di 1240 px per inner, card, dispositivi e compattazione di Strati.
+
+In landscape compatto (altezza ≤ 520 px) si riducono i font, si sposta la
+freccia e cresce il padding inferiore; i dispositivi sono limitati dall'altezza
+utile della slide, così non finiscono sotto la filmstrip.
+
+Sia su tablet che su desktop `main.js` centra il visuale di ogni card con un
+offset `--px` calcolato dalla geometria della griglia (nessuna misura del DOM,
+quindi funziona anche a metà FLIP); il track resta allineato alla slide attiva.
+Le card con un visual diverso dal laptop — Pachamar (laptop + telefono) e le
+due card con il solo telefono, biglietto e Strati — ricevono lo stesso offset
+più la correzione della loro larghezza, così mantengono il passo orizzontale
+delle altre (60 px sul desktop). Sui tablet più stretti lo scale del telefono
+viene limitato alla larghezza della colonna: il bordo destro non finisce più
+sotto l'`overflow:hidden` della card. Pachamar, invece, ha già lo spazio
+necessario nel passo tra le card: su tablet, in timeline la sua slide ha
+`overflow:visible`, così il telefono accanto al laptop può uscire dal riquadro
+senza venire croppato e resta dentro il gap riservato. In zoom l'overflow torna
+`hidden`, gli offset inline vengono rimossi e `--pv` torna a 1. Sotto i 600 px
+il layout mobile resta invariato.
 
 Sotto i 600 px in portrait il layout segue invece il reference: la card diventa
 una colonna singola con `flex-direction:column-reverse`, quindi **dispositivo
@@ -105,7 +131,9 @@ spostato verso il basso di un offset proporzionale all'altezza utile (0 px a
 superiore. La filmstrip è a tutta larghezza su telefono, con miniature omogenee ingrandite da
 ~78 px a 390 px (proporzione 16:10 su tutti gli elementi, sia `<img>` sia `<picture>`),
 gap compatto da 4 px e scroll orizzontale automatico che mantiene la miniatura attiva
-sempre al centro della viewport. Su desktop le miniature hanno larghezza 120 px.
+sempre al centro della viewport. In tablet le miniature scalano in base alla
+larghezza della finestra; su desktop restano sotto i 120 px per far stare tutte
+le 11 card nella striscia.
 
 L'inner aperto resta largo `viewport - 40` (1641 px su desktop); la card della
 striscia è il 74% dell'inner (minimo 220 px), quindi `k < 1` e l'apertura è un
@@ -117,6 +145,13 @@ il laptop con `pachamar.jpg` affiancato al telefono; in portrait sotto i 600 px
 il laptop è nascosto via CSS e resta solo il telefono, con lo stesso `--pv` di
 Strati. Anche la sua miniatura nel filmstrip usa un `<picture>` con la versione
 mobile sotto i 600 px e quella desktop sopra.
+
+La card del biglietto (subito dopo il gestionale) usa lo stesso frame Pixel con
+lo screenshot anonimizzato del biglietto del Valle Orco Highline Festival:
+la barra in alto originale è preservata, mentre nome del file, partecipante e
+codice sono sostituiti da valori dimostrativi e il QR non è valido. Con il tema
+scuro compare `biglietto-vohf-dark.jpg`: non è un sito ricreato, ma la stessa
+cattura con le sole alte luci compresse, così il bianco pieno non abbaglia.
 
 I frame sono CSS puro: laptop con lid, cinturino e base arrotondata, Pixel con
 corpo in alluminio e tasti laterali; nessuna scritta «ThinkPad» e nessun notch.
@@ -135,6 +170,12 @@ sovrapposti che si aprono dalla navigazione in alto (come l'About di Mike) e si
 chiudono con la freccia (nella colonna del testo, in alto a sinistra sul telefono),
 con `Escape` o cliccando «Lavori».
 Mentre un pannello è aperto la galleria diventa `inert`.
+
+Il pannello **Percorso** è diviso in tre gruppi: Esperienza, Formazione e
+Competenze. Su desktop e tablet sono una griglia a due colonne, con Formazione
+sopra Competenze a destra; sotto i 600 px diventano tre tab, così anche il
+contenuto più lungo resta dentro la viewport senza scorrere. Senza JavaScript
+le tab non compaiono e i tre gruppi restano tutti visibili.
 
 Senza JavaScript un foglio dentro `<noscript>` riporta tutto a scorrimento
 normale, impila le slide una sotto l'altra e mostra i pannelli in fondo: la
@@ -182,6 +223,11 @@ Dentro gli schermi ci sono **screenshot reali**, in `assets/img/screens/`:
   scatto; ha una sola variante, usata in entrambi i temi;
 - `pachamar-mobile.jpg`: versione mobile, 390×844;
 - `strati-app.jpg`: screenshot dal README di `skippydream/Strati`, nel Pixel;
+- `biglietto-vohf-light.jpg` e `biglietto-vohf-dark.jpg`: screenshot fornito,
+  con la barra in alto originale; nome del file, partecipante e codice sono
+  fittizi e il QR è dimostrativo. La variante dark comprime solo i bianchi
+  (255 → 200) e i grigi chiari (192 → 152), lasciando intatti neri, testo e
+  moduli del QR;
 - `appunti-light.jpg` e `appunti-dark.jpg`: due catture reali dello stesso sito,
   che supporta `prefers-color-scheme` — chiaro (`#f5f7f9`/bianco) e scuro
   (`#0a0d12`). Quella scura è la vecchia `appunti.jpg`; entrambe hanno la
@@ -189,20 +235,41 @@ Dentro gli schermi ci sono **screenshot reali**, in `assets/img/screens/`:
 - `one-piece-watcher-light.jpg` e `one-piece-watcher-dark.jpg`: stesso screenshot
   originale `Developer/opwatcher/Images/5.png` composto rispettivamente su
   bianco e su `#14161a`, senza inversione dei colori, così lo sfondo non è più
-  bianco in dark e la scena resta leggibile in entrambi i temi.
+  bianco in dark e la scena resta leggibile in entrambi i temi;
+- `unsplash-light.jpg` e `unsplash-dark.jpg`: collage di sei foto dal profilo
+  [unsplash.com/michelelana](https://unsplash.com/michelelana), con una testata
+  che mostra «Michele Lana / @michelelana». La variante dark **non inverte** i
+  colori: applica allo screenshot originale la stessa attenuazione del
+  biglietto (bianco 255→200, grigio 192→152, neri intatti). Come SoundCloud, è
+  una card non legata a un progetto: il link porta al profilo Unsplash.
+- `soundcloud-light.jpg` e `soundcloud-dark.jpg`: collage di otto copertine di
+  tracce caricate da
+  [soundcloud.com/snizemusic](https://soundcloud.com/snizemusic), con la testata
+  «Michele Lana / @snizemusic». Stessa attenuazione del biglietto, senza
+  inversione: i contenuti restano riconoscibili. Sono solo brani propri con
+  artwork dedicato: niente repost e niente immagini prese da altri artisti.
+  Anche qui il link porta al profilo, non a un progetto.
 
-Gli screenshot seguono il tema del sistema solo **dove esiste una variante reale**:
-`appunti-*` e `one-piece-watcher-*` stanno dentro un `<picture>` con un `<source
-media="(prefers-color-scheme: dark)">` e l'immagine chiara come fallback. Gli altri
-progetti (Torino Sul Filo, Frushío, Strati, SunSeeker, Pachamar) hanno una sola
-immagine, identica nei due temi: non ha senso fabbricare varianti sintetiche di
-siti che non le offrono. Torino Sul Filo ha pure `data-theme`, ma l'hero resta
-scuro in entrambi i casi, quindi le due catture sarebbero quasi identiche.
+Il logo del servizio è doppio: un badge in basso a destra dello schermo del
+laptop, ben visibile sia in timeline sia in zoom, e una versione accanto al
+titolo nel pannello aperto. Quello di Unsplash segue il colore del testo,
+quello di SoundCloud resta arancione. In dark è disattivato il riflesso
+diagonale sullo schermo, così l'attenuazione non viene alterata.
+
+Gli screenshot seguono il tema del sistema dove esiste una variante
+(`appunti-*`, `one-piece-watcher-*`, `unsplash-*` e `soundcloud-*`) o dove il tema
+è parte del disegno (`biglietto-*`): questi stanno dentro un `<picture>` con un
+`<source media="(prefers-color-scheme: dark)">` e l'immagine chiara come fallback.
+Gli altri progetti (Torino Sul Filo, Frushío, Strati, SunSeeker e Pachamar)
+hanno una sola immagine, identica nei due temi: non ha senso fabbricare varianti
+sintetiche di siti che non le offrono. Torino Sul Filo ha pure `data-theme`, ma
+l'hero resta scuro in entrambi i casi, quindi le due catture sarebbero quasi
+identiche.
 
 Le immagini sono salvate come JPEG baseline, non progressivi, così non compaiono
 a strisce durante il caricamento. Le miniature in basso seguono la stessa regola:
 ritagli 128×80 in `assets/img/thumbs/`, con coppie `*-light.jpg`/`*-dark.jpg` per
-Appunti e One Piece Watcher.
+Appunti, One Piece Watcher, Unsplash, SoundCloud e il biglietto del Valle Orco.
 
 ## L'anteprima social
 
@@ -248,7 +315,7 @@ usa percorsi che iniziano con `/`: va bene perché il sito sta sulla radice del 
 
 ## Prima di pubblicare
 
-- [x] Otto lavori con titoli, anni, screenshot e funzionalità
+- [x] Undici card con titoli, anni, screenshot e link (l'ultima: SoundCloud)
 - [x] `alt` scritto su ogni immagine
 - [x] Email: `info@michelelana.it` (nessun numero di telefono sul sito)
 - [x] Link al sito solo dove il sito esiste
