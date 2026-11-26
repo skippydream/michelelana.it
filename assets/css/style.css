@@ -203,6 +203,9 @@ picture{display:block}
 /* ---------- zoom: la stessa card che scala, senza rimbalzi né tagli ---------- */
 .gallery{--card-w:1240px;--inner-w:1641px;--k:1;--overlap:0px;--extra:0px;--pv:1}
 .gallery__track{transition:transform var(--paging-dur) var(--paging-ease)}
+/* Durante il gesto il track segue 1:1, senza transizione; will-change resta
+   attivo solo finché serve, poi torna a quello della card. */
+.gallery__viewport.is-scrolling .gallery__track{transition:none;will-change:transform}
 .slide{
   width:var(--slide-w,100vw);flex-basis:var(--slide-w,100vw);
   height:var(--slide-h,100vh);
@@ -711,7 +714,7 @@ picture{display:block}
     padding:var(--pad-top) 0 0;
   }
   .brand,.brand__yr{font-size:clamp(28px,8.2vw,36px);line-height:1.2;letter-spacing:-.03em}
-  .nav{margin-top:clamp(12px,2.2vh,20px)}
+  .nav-wrap .nav{margin-top:clamp(13px,2.5vh,22px)}
   .nav button{font-size:clamp(15px,4.2vw,17px);line-height:1.45}
   .nav-wrap{display:block}
   .theme-toggle,.lang-toggle{
@@ -815,13 +818,15 @@ picture{display:block}
   }
 
   /* Dimensioni dispositivi coerenti */
+  /* Immagini più grandi: il 135% della colonna cresce anche sulle card
+     più strette, con un tetto sui telefoni più larghi. */
   .device--laptop{
-    width:min(100%,280px);
-    max-width:280px;
+    width:min(135%,378px);
+    flex:0 0 auto;
   }
   .device--phone{
-    width:min(100%,130px);
-    max-width:130px;
+    width:min(135%,175.5px);
+    flex:0 0 auto;
   }
   .slide__visual--pair{
     display:flex;
@@ -830,20 +835,24 @@ picture{display:block}
     gap:8px;
   }
   .slide__visual--pair .device--laptop{
-    width:70%;
-    max-width:200px;
+    width:94.5%;
+    max-width:270px;
+    flex:0 0 auto;
   }
   .slide__visual--pair .device--phone{
-    width:26%;
-    max-width:75px;
+    width:35.1%;
+    max-width:101.5px;
+    flex:0 0 auto;
     transform:none;
   }
   .slide--pachamar .device--laptop{
     display:none;
   }
   .slide--pachamar .device--phone{
-    width:min(100%,130px);
-    max-width:130px;
+    width:min(135%,175.5px);
+    /* La regola --pair limita il telefono a 101,5 px: qui il laptop è nascosto
+       e il telefono deve occupare la stessa larghezza delle altre card. */
+    max-width:none;
     transform:none;
   }
   .gallery:not(.is-zoomed) .slide--pachamar .slide__visual{

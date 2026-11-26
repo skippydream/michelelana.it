@@ -6,8 +6,8 @@ Avvia un Firefox headless e un piccolo server locale, poi controlla:
 - il primo click va al tema opposto al sistema, poi alterna chiaro/scuro;
 - dopo il reload la scelta resta e le immagini già prese sono quelle giuste;
 - la stessa scelta vale sulla 404 e non si scaricano entrambe le varianti;
-- rotellina e drag ripristinano il paging dell'ultimo push, con focus sulle
-  miniature, progress bar e preload;
+- rotellina e drag muovono il track in continuo e si agganciano alla card
+  più vicina al centro, con focus sulle miniature, progress bar e preload;
 - i pannelli sono dialog con focus intrappolato e ripristinato;
 - Back/Forward riaprono progetto e pannello;
 - desktop/tablet/telefono non sbandano; con --shots salva gli screenshot.
@@ -158,14 +158,33 @@ class Client:
             status: (document.getElementById('gallery-status') || {}).textContent || '',
             slideLabel: slides[index] ? slides[index].getAttribute('aria-label') : '',
             preloaded: [neighbour(index - 1), neighbour(index + 1)],
-            drag: gallery.querySelector('.gallery__track').style.getPropertyValue('--drag') || '0px',
-            rebound: gallery.querySelector('.gallery__viewport').classList.contains('is-rebounding'),
+            inlineX: Math.round(new DOMMatrixReadOnly(
+              gallery.querySelector('.gallery__track').style.transform || 'none').m41),
+            scrolling: gallery.querySelector('.gallery__viewport').classList.contains('is-scrolling'),
             focus: document.activeElement ?
               (document.activeElement.getAttribute('data-go') || document.activeElement.id ||
                document.activeElement.tagName) : null
           };
         })())"""
         return json.loads(self.eval(expression))
+
+    def settle_track(self, timeout=3.0):
+        """Aspetta che la transizione di snap finisca davvero (i frame headless
+        non avanzano da soli): il gesto successivo deve leggere la posizione
+        visibile, non un transform ancora in viaggio."""
+        end = time.time() + timeout
+        while time.time() < end:
+            state = json.loads(self.eval("""JSON.stringify((function () {
+              var t = document.querySelector('.gallery__track');
+              var inline = new DOMMatrixReadOnly(t.style.transform || 'none').m41;
+              var computed = new DOMMatrixReadOnly(getComputedStyle(t).transform || 'none').m41;
+              return {diff: Math.abs(inline - computed),
+                      scrolling: document.querySelector('.gallery__viewport')
+                        .classList.contains('is-scrolling')};
+            })())"""))
+            if state["diff"] <= 2 and not state["scrolling"]:
+                return
+            time.sleep(0.05)
 
     def press(self, key):
         self.eval("(function(){var e=new KeyboardEvent('keydown',{key:%s,bubbles:true,cancelable:true});"
@@ -324,31 +343,46 @@ def main():
               "le frecce non cambiano progetto: " + json.dumps(client.ui_state()))
 
         client.press("Home")
-        time.sleep(0.35)
-        # Rotellina e drag con il mouse: il paging dell'ultimo push.
+        client.settle_track()
+        # Rotellina: il track segue il delta, poi si aggancia alla card più vicina.
+        home_x = client.ui_state()["inlineX"]
         client.eval("""(function () {
           document.querySelector('.gallery__viewport').dispatchEvent(
-            new WheelEvent('wheel', {deltaX: 60, deltaY: 0, bubbles: true,
+            new WheelEvent('wheel', {deltaX: 400, deltaY: 0, bubbles: true,
               cancelable: true}));
         })()""")
-        check(client.ui_state()["index"] == 1,
-              "la rotellina orizzontale non cambia progetto: " + json.dumps(client.ui_state()))
-        time.sleep(0.35)
+        moving = client.ui_state()
+        check(moving["scrolling"] and moving["index"] == 0 and
+              home_x - moving["inlineX"] > 300,
+              "la rotellina non muove il track in continuo (base %s): %s" %
+              (home_x, json.dumps(moving)))
+        client.settle_track()
+        snapped = client.ui_state()
+        check(snapped["index"] == 1 and not snapped["scrolling"],
+              "la rotellina non si aggancia alla card centrale: " + json.dumps(snapped))
+
+        # Drag: stesso gesto continuo, snap al rilascio.
         client.eval("""(function () {
           var vp = document.querySelector('.gallery__viewport');
           vp.dispatchEvent(new MouseEvent('mousedown', {button: 0, clientX: 600,
             clientY: 300, bubbles: true, cancelable: true}));
-          window.dispatchEvent(new MouseEvent('mousemove', {clientX: 500,
-            clientY: 300, bubbles: true, cancelable: true}));
-          window.dispatchEvent(new MouseEvent('mouseup', {button: 0, clientX: 500,
+          window.dispatchEvent(new MouseEvent('mousemove', {clientX: 200,
             clientY: 300, bubbles: true, cancelable: true}));
         })()""")
+        held = client.ui_state()
+        check(held["scrolling"] and held["index"] == 1 and
+              snapped["inlineX"] - held["inlineX"] > 300,
+              "il drag non muove il track in continuo (base %s): %s" %
+              (snapped["inlineX"], json.dumps(held)))
+        client.eval("""window.dispatchEvent(new MouseEvent('mouseup', {button: 0,
+          clientX: 200, clientY: 300, bubbles: true, cancelable: true}))""")
+        client.settle_track()
         dragged = client.ui_state()
-        check(dragged["index"] == 2 and
+        check(dragged["index"] == 2 and not dragged["scrolling"] and
               dragged["status"].startswith("Project 3 of 11: "),
-              "il drag non cambia progetto: " + json.dumps(dragged))
+              "il drag non si aggancia alla card centrale: " + json.dumps(dragged))
         client.press("Home")
-        time.sleep(0.35)
+        client.settle_track()
 
         # I pannelli sono dialog: focus dentro, Tab intrappolato, focus restituito
         client.eval("document.querySelector('[data-panel=contatti]').click()")
@@ -449,8 +483,8 @@ def main():
         check(error["bodyBg"] == "rgb(20, 22, 26)", "la 404 ignora il tema salvato")
         check(error["metas"] == ["not all", "all"], "i meta theme-color della 404 sono sbagliati")
 
-        print("OK: lingua EN/IT, tema %s/%s/%s, reload, 404, immagini, frecce, rotellina, "
-              "drag, dialog, progress, preload, layout e Back/Forward." % (first, second, first))
+        print("OK: lingua EN/IT, tema %s/%s/%s, reload, 404, immagini, frecce, scroll continuo, "
+              "snap, dialog, progress, preload, layout e Back/Forward." % (first, second, first))
     finally:
         if client:
             client.close()

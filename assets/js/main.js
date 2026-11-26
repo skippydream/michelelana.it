@@ -44,10 +44,8 @@
 
   var index = 0;
   var zoomed = false;
-  var locked = false;       // solo per il paging orizzontale
   var activePanel = null;
   var panelTrigger = null;
-  var LOCK = 300;           // cooldown reattivo tra uno scatto e l'altro
   var FLY = 520;            // durata scattante e fluida dell'enlargement (GPU composited)
   var EASE = 'cubic-bezier(.16,1,.3,1)';
   var touchX = null, touchY = null;
@@ -191,10 +189,19 @@
   var lastSlideTime = 0;
   var lastWheelTime = 0;
   var yearDigits = [];
-  var prevDeltaX = 0;
   var prevDeltaY = 0;
-  var wheelAccumX = 0;
   var wheelAccumY = 0;
+
+  /* Scorrimento continuo: durante il gesto il track segue il puntatore/delta
+     senza transizione; al rilascio si aggancia alla card più vicina al centro. */
+  var slideOffsets = [0];
+  var centerPx = 0;
+  var trackBasePx = 0;
+  var dragPx = 0;
+  var scrolling = false;
+  var snapTimer = null;
+  var touchStartOffset = 0;
+  var touchAxis = null;
 
   function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
@@ -386,6 +393,7 @@
   }
 
   function apply() {
+    cancelScroll();
     var cw = cardWidth(), iw = innerWidth();
     var k = cw / iw;
     var vw = window.innerWidth, vh = window.innerHeight;
@@ -424,8 +432,11 @@
       }
       offsets.push(pos);
     }
-    var center = zoomed ? 0 : (vw - cw) / 2;
-    track.style.transform = 'translate3d(' + Math.round(center - offsets[index]) + 'px,0,0)';
+    centerPx = zoomed ? 0 : (vw - cw) / 2;
+    slideOffsets = offsets;
+    trackBasePx = Math.round(centerPx - offsets[index]);
+    dragPx = trackBasePx;
+    track.style.transform = 'translate3d(' + trackBasePx + 'px,0,0)';
     gallery.classList.toggle('is-zoomed', zoomed);
     var date = slides[index].querySelector('.slide__date');
     var newYear = date ? date.textContent.trim() : '';
@@ -452,9 +463,76 @@
     preloadNeighbours();
   }
 
-  function lock() {
-    locked = true;
-    window.setTimeout(function () { locked = false; }, reduce.matches ? 120 : LOCK);
+  function cancelScroll() {
+    if (snapTimer !== null) { window.clearTimeout(snapTimer); snapTimer = null; }
+    var wasScrolling = scrolling;
+    scrolling = false;
+    viewport.classList.remove('is-scrolling');
+    dragPx = trackBasePx;
+    // Se move() non cambia indice, apply() non passa: ripristina qui il transform.
+    if (wasScrolling) setTrackPx(trackBasePx);
+  }
+
+  function setTrackPx(px) {
+    track.style.transform = 'translate3d(' + Math.round(px) + 'px,0,0)';
+  }
+
+  function clampTrackPx(px) {
+    var min = centerPx - slideOffsets[slideOffsets.length - 1];
+    var max = centerPx - slideOffsets[0];
+    return Math.max(min, Math.min(max, px));
+  }
+
+  function beginScroll() {
+    if (!scrolling) {
+      scrolling = true;
+      viewport.classList.add('is-scrolling');
+    }
+  }
+
+  // Legge la posizione davvero visibile: durante lo snap il transform sta ancora
+  // viaggiando verso trackBasePx. Va chiamata una volta all'inizio di un gesto.
+  function currentTrackX() {
+    var t = getComputedStyle(track).transform;
+    return t && t !== 'none' ? new DOMMatrixReadOnly(t).m41 : trackBasePx;
+  }
+
+  function startGesture() {
+    if (snapTimer !== null) { window.clearTimeout(snapTimer); snapTimer = null; }
+    dragPx = currentTrackX();
+  }
+
+  function scrollBy(delta) {
+    beginScroll();
+    dragPx = clampTrackPx(dragPx + delta);
+    setTrackPx(dragPx);
+    if (snapTimer !== null) window.clearTimeout(snapTimer);
+    snapTimer = window.setTimeout(finishScroll, reduce.matches ? 60 : 110);
+  }
+
+  function nearestSlide() {
+    var atCenter = centerPx - dragPx;
+    var best = 0, bestDistance = Infinity;
+    for (var i = 0; i < slideOffsets.length; i++) {
+      var d = Math.abs(slideOffsets[i] - atCenter);
+      if (d < bestDistance) { bestDistance = d; best = i; }
+    }
+    return best;
+  }
+
+  function finishScroll() {
+    if (snapTimer !== null) { window.clearTimeout(snapTimer); snapTimer = null; }
+    if (!scrolling) return;
+    scrolling = false;
+    viewport.classList.remove('is-scrolling');
+    // Rilegge il transform corrente con la transizione già attiva: il ritorno
+    // allo snap deve essere animato, a differenza del gesto che lo precede.
+    void track.offsetWidth;
+    var dest = nearestSlide();
+    if (dest === index) {
+      dragPx = trackBasePx;
+      setTrackPx(trackBasePx);
+    } else move(dest);
   }
 
   /* Apre/chiude (e/o cambia progetto) con FLIP sull'inner: è lui che contiene
@@ -466,6 +544,7 @@
     to = clamp(to, 0, slides.length - 1);
     open = !!open;
     if (activePanel || (to === index && open === zoomed)) return false;
+    cancelScroll();
 
     var target = slides[to];
     var inner = target.querySelector('.slide__inner');
@@ -560,6 +639,7 @@
   }
 
   function move(to) {
+    cancelScroll();
     var dest = clamp(to, 0, slides.length - 1);
     if (dest === index) return false;
     index = dest;
@@ -572,9 +652,8 @@
   }
 
   function step(dir) {
-    if (locked || activePanel) return;
-    if (!move(index + dir)) return;
-    lock();
+    if (activePanel) return;
+    move(index + dir);
   }
 
   function distance(touches) {
@@ -587,9 +666,9 @@
     if (activePanel || e.ctrlKey) return;
 
     var now = performance.now();
-    var timeSinceLastSlide = now - lastSlideTime;
     var timeSinceLastEvent = now - lastWheelTime;
     lastWheelTime = now;
+    if (!scrolling) startGesture();
 
     var dx = e.deltaX, dy = e.deltaY;
     if (e.deltaMode === 1) { dx *= 20; dy *= 20; }
@@ -598,77 +677,48 @@
     var absX = Math.abs(dx);
     var absY = Math.abs(dy);
 
-    // Se l'utente si è fermato per più di 150ms, azzera l'accumulo e lo stato precedente
     if (timeSinceLastEvent > 150) {
-      wheelAccumX = 0;
       wheelAccumY = 0;
-      prevDeltaX = 0;
       prevDeltaY = 0;
     }
 
-    // Durante la transizione dello scatto (primi 450ms), assorbi l'evento
-    if (timeSinceLastSlide < 450) {
-      prevDeltaX = absX;
-      prevDeltaY = absY;
-      e.preventDefault();
-      return;
-    }
-
-    // Se arrivano eventi della coda di inerzia con velocità decrescente (< prevDelta),
-    // sono la scia dello stesso gesto: ignorali per evitare il doppio scatto
-    var isDecayingX = prevDeltaX > 0 && absX <= prevDeltaX && timeSinceLastEvent < 100;
-    var isDecayingY = prevDeltaY > 0 && absY <= prevDeltaY && timeSinceLastEvent < 100;
-
-    prevDeltaX = absX;
-    prevDeltaY = absY;
-
-    // Asse verticale prevalente: Zoom
+    // Asse verticale prevalente: Zoom. La coda di inerzia non deve ripeterlo.
     if (absY > absX * 1.3) {
-      if (isDecayingY) {
-        e.preventDefault();
-        return;
-      }
-      wheelAccumY += dy;
-      if (Math.abs(wheelAccumY) > 48) {
-        setZoom(wheelAccumY > 0);
-        lastSlideTime = now;
-        wheelAccumX = 0;
-        wheelAccumY = 0;
-        prevDeltaX = 0;
-        prevDeltaY = 0;
+      var isDecayingY = prevDeltaY > 0 && absY <= prevDeltaY && timeSinceLastEvent < 100;
+      prevDeltaY = absY;
+      if (!isDecayingY) {
+        wheelAccumY += dy;
+        if (Math.abs(wheelAccumY) > 48) {
+          setZoom(wheelAccumY > 0);
+          lastSlideTime = now;
+          wheelAccumY = 0;
+          prevDeltaY = 0;
+        }
       }
       e.preventDefault();
-    } else if (absX > 4) {
-      // Asse orizzontale: Paging della timeline
-      if (isDecayingX) {
-        e.preventDefault();
-        return;
-      }
-      wheelAccumX += dx;
-      if (Math.abs(wheelAccumX) > 35) {
-        var dir = wheelAccumX > 0 ? 1 : -1;
-        move(index + dir);
-        lastSlideTime = now;
-        wheelAccumX = 0;
-        wheelAccumY = 0;
-        prevDeltaX = 0;
-        prevDeltaY = 0;
-      }
+    } else if (absX > 1) {
+      // Asse orizzontale: il track segue il delta, poi si aggancia al centro.
+      prevDeltaY = 0;
+      scrollBy(-dx);
       e.preventDefault();
     }
   }
   viewport.addEventListener('wheel', wheel, { passive: false });
 
   viewport.addEventListener('touchstart', function (e) {
+    startGesture();
     if (e.touches.length === 2) {
       pinchDist = distance(e.touches);
       touchX = touchY = null;
+      touchAxis = null;
       return;
     }
     pinchDist = null;
+    touchAxis = null;
     if (e.touches.length !== 1) return;
     touchX = e.touches[0].clientX;
     touchY = e.touches[0].clientY;
+    touchStartOffset = dragPx;
   }, { passive: true });
 
   viewport.addEventListener('touchmove', function (e) {
@@ -678,6 +728,18 @@
         setZoom(d > pinchDist);
         pinchDist = d;
       }
+      return;
+    }
+    if (activePanel || e.touches.length !== 1 || touchX === null) return;
+    var dx = e.touches[0].clientX - touchX;
+    var dy = e.touches[0].clientY - touchY;
+    if (!touchAxis && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+      touchAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+    if (touchAxis === 'x') {
+      beginScroll();
+      dragPx = clampTrackPx(touchStartOffset + dx);
+      setTrackPx(dragPx);
     }
   }, { passive: true });
 
@@ -685,6 +747,7 @@
     if (edgeSwipeConsumed) {
       edgeSwipeConsumed = false;
       touchX = touchY = null;
+      touchAxis = null;
       return;
     }
     if (pinchDist !== null && e.touches.length < 2) { pinchDist = null; return; }
@@ -693,15 +756,32 @@
     var dy = e.changedTouches[0].clientY - touchY;
     touchX = touchY = null;
     if (activePanel) return;
+    if (touchAxis === 'x') {
+      touchAxis = null;
+      finishScroll();
+      return;
+    }
+    touchAxis = null;
     if (Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx)) { setZoom(dy < 0); return; }
-    if (Math.abs(dx) >= 45 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+    if (Math.abs(dx) >= 45 && Math.abs(dx) > Math.abs(dy)) {
+      scrollBy(-dx);
+      finishScroll();
+    } else if (scrolling) {
+      // Un tap durante lo snap ha già fermato il timer in touchstart.
+      finishScroll();
+    }
+  }, { passive: true });
+
+  viewport.addEventListener('touchcancel', function () {
+    touchX = touchY = null;
+    touchAxis = null;
+    finishScroll();
   }, { passive: true });
 
   // drag-to-pan orizzontale con mouse sulla timeline
   var isMouseDown = false;
-  var dragStartX = 0, dragStartY = 0;
+  var dragStartX = 0, dragStartY = 0, dragStartOffset = 0;
   var hasDragged = false;
-  var dragAccum = 0;
 
   viewport.addEventListener('mousedown', function (e) {
     if (activePanel || zoomed || e.button !== 0) return;
@@ -710,7 +790,8 @@
     hasDragged = false;
     dragStartX = e.clientX;
     dragStartY = e.clientY;
-    dragAccum = 0;
+    startGesture();
+    dragStartOffset = dragPx;
   });
 
   window.addEventListener('mousemove', function (e) {
@@ -722,15 +803,10 @@
       viewport.classList.add('is-dragging');
       if (cursor) cursor.classList.add('is-dragging');
     }
-    if (hasDragged && !locked) {
-      dragAccum += dx;
-      dragStartX = e.clientX;
-      dragStartY = e.clientY;
-      if (Math.abs(dragAccum) > 48) {
-        var dir = dragAccum > 0 ? -1 : 1;
-        if (move(index + dir)) lock();
-        dragAccum = 0;
-      }
+    if (hasDragged) {
+      beginScroll();
+      dragPx = clampTrackPx(dragStartOffset + dx);
+      setTrackPx(dragPx);
     }
   });
 
@@ -739,6 +815,7 @@
     isMouseDown = false;
     viewport.classList.remove('is-dragging');
     if (cursor) cursor.classList.remove('is-dragging');
+    if (scrolling) finishScroll();
     if (hasDragged) {
       setTimeout(function () { hasDragged = false; }, 60);
     }
